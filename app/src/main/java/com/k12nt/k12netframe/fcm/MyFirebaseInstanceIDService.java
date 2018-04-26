@@ -33,54 +33,9 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
-    }
-    // [END refresh_token]
-
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private void sendRegistrationToServer(String token) {
-
-        TokenAsyncTask tokenAsyncTask = new TokenAsyncTask(token);
-        tokenAsyncTask.execute();
-
+        K12NetUserReferences.setDeviceToken(refreshedToken);
     }
 
-    public class TokenAsyncTask extends AsistoAsyncTask {
 
-        private String token;
 
-        public TokenAsyncTask(String token) {
-            this.token = token;
-        }
-
-        @Override
-        protected void onAsyncComplete() {
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            String requestQuery = K12NetUserReferences.getConnectionAddress() + "/SPSL.Web/ClientBin/Yuce-K12NET-SPServicesLibrary-SPDomainService.svc/json/SubmitChanges";
-
-            String electronicIdJson = "{\"changeSet\": [{\"HasMemberChanges\": 0, \"Id\": 0, \"Operation\": 2, \"Entity\": {\"__type\": \"ElectronicId:#Yuce.K12NET.SPServicesLibrary\", \"ID\": \"00000000-0000-0000-0000-000000000000\", \"TypeID\": \""+ K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID+"\", \"Value\": \""+token+"\"}, \"Associations\": [{\"Key\": \"PersonalInfo_ElectronicIds\", \"Value\": [1]}]}, {\"HasMemberChanges\": 0, \"Id\": 1, \"Operation\": 2, \"Entity\": {\"__type\": \"PersonalInfo_ElectronicId:#Yuce.K12NET.SPServicesLibrary\", \"PersonalInfoID\": \""+ LoginActivity.providerId+"\", \"ElectronicIdID\": \"00000000-0000-0000-0000-000000000000\"}, \"Associations\": [{\"Key\": \"ElectronicId\", \"Value\": [0]}]}]}";
-
-            try {
-                String line = K12NetHttpClient.execute(requestQuery, electronicIdJson);
-                Log.d("REGISTER", line);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }
 }

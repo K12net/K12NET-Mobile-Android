@@ -70,7 +70,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 				intent.setType("text/plain");
 				intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
 				intent.putExtra(Intent.EXTRA_TEXT, strBody);
-				intent.setData(Uri.parse("mailto:info@k12net.com")); // or just "mailto:" for blank
+				intent.setData(Uri.parse("mailto:...@gmail.com")); // or just "mailto:" for blank
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
 				startActivity(intent);
 
