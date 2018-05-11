@@ -58,6 +58,7 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 public class WebViewerActivity extends K12NetActivity implements K12NetAsyncCompleteListener {
 
     public static String startUrl = "";
+    public static String previousUrl = "";
     public static Context ctx = null;
     WebView webview = null;
 
@@ -219,7 +220,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
                 intent.putExtra(Intent.EXTRA_TEXT, strBody);
-                intent.setData(Uri.parse("mailto:destek@clazzapps.com")); // or just "mailto:" for blank
+                intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
                 startActivity(intent);
 
@@ -376,6 +377,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             public void onClick(View v) {
 
                 webview.reload();
+            }
+        });
+
+        View home_button = (View) findViewById(R.id.lyt_home);
+        home_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                webview.loadUrl(K12NetUserReferences.getConnectionAddress());
             }
         });
 
@@ -589,12 +599,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onBackPressed() {
-        if (webview.canGoBack()) {
+        if (previousUrl != null) {
+            webview.loadUrl(previousUrl);
+        } else if (webview.canGoBack()) {
             webview.goBack();
         } else {
             super.onBackPressed();
             finish();
         }
+
+        previousUrl = null;
     }
 
     protected boolean checkWritePermission() {

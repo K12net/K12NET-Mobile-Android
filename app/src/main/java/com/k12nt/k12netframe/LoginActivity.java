@@ -3,6 +3,9 @@ package com.k12nt.k12netframe;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -11,10 +14,16 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import org.apache.http.cookie.Cookie;
+import android.webkit.CookieManager;
 
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 
 public class LoginActivity extends Activity {
 
@@ -24,6 +33,37 @@ public class LoginActivity extends Activity {
      final int anim_wait_len = 1200;
 
     Handler handler = new Handler();
+
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        this.setIntent(intent);
+
+        if(intent != null && intent.getExtras() != null) {
+            String uri = intent.getExtras().getString("intent",null);
+
+            if(uri != null) {
+                final CheckBox chkRememberMe = (CheckBox) findViewById(R.id.chk_remember_me);
+
+                if (chkRememberMe.isChecked()) {
+                    Button login_button = (Button) findViewById(R.id.btn_login_submit);
+                    login_button.performClick();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // refresh your views here
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onResume(){
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+        super.onResume();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +80,7 @@ public class LoginActivity extends Activity {
 
         K12NetHttpClient.resetBrowser(getApplicationContext());
 
-        //String lang = K12NetUserReferences.getLanguageCode();
-        //Locale locale = new Locale(lang);
-        //Locale.setDefault(locale);
-        //Configuration config = new Configuration();
-        //config.locale = locale;
-        //getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
 
         setContentView(R.layout.k12net_login_layout);
 
@@ -78,6 +113,26 @@ public class LoginActivity extends Activity {
                 Mint.addExtraData("enteredFS", K12NetUserReferences.getFileServerAddress());*/
 
                 K12NetHttpClient.resetBrowser(getApplicationContext());
+
+                CookieManager cookieManager = CookieManager.getInstance();
+                List<Cookie> cookies = K12NetHttpClient.getCookieList();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        if (cookie.getName().contains("NotCompletedPollCount")){
+                            String cookieString = cookie.getName() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT" + "; Domain=" + cookie.getDomain();
+                            cookieManager.setCookie(cookie.getDomain(), cookieString);
+                        }
+                    }
+                }
+
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.MONTH, 1);
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                String strUTCDate = dateFormatter.format(cal.getTime());
+
+                K12NetHttpClient.setCookie("UICulture", K12NetUserReferences.getLanguageCode(), strUTCDate);
+                K12NetHttpClient.setCookie("Culture", K12NetUserReferences.getLanguageCode(), strUTCDate);
+
                 LoginAsyncTask loginTasAsyncTask = new LoginAsyncTask(context, username.getText().toString(), password.getText().toString(), LoginActivity.this);
                 loginTasAsyncTask.execute();
 
@@ -93,6 +148,19 @@ public class LoginActivity extends Activity {
             public void onClick(View arg0) {
                 K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext());
                 dialogView.createContextView(null);
+
+                dialogView.setOnDismissListener(new OnDismissListener() {
+
+                    @Override
+                    public void onDismiss(final DialogInterface dialog) {
+
+                        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+                        recreate();
+
+                    }
+                });
+
                 dialogView.show();
             }
         });

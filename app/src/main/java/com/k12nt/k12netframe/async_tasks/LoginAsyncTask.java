@@ -1,10 +1,12 @@
 package com.k12nt.k12netframe.async_tasks;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.webkit.CookieManager;
+import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.k12nt.k12netframe.LoginActivity;
@@ -31,6 +33,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
 
     Boolean success;
     String line = null;
+    Boolean isConfirmed = false;
 
     private Boolean isLogin = false;
 
@@ -127,9 +130,85 @@ public class LoginAsyncTask extends AsistoAsyncTask {
             MyFirebaseInstanceIDService firebaseInstanceIDService = new MyFirebaseInstanceIDService();
             firebaseInstanceIDService.onTokenRefresh();
 
-            WebViewerActivity.startUrl = K12NetUserReferences.getConnectionAddress();
-            Intent intent = new Intent(ctx, WebViewerActivity.class);
-            ctx.startActivity(intent);
+            Intent intentOfLogin = currentActivity.getIntent();
+            String startUrl = K12NetUserReferences.getConnectionAddress();
+
+            WebViewerActivity.previousUrl = null;
+            if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
+                final String intent = intentOfLogin.getExtras().getString("intent",null);
+
+                if(intent != null) {
+                    final String portal = intentOfLogin.getExtras().getString("portal","");
+                    final String query = intentOfLogin.getExtras().getString("query","");
+
+                    Runnable confirmComplated = new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intentOfLogin = currentActivity.getIntent();
+                            String url = K12NetUserReferences.getConnectionAddress();
+
+                            intentOfLogin.putExtra("intent","");
+                            intentOfLogin.putExtra("portal","");
+                            intentOfLogin.putExtra("query","");
+
+                            if (isConfirmed) {
+                                url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
+                                WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+
+                                navigateTo(url);
+                            }
+                        }
+                    };
+
+                    setConfirmDialog("Confirmation","You are about to navigate notification page. Do you really want to exit current view?",confirmComplated);
+
+                    return;
+                }
+            }
+
+            navigateTo(startUrl);
         }
+    }
+
+    private void navigateTo(String url) {
+        WebViewerActivity.startUrl = url;
+        Intent intent = new Intent(ctx, WebViewerActivity.class);
+        ctx.startActivity(intent);
+    }
+
+    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+        isConfirmed = false;
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = true;
+
+                func.run();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = false;
+
+                func.run();
+            }
+        });
+
+        builder.show();
+
+        /*AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                //TODO your background code
+            }
+        });*/
     }
 }

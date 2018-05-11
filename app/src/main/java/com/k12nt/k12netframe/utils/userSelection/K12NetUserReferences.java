@@ -168,6 +168,7 @@ public class K12NetUserReferences {
     public static void setLanguage(String languageCode) {
         references.languageCode = languageCode;
         references.storeString(LANGAUGE, references.languageCode);
+
     }
 
     public static String getLanguageCode(){

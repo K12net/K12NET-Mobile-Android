@@ -68,7 +68,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            String requestQuery = K12NetUserReferences.getConnectionAddress() + "/SPSL.Web/ClientBin/Yuce-K12NET-SPServicesLibrary-SPDomainService.svc/json/SubmitChanges";
+            /*String requestQuery = K12NetUserReferences.getConnectionAddress() + "/SPSL.Web/ClientBin/Yuce-K12NET-SPServicesLibrary-SPDomainService.svc/json/SubmitChanges";
 
             String electronicIdJson = "{\"changeSet\": [{\"HasMemberChanges\": 0, \"Id\": 0, \"Operation\": 2, \"Entity\": {\"__type\": \"ElectronicId:#Yuce.K12NET.SPServicesLibrary\", \"ID\": \"00000000-0000-0000-0000-000000000000\", \"TypeID\": \""+ K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID+"\", \"Value\": \""+token+"\"}, \"Associations\": [{\"Key\": \"PersonalInfo_ElectronicIds\", \"Value\": [1]}]}, {\"HasMemberChanges\": 0, \"Id\": 1, \"Operation\": 2, \"Entity\": {\"__type\": \"PersonalInfo_ElectronicId:#Yuce.K12NET.SPServicesLibrary\", \"PersonalInfoID\": \""+ LoginActivity.providerId+"\", \"ElectronicIdID\": \"00000000-0000-0000-0000-000000000000\"}, \"Associations\": [{\"Key\": \"ElectronicId\", \"Value\": [0]}]}]}";
 
@@ -78,7 +78,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
             }
             catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
 
             return null;
         }

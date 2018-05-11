@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
+import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -35,6 +36,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 public class K12NetHttpClient {
@@ -226,5 +229,11 @@ public class K12NetHttpClient {
 
     public static List<Cookie> getCookieList(){
         return cookie_store.getCookies();
+    }
+
+    public static void setCookie(String name, String value, String expires){
+        android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+        String cookieString = name + "=" + value + ";expires=" + expires + "; path=/;Domain=.k12net.com";
+        cookieManager.setCookie(".k12net.com", cookieString);
     }
 }
