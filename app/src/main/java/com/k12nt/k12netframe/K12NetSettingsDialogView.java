@@ -5,19 +5,23 @@ import android.content.res.Configuration;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
 import java.util.Locale;
 
+import android.content.res.Resources;
+import android.content.res.Configuration;
+import android.content.Intent;
+import android.app.Activity;
+import android.os.Build;
+
 public class K12NetSettingsDialogView extends K12NetDailogView {
 
     public static String TURKISH = "tr";
     public static String ENGLISH = "en";
     public static String ARABIC = "ar";
-
 
 	public K12NetSettingsDialogView(Context context) {
 		super(context);
@@ -45,9 +49,9 @@ public class K12NetSettingsDialogView extends K12NetDailogView {
         appAddress.setText(K12NetUserReferences.getConnectionAddress());
         fsAddress.setText(K12NetUserReferences.getFileServerAddress());
 
-        Button login_button = (Button) view.findViewById(R.id.btn_save);
+        Button save_button = (Button) view.findViewById(R.id.btn_save);
 
-        login_button.setOnClickListener(new View.OnClickListener() {
+        save_button.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
@@ -56,7 +60,6 @@ public class K12NetSettingsDialogView extends K12NetDailogView {
             dismiss();
             }
         });
-
 
         ToggleButton btn_tr = (ToggleButton) view.findViewById(R.id.btn_tr);
         ToggleButton btn_en = (ToggleButton) view.findViewById(R.id.btn_en);
@@ -111,17 +114,28 @@ public class K12NetSettingsDialogView extends K12NetDailogView {
             language_btn_list[i].setChecked(i == languageIndex);
         }
 
+        setLanguageToDefault(getContext());
     }
 
-    public void changeLanguage(){
+    public static void setLanguageToDefault(Context context){
 
-        String lang = K12NetUserReferences.getLanguageCode();
-        Locale locale = new Locale(lang);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-        getContext().getResources().updateConfiguration(config,
-                getContext().getResources().getDisplayMetrics());
+        Locale myLocale = new Locale(K12NetUserReferences.getLanguageCode());
+        Resources res = context.getResources();
+        Configuration configuration = res.getConfiguration();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+            configuration.setLocale(myLocale);
+        } else{
+            configuration.locale=myLocale;
+        }
+
+        Locale.setDefault(myLocale);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            context.createConfigurationContext(configuration);
+        } else {
+            res.updateConfiguration(configuration,res.getDisplayMetrics());
+        }
 
     }
 

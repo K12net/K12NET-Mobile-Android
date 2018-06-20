@@ -1,14 +1,17 @@
 package com.k12nt.k12netframe.async_tasks;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.widget.Toast;
-
+import android.os.AsyncTask;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
+import com.k12nt.k12netframe.fcm.MyFirebaseInstanceIDService;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -26,8 +29,9 @@ public class LoginAsyncTask extends AsistoAsyncTask {
     Dialog progress_dialog;
     String username;
     String password;
+    Boolean isConfirmed = false;
 
-    private Boolean isLogin = false;
+    public static Boolean isLogin = false;
 
     public LoginAsyncTask(Context ctx, String username, String password, Activity currentActivity) {
         this.currentActivity = currentActivity;
@@ -97,9 +101,87 @@ public class LoginAsyncTask extends AsistoAsyncTask {
         if (isLogin == false) {
             Toast.makeText(ctx, R.string.login_failed, Toast.LENGTH_SHORT).show();
         } else {
-            WebViewerActivity.startUrl = K12NetUserReferences.getConnectionAddress();
-            Intent intent = new Intent(ctx, WebViewerActivity.class);
-            ctx.startActivity(intent);
+            MyFirebaseInstanceIDService firebaseInstanceIDService = new MyFirebaseInstanceIDService();
+            firebaseInstanceIDService.onTokenRefresh();
+
+            Intent intentOfLogin = currentActivity.getIntent();
+            String startUrl = K12NetUserReferences.getConnectionAddress();
+
+            WebViewerActivity.previousUrl = null;
+            if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
+                final String intent = intentOfLogin.getExtras().getString("intent","");
+
+                if(intent != "") {
+                    final String portal = intentOfLogin.getExtras().getString("portal","");
+                    final String query = intentOfLogin.getExtras().getString("query","");
+
+                    Runnable confirmComplated = new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intentOfLogin = currentActivity.getIntent();
+                            String url = K12NetUserReferences.getConnectionAddress();
+
+                            intentOfLogin.putExtra("intent","");
+                            intentOfLogin.putExtra("portal","");
+                            intentOfLogin.putExtra("query","");
+
+                            if (isConfirmed) {
+                                url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
+                                WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+
+                                navigateTo(url);
+                            }
+                        }
+                    };
+
+                    if (WebViewerActivity.startUrl == startUrl) {
+                        isConfirmed = true;
+                        confirmComplated.run();
+                    } else {
+                        setConfirmDialog(ctx.getString(R.string.confirmation),ctx.getString(R.string.navToNotify),confirmComplated);
+                    }
+
+                    return;
+                }
+            }
+
+            navigateTo(startUrl);
         }
+
+    }
+
+    private void navigateTo(String url) {
+        WebViewerActivity.startUrl = url;
+        Intent intent = new Intent(ctx, WebViewerActivity.class);
+        ctx.startActivity(intent);
+    }
+
+    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+        isConfirmed = false;
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        builder.setPositiveButton(ctx.getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = true;
+
+                func.run();
+            }
+        });
+
+        builder.setNegativeButton(ctx.getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = false;
+
+                func.run();
+            }
+        });
+
+        builder.show();
     }
 }

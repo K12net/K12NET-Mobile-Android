@@ -2,6 +2,8 @@ package com.k12nt.k12netframe;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.AlertDialog;
+import android.content.res.Configuration;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -39,6 +41,19 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 	protected RelativeLayout loadView = null;
 
     static Boolean isMobile = null;
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // refresh your views here
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

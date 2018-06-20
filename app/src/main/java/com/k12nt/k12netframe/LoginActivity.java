@@ -8,6 +8,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.res.Configuration;
+
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +21,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import org.apache.http.cookie.Cookie;
+import android.webkit.CookieManager;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
@@ -39,6 +50,19 @@ public class LoginActivity extends Activity {
     CheckBox chkRememberMe;
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // refresh your views here
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onResume(){
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+        super.onResume();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -52,6 +76,7 @@ public class LoginActivity extends Activity {
         }
 
         K12NetHttpClient.resetBrowser(getApplicationContext());
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
 
         setContentView(R.layout.k12net_login_layout);
 
@@ -85,6 +110,19 @@ public class LoginActivity extends Activity {
             public void onClick(View arg0) {
                 K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext());
                 dialogView.createContextView(null);
+
+                dialogView.setOnDismissListener(new OnDismissListener() {
+
+                    @Override
+                    public void onDismiss(final DialogInterface dialog) {
+
+                        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+                        recreate();
+
+                    }
+                });
+
                 dialogView.show();
             }
         });
@@ -135,6 +173,26 @@ public class LoginActivity extends Activity {
         K12NetUserReferences.setRememberMe(chkRememberMe.isChecked());
 
         K12NetHttpClient.resetBrowser(getApplicationContext());
+
+        CookieManager cookieManager = CookieManager.getInstance();
+        List<Cookie> cookies = K12NetHttpClient.getCookieList();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().contains("NotCompletedPollCount")){
+                    String cookieString = cookie.getName() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT" + "; Domain=" + cookie.getDomain();
+                    cookieManager.setCookie(cookie.getDomain(), cookieString);
+                }
+            }
+        }
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, 1);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String strUTCDate = dateFormatter.format(cal.getTime());
+
+        K12NetHttpClient.setCookie("UICulture", K12NetUserReferences.getLanguageCode(), strUTCDate);
+        K12NetHttpClient.setCookie("Culture", K12NetUserReferences.getLanguageCode(), strUTCDate);
+
         LoginAsyncTask loginTasAsyncTask = new LoginAsyncTask(context, username.getText().toString(), password.getText().toString(), LoginActivity.this);
         loginTasAsyncTask.execute();
     }
@@ -164,12 +222,14 @@ public class LoginActivity extends Activity {
 //It retrieves the latest version by scraping the content of current version from play store at runtime
 
                 Document doc = Jsoup.connect(K12NetStaticDefinition.DETAILED_APP_ADDRESS).get();
-                latestVersion = doc.getElementsByAttributeValue
-                        ("itemprop","softwareVersion").first().text();
 
-                //check if version number only has 2 segment
-                if(K12NetHelper.findPattermCount(latestVersion, ".") < 2){
-                    latestVersion += ".0";
+                if(doc.getElementsByAttributeValue("itemprop","softwareVersion").size() > 0) {
+                    latestVersion = doc.getElementsByAttributeValue("itemprop","softwareVersion").first().text();
+
+                    //check if version number only has 2 segment
+                    if(K12NetHelper.findPattermCount(latestVersion, ".") < 2){
+                        latestVersion += ".0";
+                    }
                 }
 
             }catch (Exception e){

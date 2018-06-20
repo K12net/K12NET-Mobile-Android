@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/K12NET-Frame-Android.iml" filepath="$PROJECT_DIR$/K12NET-Frame-Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/K12NET-Mobile-Android.iml" filepath="$PROJECT_DIR$/K12NET-Mobile-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

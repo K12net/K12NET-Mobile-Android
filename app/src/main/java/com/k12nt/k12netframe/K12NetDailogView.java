@@ -8,8 +8,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.k12nt.k12netframe.R;
-
 public abstract class K12NetDailogView extends Dialog {
 
     LayoutInflater inflater = null;

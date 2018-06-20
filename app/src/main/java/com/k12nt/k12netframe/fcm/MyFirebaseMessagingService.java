@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
+import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -27,7 +28,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
 
-    public static final int NOTIFICATION_ID = 1;
+    public static int NOTIFICATION_ID = 1;
 
     /**
      * Called when message is received.
@@ -47,7 +48,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
 
+        NOTIFICATION_ID++;
+
         String msg = "not found";
+        String intent = "";
+        String portal = "";
+        String query = "";
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
@@ -57,14 +63,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             msg = remoteMessage.getData().get("message");
-       /*   String webPart = remoteMessage.getData().get("part");
-            String message_en = remoteMessage.getData().get("message_en");
-            String message_tr = remoteMessage.getData().get("message_tr");
 
-            msg = message_en;
-            if(Locale.getDefault().getLanguage() == "tr"){
-                msg = message_tr;
-            }*/
+            intent = remoteMessage.getData().get("intent");
+            portal = remoteMessage.getData().get("portal");
+            query = remoteMessage.getData().get("query");
 
         }
 
@@ -78,7 +80,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         K12NetUserReferences.increaseBadgeNumber();
         ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
 
-        sendNotification(msg);
+        sendNotification(msg,intent,portal,query);
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
@@ -90,11 +92,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody) {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+    private void sendNotification(String messageBody,String intentStr,String portal,String query) {
+        Intent intent = new Intent(this, WebViewerActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        /*intent.setData(url);*/
+        intent.putExtra("intent",intentStr);
+        intent.putExtra("portal", portal);
+        intent.putExtra("query", query);
+
+        int requestID = (int) System.currentTimeMillis();
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
