@@ -1,10 +1,14 @@
 package com.k12nt.k12netframe;
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -28,6 +32,9 @@ import android.webkit.JavascriptInterface;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -40,6 +47,7 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
+import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -65,6 +73,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private ValueCallback<Uri> mUploadMessage;
     private ValueCallback<Uri[]> mFilePathCallback;
     private final static int FILECHOOSER_RESULTCODE = 1;
+    private Boolean isConfirmed = false;
 
     boolean hasWriteAccess = false;
     boolean hasReadAccess = false;
@@ -78,6 +87,101 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
 
+    protected void onNewIntent(Intent intent) {
+
+        if(intent != null && intent.getExtras() != null) {
+            super.onNewIntent(intent);
+            this.setIntent(intent);
+
+            final String uri = intent.getExtras().getString("intent","");
+
+            if(uri != "") {
+                final String portal = intent.getExtras().getString("portal","");
+                final String query = intent.getExtras().getString("query","");
+                final String webPart = intent.getExtras().getString("intent","");
+                final Intent intentOfLogin = this.getIntent();
+
+                Runnable confirmComplated = new Runnable() {
+                    @Override
+                    public void run() {
+                        String url = K12NetUserReferences.getConnectionAddress();
+
+                        intentOfLogin.putExtra("intent","");
+                        intentOfLogin.putExtra("portal","");
+                        intentOfLogin.putExtra("query","");
+
+                        if (isConfirmed) {
+                            url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
+                            WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+
+                            navigateTo(url);
+                        }
+                    }
+                };
+
+                if (WebViewerActivity.startUrl == K12NetUserReferences.getConnectionAddress() || WebViewerActivity.startUrl.contains("Login.aspx")) {
+                    isConfirmed = true;
+                    confirmComplated.run();
+                } else {
+                    setConfirmDialog(ctx.getString(R.string.confirmation),ctx.getString(R.string.navToNotify),confirmComplated);
+                }
+            }
+        }
+    }
+
+    private void navigateTo(String url) {
+        WebViewerActivity.startUrl = url;
+
+        if (LoginAsyncTask.isLogin) {
+            Intent intent = new Intent(ctx, WebViewerActivity.class);
+            ctx.startActivity(intent);
+        } else {
+            Intent intent = new Intent(ctx, LoginActivity.class);
+
+            final String portal = this.getIntent().getExtras().getString("portal","");
+            final String query = this.getIntent().getExtras().getString("query","");
+            final String webPart = this.getIntent().getExtras().getString("intent","");
+
+            intent.putExtra("intent",webPart);
+            intent.putExtra("portal", portal);
+            intent.putExtra("query", query);
+
+            ctx.startActivity(intent);
+        }
+    }
+
+    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+        isConfirmed = false;
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        builder.setPositiveButton(ctx.getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = true;
+
+                func.run();
+            }
+        });
+
+        builder.setNegativeButton(ctx.getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = false;
+
+                func.run();
+            }
+        });
+
+        try {
+            builder.show();
+        } catch (Exception e) {
+
+        }
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
@@ -235,6 +339,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview = new WebView(WebViewerActivity.this);
         webview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
+            { WebView.setWebContentsDebuggingEnabled(true); }
+        }
+
         webview.setWebViewClient(new WebViewClient() {
 
             public void onPageFinished(WebView view, String url) {
@@ -250,6 +359,56 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
                 startUrl = url;
             }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public void onReceivedError(WebView view, int errorCod,String description, String failingUrl) {
+                Toast.makeText(getApplicationContext(), "Your Internet Connection May not be active Or " + description , Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            @TargetApi(Build.VERSION_CODES.M)
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                                        WebResourceError error) {
+
+                Toast.makeText(getApplicationContext(),
+                        "WebView Error" + error.getDescription(),
+                        Toast.LENGTH_SHORT).show();
+
+                super.onReceivedError(view, request, error);
+
+            }
+
+            /*
+              Added in API level 23
+            */
+            @Override
+            public void onReceivedHttpError(WebView view,
+                                            WebResourceRequest request, WebResourceResponse errorResponse) {
+
+               /* Toast.makeText(getActivity(),
+                        "WebView Error" + errorResponse.getReasonPhrase(),
+                        Toast.LENGTH_SHORT).show();*/
+
+
+                super.onReceivedHttpError(view, request, errorResponse);
+            }
+            /*
+             * Added in API level 23 replacing :-
+             *
+             * onReceivedError(WebView view, int errorCode, String description, String failingUrl)
+             */
+   /*@Override
+   public void onReceivedError(WebView view, WebResourceRequest request,
+                               WebResourceError error) {
+
+       Toast.makeText(getActivity(),
+               "WebView Error" + error.getDescription(),
+               Toast.LENGTH_SHORT).show();
+
+       super.onReceivedError(view, request, error);
+
+   }*/
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("tel:")) {
@@ -396,7 +555,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setLoadWithOverviewMode(true);
         webview.getSettings().setUseWideViewPort(true);
         webview.getSettings().setGeolocationEnabled(true);
-
 
         webview.setWebChromeClient(new WebChromeClient() {
 
@@ -557,6 +715,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        this.onNewIntent(this.getIntent());
     }
 
     private void enableHTML5AppCache(WebView webView) {

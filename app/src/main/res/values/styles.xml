@@ -154,7 +154,7 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="Asisto_BusyIndicator" parent="@android:attr/progressBarStyleLarge">
+    <style name="Asisto_BusyIndicator" parent="@android:style/Widget.ProgressBar.Large">
         <item name="android:indeterminateDrawable">@drawable/progress</item>
         <item name="android:layout_height">128dip</item>
         <item name="android:layout_width">128dip</item>
@@ -162,7 +162,7 @@
         <item name="android:maxHeight">128dip</item>
     </style>
 
-    <style name="Asisto_SmallBusyIndicator" parent="@android:attr/progressBarStyleLarge">
+    <style name="Asisto_SmallBusyIndicator" parent="@android:style/Widget.ProgressBar.Large">
         <item name="android:indeterminateDrawable">@drawable/progress</item>
         <item name="android:layout_height">48dip</item>
         <item name="android:layout_width">48dip</item>

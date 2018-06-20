@@ -236,5 +236,10 @@
     <string name="readAccessAppSettings">Read External Storage permission allows us to read stored images. Please allow this permission in App Settings.</string>
     <string name="locationAccessAppSettings">Getting Location permission allows us to read current position and record if you want. Please allow this permission in App Settings.</string>
     <string name="resetPassword">Forgot Password</string>
+    <string name="newUpdateAvailable">A new update is available. Please update before continue.</string>
+    <string name="update">Update</string>
+    <string name="cancel">Cancel</string>
+    <string name="newUpdateAvailableWarning">A new update is available. You can update application later if you want.</string>
+    <string name="ok">Ok</string>
 
 </resources>

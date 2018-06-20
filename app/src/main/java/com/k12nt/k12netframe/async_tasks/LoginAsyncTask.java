@@ -6,18 +6,17 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.widget.Toast;
-
-import com.k12nt.k12netframe.LoginActivity;
+import android.os.AsyncTask;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.fcm.MyFirebaseInstanceIDService;
+import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
@@ -30,12 +29,9 @@ public class LoginAsyncTask extends AsistoAsyncTask {
     Dialog progress_dialog;
     String username;
     String password;
-
-    Boolean success;
-    String line = null;
     Boolean isConfirmed = false;
 
-    private Boolean isLogin = false;
+    public static Boolean isLogin = false;
 
     public LoginAsyncTask(Context ctx, String username, String password, Activity currentActivity) {
         this.currentActivity = currentActivity;
@@ -60,6 +56,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
     }
 
     public static boolean login() {
+        boolean success = false;
         HttpResponse response = null;
         try {
             JSONObject json = new JSONObject();
@@ -72,42 +69,20 @@ public class LoginAsyncTask extends AsistoAsyncTask {
             StringEntity entity = new StringEntity(json.toString(), HTTP.UTF_8);
             httpost.setEntity(entity);
             httpost.setHeader("Content-type", "application/json;charset=UTF-8");
+            httpost.setHeader("Atlas-DeviceID", K12NetUserReferences.getDeviceToken());
+            httpost.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
 
             String line = K12NetHttpClient.execute(httpost);
 
             JSONObject responseJSON = new JSONObject(line);
 
-            if(responseJSON.optBoolean("d", false)) {
-
-                HttpGet userGet = new HttpGet(K12NetUserReferences.getConnectionAddress() + "/SPSL.Web/ClientBin/Yuce-K12NET-SPSL-Web-AuthenticationService.svc/json/GetUser");
-                line = K12NetHttpClient.execute(userGet);
-
-                JSONObject jObject = (new JSONObject(line)).getJSONObject("GetUserResult").getJSONArray("RootResults").getJSONObject(0);
-
-                LoginActivity.providerId = jObject.optString("ProviderUserKey", "");
-
-               // String cookieString = CookieManager.getInstance().getCookie(K12NetUserReferences.getConnectionAddress());
-
-                return true;
-
-            }
-            else {
-                LoginActivity.providerId = "";
-                return false;
-            }
+            success = responseJSON.optBoolean("d", false);
 
         } catch (Exception ex) {
-            /*if(response != null) {
-                try {
-                    response.getEntity().consumeContent();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-            ex = null;
-            //}
+            success = false;
         }
 
-        return false;
+        return success;
 
     }
 
@@ -126,7 +101,6 @@ public class LoginAsyncTask extends AsistoAsyncTask {
         if (isLogin == false) {
             Toast.makeText(ctx, R.string.login_failed, Toast.LENGTH_SHORT).show();
         } else {
-
             MyFirebaseInstanceIDService firebaseInstanceIDService = new MyFirebaseInstanceIDService();
             firebaseInstanceIDService.onTokenRefresh();
 
@@ -135,9 +109,9 @@ public class LoginAsyncTask extends AsistoAsyncTask {
 
             WebViewerActivity.previousUrl = null;
             if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
-                final String intent = intentOfLogin.getExtras().getString("intent",null);
+                final String intent = intentOfLogin.getExtras().getString("intent","");
 
-                if(intent != null) {
+                if(intent != "") {
                     final String portal = intentOfLogin.getExtras().getString("portal","");
                     final String query = intentOfLogin.getExtras().getString("query","");
 
@@ -160,7 +134,12 @@ public class LoginAsyncTask extends AsistoAsyncTask {
                         }
                     };
 
-                    setConfirmDialog("Confirmation","You are about to navigate notification page. Do you really want to exit current view?",confirmComplated);
+                    if (WebViewerActivity.startUrl == startUrl) {
+                        isConfirmed = true;
+                        confirmComplated.run();
+                    } else {
+                        setConfirmDialog(ctx.getString(R.string.confirmation),ctx.getString(R.string.navToNotify),confirmComplated);
+                    }
 
                     return;
                 }
@@ -168,6 +147,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
 
             navigateTo(startUrl);
         }
+
     }
 
     private void navigateTo(String url) {
@@ -184,7 +164,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(false);
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(ctx.getString(R.string.yes), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isConfirmed = true;
@@ -193,7 +173,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
             }
         });
 
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(ctx.getString(R.string.no), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isConfirmed = false;
@@ -203,12 +183,5 @@ public class LoginAsyncTask extends AsistoAsyncTask {
         });
 
         builder.show();
-
-        /*AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                //TODO your background code
-            }
-        });*/
     }
 }

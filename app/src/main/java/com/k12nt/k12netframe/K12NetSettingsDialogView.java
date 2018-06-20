@@ -16,6 +16,12 @@ import android.content.Intent;
 import android.app.Activity;
 import android.os.Build;
 
+import android.content.res.Resources;
+import android.content.res.Configuration;
+import android.content.Intent;
+import android.app.Activity;
+import android.os.Build;
+
 public class K12NetSettingsDialogView extends K12NetDailogView {
 
     public static String TURKISH = "tr";

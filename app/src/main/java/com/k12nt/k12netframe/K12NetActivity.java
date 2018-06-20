@@ -3,8 +3,8 @@ package com.k12nt.k12netframe;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
@@ -42,18 +42,18 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 
     static Boolean isMobile = null;
 
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		// refresh your views here
-		super.onConfigurationChanged(newConfig);
-	}
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // refresh your views here
+        super.onConfigurationChanged(newConfig);
+    }
 
-	@Override
-	public void onResume(){
-		super.onResume();
+    @Override
+    public void onResume(){
+        super.onResume();
 
-		K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
-	}
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +85,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 				intent.setType("text/plain");
 				intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
 				intent.putExtra(Intent.EXTRA_TEXT, strBody);
-				intent.setData(Uri.parse("mailto:info@k12net.com")); // or just "mailto:" for blank
+				intent.setData(Uri.parse("mailto:...@gmail.com")); // or just "mailto:" for blank
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
 				startActivity(intent);
 
@@ -159,7 +159,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 			atask.execute();
 		}
 	}
-
+	
 	public abstract void buildCustomView();
 
 	protected abstract AsistoAsyncTask getAsyncTask();

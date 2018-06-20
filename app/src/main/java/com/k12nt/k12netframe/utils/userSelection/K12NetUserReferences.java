@@ -24,6 +24,8 @@ public class K12NetUserReferences {
 	private static final String LIGHT_OPTION = "lightOption";
     private static final String CALENDAR_PROVIDER_ID = "calendarProviderId";
     private static final String BADGENUMBER = "badgeNumber";
+    private static final String WARNVERSION = "warnVersion";
+    private static final String TOKEN = "token";
 
 	private static K12NetUserReferences references = null;
 
@@ -38,6 +40,8 @@ public class K12NetUserReferences {
     private int calendarProviderId;
     private int badgeNumber;
     private String languageCode;
+    private String warnedVersion;
+    private String token;
 	
 	public K12NetUserReferences(Context context) {
 		settings = context.getSharedPreferences(SETTINGS_FILE_NAME, Context.MODE_PRIVATE);
@@ -51,6 +55,8 @@ public class K12NetUserReferences {
         calendarProviderId = settings.getInt(CALENDAR_PROVIDER_ID, 1);
         badgeNumber = settings.getInt(BADGENUMBER, 0);
         languageCode = settings.getString(LANGAUGE, null);
+        warnedVersion = settings.getString(WARNVERSION, null);
+        token = settings.getString(TOKEN, "");
 	}
 
 	public static void initUserReferences(Context context) {
@@ -173,6 +179,24 @@ public class K12NetUserReferences {
 
     public static String getLanguageCode(){
         return references.languageCode;
+    }
+
+    public static void setWarnedVersionString(String newWarnedVersionStr) {
+        references.warnedVersion = newWarnedVersionStr;
+        references.storeString(WARNVERSION, references.warnedVersion);
+    }
+
+    public static String getWarnedVersionString(){
+        return references.warnedVersion;
+    }
+
+    public static void setDeviceToken(String newDeviceToken) {
+        references.token = newDeviceToken;
+        references.storeString(TOKEN, references.token);
+    }
+
+    public static String getDeviceToken(){
+        return references.token;
     }
 
 }

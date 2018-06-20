@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
 public abstract class K12NetDailogView extends Dialog {
 
     LayoutInflater inflater = null;

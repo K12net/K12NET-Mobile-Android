@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
+import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -66,6 +67,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent = remoteMessage.getData().get("intent");
             portal = remoteMessage.getData().get("portal");
             query = remoteMessage.getData().get("query");
+
         }
 
         // Check if message contains a notification payload.
@@ -84,13 +86,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // message, here is where that should be initiated. See sendNotification method below.
     }
     // [END receive_message]
+
     /**
      * Create and show a simple notification containing the received FCM message.
      *
      * @param messageBody FCM message body received.
      */
     private void sendNotification(String messageBody,String intentStr,String portal,String query) {
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, WebViewerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         /*intent.setData(url);*/
         intent.putExtra("intent",intentStr);

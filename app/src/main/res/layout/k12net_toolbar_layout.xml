@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:id="@+id/lyt_back"
-        android:layout_width="70dp"
+        android:layout_width="60dp"
         android:layout_height="match_parent"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
@@ -26,7 +26,7 @@
 
     <LinearLayout
         android:id="@+id/lyt_home"
-        android:layout_width="70dp"
+        android:layout_width="60dp"
         android:layout_height="match_parent"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
@@ -46,7 +46,7 @@
 
     <LinearLayout
         android:id="@+id/lyt_next"
-        android:layout_width="70dp"
+        android:layout_width="60dp"
         android:layout_height="match_parent"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
@@ -54,7 +54,7 @@
         android:layout_toRightOf="@+id/lyt_back"
         android:paddingTop="6dp"
         android:paddingBottom="6dp"
-        android:layout_marginLeft="70dp">
+        android:layout_marginLeft="60dp">
 
         <ImageView
             android:id="@+id/btn_next"
