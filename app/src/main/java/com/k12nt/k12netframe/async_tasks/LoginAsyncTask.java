@@ -44,7 +44,10 @@ public class LoginAsyncTask extends AsistoAsyncTask {
     public void onPreExecute() {
         progress_dialog = new Dialog(ctx, R.style.K12NET_ModalLayout);
         progress_dialog.setContentView(R.layout.loading_view_layout);
-        progress_dialog.show();
+        if(!((Activity) ctx).isFinishing())
+        {
+            progress_dialog.show();
+        }
     }
 
     @Override
@@ -114,6 +117,8 @@ public class LoginAsyncTask extends AsistoAsyncTask {
                 if(intent != "") {
                     final String portal = intentOfLogin.getExtras().getString("portal","");
                     final String query = intentOfLogin.getExtras().getString("query","");
+                    final String body = intentOfLogin.getExtras().getString("body","");
+                    final String title = intentOfLogin.getExtras().getString("title","");
 
                     Runnable confirmComplated = new Runnable() {
                         @Override
@@ -124,6 +129,8 @@ public class LoginAsyncTask extends AsistoAsyncTask {
                             intentOfLogin.putExtra("intent","");
                             intentOfLogin.putExtra("portal","");
                             intentOfLogin.putExtra("query","");
+                            intentOfLogin.putExtra("body","");
+                            intentOfLogin.putExtra("title","");
 
                             if (isConfirmed) {
                                 url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
@@ -138,7 +145,7 @@ public class LoginAsyncTask extends AsistoAsyncTask {
                         isConfirmed = true;
                         confirmComplated.run();
                     } else {
-                        setConfirmDialog(ctx.getString(R.string.confirmation),ctx.getString(R.string.navToNotify),confirmComplated);
+                        setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + ctx.getString(R.string.navToNotify),confirmComplated);
                     }
 
                     return;

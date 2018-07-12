@@ -1,16 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 26
     buildToolsVersion '27.0.3'
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 31
-        versionName "1.30.0"
+        targetSdkVersion 26
+        versionCode 32
+        versionName "1.30.1"
     }
     buildTypes {
         release {
@@ -29,13 +29,13 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.google.firebase:firebase-messaging:9.4.0'
-    compile 'com.google.firebase:firebase-core:9.4.0'
-    compile 'me.leolin:ShortcutBadger:1.1.6@aar'
-    compile 'com.google.android.gms:play-services-appindexing:9.4.0'
-    compile 'org.jsoup:jsoup:1.9.2'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.google.firebase:firebase-messaging:17.0.0'
+    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'me.leolin:ShortcutBadger:1.1.6@aar'
+    implementation 'com.google.firebase:firebase-appindexing:16.0.1'
+    implementation 'org.jsoup:jsoup:1.9.2'
     // https://mvnrepository.com/artifact/com.android.tools.lint/lint-gradle-api
     //compile 'com.android.tools.lint:lint-gradle-api:26.1.3'
 }

@@ -54,6 +54,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String intent = "";
         String portal = "";
         String query = "";
+        String title = "";
 
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
@@ -67,20 +68,25 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent = remoteMessage.getData().get("intent");
             portal = remoteMessage.getData().get("portal");
             query = remoteMessage.getData().get("query");
+            title = remoteMessage.getData().get("title");
 
+            if (msg == null) {
+                msg = remoteMessage.getData().get("body");
+            }
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
             msg =  remoteMessage.getNotification().getBody();
+            title = remoteMessage.getNotification().getTitle();
         }
 
         K12NetUserReferences.initUserReferences(this);
         K12NetUserReferences.increaseBadgeNumber();
         ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
 
-        sendNotification(msg,intent,portal,query);
+        sendNotification(msg,title,intent,portal,query);
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
@@ -92,13 +98,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody,String intentStr,String portal,String query) {
+    private void sendNotification(String messageBody,String title,String intentStr,String portal,String query) {
         Intent intent = new Intent(this, WebViewerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         /*intent.setData(url);*/
         intent.putExtra("intent",intentStr);
         intent.putExtra("portal", portal);
         intent.putExtra("query", query);
+        intent.putExtra("body", messageBody);
+        intent.putExtra("title", title);
 
         int requestID = (int) System.currentTimeMillis();
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,

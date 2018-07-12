@@ -228,7 +228,7 @@ public class K12NetHttpClient {
     }
 
     public static List<Cookie> getCookieList(){
-        return cookie_store.getCookies();
+        return cookie_store == null ? null : cookie_store.getCookies();
     }
 
     public static void setCookie(String name, String value, String expires){

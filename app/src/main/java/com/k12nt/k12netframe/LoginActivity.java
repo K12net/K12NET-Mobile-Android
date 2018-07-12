@@ -55,6 +55,18 @@ public class LoginActivity extends Activity {
         super.onConfigurationChanged(newConfig);
     }
 
+    protected void onNewIntent(Intent intent) {
+
+        if(intent != null && intent.getExtras() != null) {
+            super.onNewIntent(intent);
+            this.setIntent(intent);
+
+            if (chkRememberMe.isChecked()) {
+                StartLoginOperation();
+            }
+        }
+    }
+
     @Override
     public void onResume(){
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());

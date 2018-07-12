@@ -42,9 +42,9 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
@@ -99,9 +99,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 final String portal = intent.getExtras().getString("portal","");
                 final String query = intent.getExtras().getString("query","");
                 final String webPart = intent.getExtras().getString("intent","");
+                final String body = intent.getExtras().getString("body","");
+                final String title = intent.getExtras().getString("title","");
+
                 final Intent intentOfLogin = this.getIntent();
 
-                Runnable confirmComplated = new Runnable() {
+                Runnable confirmation = new Runnable() {
                     @Override
                     public void run() {
                         String url = K12NetUserReferences.getConnectionAddress();
@@ -109,6 +112,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         intentOfLogin.putExtra("intent","");
                         intentOfLogin.putExtra("portal","");
                         intentOfLogin.putExtra("query","");
+                        intentOfLogin.putExtra("body","");
+                        intentOfLogin.putExtra("title","");
 
                         if (isConfirmed) {
                             url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
@@ -121,9 +126,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 if (WebViewerActivity.startUrl == K12NetUserReferences.getConnectionAddress() || WebViewerActivity.startUrl.contains("Login.aspx")) {
                     isConfirmed = true;
-                    confirmComplated.run();
+                    confirmation.run();
                 } else {
-                    setConfirmDialog(ctx.getString(R.string.confirmation),ctx.getString(R.string.navToNotify),confirmComplated);
+                    setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + ctx.getString(R.string.navToNotify),confirmation);
                 }
             }
         }
@@ -488,7 +493,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         List<Cookie> cookies = K12NetHttpClient.getCookieList();
         Cookie sessionInfo = null;
 
-        if (!cookies.isEmpty()) {
+        if (cookies != null && !cookies.isEmpty()) {
             CookieSyncManager.createInstance(getApplicationContext());
             CookieManager cookieManager = CookieManager.getInstance();
 
