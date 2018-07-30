@@ -211,7 +211,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 File file = new File(filePath);
                 uriArray.add(Uri.fromFile(file));
             }
-            else if(intent.getClipData() != null && intent.getClipData().getItemCount() > 0) {
+            else if(intent != null && intent.getClipData() != null && intent.getClipData().getItemCount() > 0) {
                 for(int i = 0; i < intent.getClipData().getItemCount();i++) {
                     String filePath = getPath(this, intent.getClipData().getItemAt(i).getUri());//getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
                    // String filePath = getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());

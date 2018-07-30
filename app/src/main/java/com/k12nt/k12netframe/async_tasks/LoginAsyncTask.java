@@ -6,9 +6,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.webkit.CookieManager;
 import android.widget.Toast;
-import android.os.AsyncTask;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.fcm.MyFirebaseInstanceIDService;
@@ -18,9 +17,12 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class LoginAsyncTask extends AsistoAsyncTask {
 
@@ -62,6 +64,17 @@ public class LoginAsyncTask extends AsistoAsyncTask {
         boolean success = false;
         HttpResponse response = null;
         try {
+            CookieManager cookieManager = CookieManager.getInstance();
+            List<Cookie> cookies = K12NetHttpClient.getCookieList();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().contains("NotCompletedPollCount")){
+                        String cookieString = cookie.getName() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT" + "; Domain=" + cookie.getDomain();
+                        cookieManager.setCookie(cookie.getDomain(), cookieString);
+                    }
+                }
+            }
+
             JSONObject json = new JSONObject();
             json.put("userName", K12NetUserReferences.getUsername());
             json.put("password", K12NetUserReferences.getPassword());
