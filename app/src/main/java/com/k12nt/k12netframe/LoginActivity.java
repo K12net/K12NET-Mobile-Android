@@ -28,6 +28,7 @@ import android.webkit.CookieManager;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
@@ -38,6 +39,7 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 public class LoginActivity extends Activity {
 
@@ -175,6 +177,8 @@ public class LoginActivity extends Activity {
             currentVersion += ".0";
         }
 
+        K12NetUserReferences.setWarnedVersionString(currentVersion);
+
         new GetLatestVersion(context).execute();
 
     }
@@ -233,15 +237,15 @@ public class LoginActivity extends Activity {
             try {
 //It retrieves the latest version by scraping the content of current version from play store at runtime
 
-                Document doc = Jsoup.connect(K12NetStaticDefinition.DETAILED_APP_ADDRESS).get();
+                Document doc = Jsoup.connect("http://fs.k12net.com/mobile/files/versions.k12net.txt").get();
 
-                if(doc.getElementsByAttributeValue("itemprop","softwareVersion").size() > 0) {
-                    latestVersion = doc.getElementsByAttributeValue("itemprop","softwareVersion").first().text();
+                if(doc.getElementsByTag("android").size() > 0) {
+                    latestVersion = doc.getElementsByTag("android").first().attr("version");
+                }
 
-                    //check if version number only has 2 segment
-                    if(K12NetHelper.findPattermCount(latestVersion, ".") < 2){
-                        latestVersion += ".0";
-                    }
+                //check if version number only has 2 segment25*
+                if(latestVersion != null && K12NetHelper.findPattermCount(latestVersion, ".") < 2){
+                    latestVersion += ".0";
                 }
 
             }catch (Exception e){

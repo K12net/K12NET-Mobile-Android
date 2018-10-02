@@ -92,6 +92,15 @@
             android:text="@string/save"
             android:layout_marginTop="15dp" />
 
+        <Button
+            android:id="@+id/btn_policy"
+            style="@android:style/Widget.DeviceDefault.Light.Button.Borderless.Small"
+            android:layout_width="254dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:text="@string/privacy_policy" />
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -42,9 +42,10 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
+import com.google.firebase.appindexing.Action;
+import com.google.firebase.appindexing.FirebaseUserActions;
+import com.google.firebase.appindexing.builders.Actions;
+
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
@@ -78,11 +79,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     boolean hasWriteAccess = false;
     boolean hasReadAccess = false;
     static boolean screenAlwaysOn = false;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
@@ -670,7 +666,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 hasWriteAccess = false;
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                    if (checkReadPermission()) {
+                    if (checkWritePermission()) {
                         hasWriteAccess = true;
                     } else {
                         requestWritePermission();
@@ -716,10 +712,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         mainLayout.addView(webview);
 
         ctx = this;
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         this.onNewIntent(this.getIntent());
     }
@@ -863,13 +855,24 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
+    public Action getAction() {
+        return Actions.newView("WebViewer Page", "android-app://com.k12nt.k12netframe/http/host/path");
+    }
+
     @Override
     public void onStart() {
         super.onStart();
 
+        /* If you’re logging an action on an item that has already been added to the index,
+        you don’t have to add the following update line. See
+        https://firebase.google.com/docs/app-indexing/android/personal-content#update-the-index for
+        adding content to the index */
+        //FirebaseAppIndex.getInstance().update(getIndexable());
+        FirebaseUserActions.getInstance().start(getAction());
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
+       /* client.connect();
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
                 "WebViewer Page", // TODO: Define a title for the content shown.
@@ -880,27 +883,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 // TODO: Make sure this auto-generated app URL is correct.
                 Uri.parse("android-app://com.k12nt.k12netframe/http/host/path")
         );
-        AppIndex.AppIndexApi.start(client, viewAction);
+        AppIndex.AppIndexApi.start(client, viewAction);*/
     }
 
     @Override
     public void onStop() {
+        FirebaseUserActions.getInstance().end(getAction());
         super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "WebViewer Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.k12nt.k12netframe/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
     }
 
     @Override

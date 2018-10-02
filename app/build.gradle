@@ -7,10 +7,10 @@ android {
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
-        minSdkVersion 14
+        minSdkVersion 22
         targetSdkVersion 26
-        versionCode 32
-        versionName "1.30.1"
+        versionCode 35
+        versionName "1.31.2"
     }
     buildTypes {
         release {

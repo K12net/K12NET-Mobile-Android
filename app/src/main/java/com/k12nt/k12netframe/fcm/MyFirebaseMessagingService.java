@@ -3,6 +3,7 @@ package com.k12nt.k12netframe.fcm;
 /**
  * Created by tarikcanturk on 21/09/16.
  */
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -28,7 +29,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
 
-    public static int NOTIFICATION_ID = 1;
+    public static int NOTIFICATION_ID = 1453;
 
     /**
      * Called when message is received.
@@ -47,8 +48,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // and data payloads are treated as notification messages. The Firebase console always sends notification
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
-
-        NOTIFICATION_ID++;
 
         String msg = "not found";
         String intent = "";
@@ -79,7 +78,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
             msg =  remoteMessage.getNotification().getBody();
-            title = remoteMessage.getNotification().getTitle();
+
+            if (title == null) {
+                title = remoteMessage.getNotification().getTitle();
+            }
+        }
+
+        if (title == null) {
+            title = this.getString(R.string.app_name);
         }
 
         K12NetUserReferences.initUserReferences(this);
@@ -100,8 +106,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     private void sendNotification(String messageBody,String title,String intentStr,String portal,String query) {
         Intent intent = new Intent(this, WebViewerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        /*intent.setData(url);*/
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
         intent.putExtra("intent",intentStr);
         intent.putExtra("portal", portal);
         intent.putExtra("query", query);
@@ -113,11 +119,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
+                .setDefaults(Notification.DEFAULT_ALL)
                 .setSmallIcon(R.drawable.k12net_logo)
-                .setContentTitle(this.getString(R.string.app_name))
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(messageBody))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
+                .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
@@ -125,10 +131,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-      /*  if(WebViewerActivity.ctx != null) {
-            Toast.makeText(WebViewerActivity.ctx, messageBody, Toast.LENGTH_SHORT).show();
-        }*/
 
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }

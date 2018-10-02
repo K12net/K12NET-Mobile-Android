@@ -2,6 +2,7 @@ package com.k12nt.k12netframe;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -63,6 +64,22 @@ public class K12NetSettingsDialogView extends K12NetDailogView {
                 K12NetUserReferences.setConnectionAddress(appAddress.getText().toString());
                 K12NetUserReferences.setFileServerAddress(fsAddress.getText().toString());
                 dismiss();
+            }
+        });
+
+        Button btn_policy = (Button) view.findViewById(R.id.btn_policy);
+
+        btn_policy.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.addCategory(Intent.CATEGORY_BROWSABLE);
+
+                //todo: App provider must include their own PrivacyPolicy by changing below url
+                intent.setData(Uri.parse(String.format("http://fs.k12net.com/mobile/files/PrivacyPolicy_%s.pdf",K12NetUserReferences.getLanguageCode())));
+                getContext().startActivity(intent);
             }
         });
 

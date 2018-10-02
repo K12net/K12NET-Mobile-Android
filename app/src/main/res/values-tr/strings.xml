@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="privacy_policy">Gizlilik Politikası</string>
     <string name="app_name">K12NET Mobil</string>
     <string name="action_settings">Ayarlar</string>
     <string name="username">Kullanıcı Adı</string>
