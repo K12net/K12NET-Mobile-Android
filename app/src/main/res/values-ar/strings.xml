@@ -241,5 +241,6 @@
     <string name="cancel">Cancel</string>
     <string name="newUpdateAvailableWarning">A new update is available. You can update application later if you want.</string>
     <string name="ok">Ok</string>
+    <string name="fileNotFound">File not found!</string>
 
 </resources>

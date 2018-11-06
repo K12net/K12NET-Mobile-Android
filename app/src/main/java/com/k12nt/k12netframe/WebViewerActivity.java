@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -18,8 +20,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -55,12 +59,18 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 
 import org.apache.http.cookie.Cookie;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
@@ -204,15 +214,26 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             if (resultStr != null) {
 
                 String filePath = getPath(this, Uri.parse(resultStr));// getFilePathFromContent(resultStr);
-                File file = new File(filePath);
-                uriArray.add(Uri.fromFile(file));
+
+                if(filePath == null) {
+                    Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                } else {
+                    File file = new File(filePath);
+                    uriArray.add(Uri.fromFile(file));
+                }
+
             }
             else if(intent != null && intent.getClipData() != null && intent.getClipData().getItemCount() > 0) {
                 for(int i = 0; i < intent.getClipData().getItemCount();i++) {
                     String filePath = getPath(this, intent.getClipData().getItemAt(i).getUri());//getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
                    // String filePath = getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
-                    File file = new File(filePath);
-                    uriArray.add(Uri.fromFile(file));
+
+                    if(filePath == null) {
+                        Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                    } else {
+                        File file = new File(filePath);
+                        uriArray.add(Uri.fromFile(file));
+                    }
                 }
             }
 
@@ -935,59 +956,103 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
-        // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
+        if(isKitKat) {
 
-                if ("primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+            // DocumentProvider
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                // ExternalStorageProvider
+                if (isExternalStorageDocument(uri)) {
+                    final String docId = DocumentsContract.getDocumentId(uri);
+                    final String[] split = docId.split(":");
+                    final String type = split[0];
+
+                    if ("primary".equalsIgnoreCase(type)) {
+                        return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    }
+
+                    // TODO handle non-primary volumes
+                }
+                // DownloadsProvider
+                else if (isDownloadsDocument(uri)) {
+                    final String id = DocumentsContract.getDocumentId(uri);
+
+                    if (!TextUtils.isEmpty(id)) {
+                        if (id.startsWith("raw:")) {
+                            return id.replaceFirst("raw:", "");
+                        }
+                        try {
+                            final Uri contentUri = ContentUris.withAppendedId(
+                                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                            return getDataColumn(context, contentUri, null, null);
+                        } catch (NumberFormatException e) {
+                            return null;
+                        }
+                    }
+                }
+                // MediaProvider
+                else if (isMediaDocument(uri)) {
+                    final String docId = DocumentsContract.getDocumentId(uri);
+                    final String[] split = docId.split(":");
+                    final String type = split[0];
+
+                    Uri contentUri = null;
+                    if ("image".equals(type)) {
+                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    } else if ("video".equals(type)) {
+                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    } else if ("audio".equals(type)) {
+                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                    }
+
+                    final String selection = "_id=?";
+                    final String[] selectionArgs = new String[] {
+                            split[1]
+                    };
+
+                    return getDataColumn(context, contentUri, selection, selectionArgs);
+                } else if (isGoogleDrive(uri)) { // Google Drive
+                    try {
+                        File file = saveFileIntoExternalStorageByUri(context, uri);
+
+                        return  file.getPath();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                } // MediaStore (and general)
+            }
+            // MediaStore (and general)
+            else if ("content".equalsIgnoreCase(uri.getScheme())) {
+                if (isGoogleOldPhotosUri(uri)) {
+                    // return http path, then download file.
+                    return uri.getLastPathSegment();
+                } else if (isGoogleNewPhotosUri(uri)) {
+                    // copy from uri. context.getContentResolver().openInputStream(uri);
+                    return copyFile(context, uri);
+                } else if (isPicasaPhotoUri(uri)) {
+                    // copy from uri. context.getContentResolver().openInputStream(uri);
+                    return copyFile(context, uri);
                 }
 
-                // TODO handle non-primary volumes
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                return getDataColumn(context, contentUri, null, null);
-            }
-            // MediaProvider
-            else if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-
-                Uri contentUri = null;
-                if ("image".equals(type)) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                } else if ("video".equals(type)) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                } else if ("audio".equals(type)) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                try{
+                    return getDataColumn(context, uri, null, null);
+                } catch(Exception e) {
+                    if(isFileProviderUri(uri)) {
+                        return uri.toString();
+                    } else {
+                        return  null;
+                    }
                 }
-
-                final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
-                        split[1]
-                };
-
-                return getDataColumn(context, contentUri, selection, selectionArgs);
             }
-        }
-        // MediaStore (and general)
-        else if ("content".equalsIgnoreCase(uri.getScheme())) {
-            return getDataColumn(context, uri, null, null);
-        }
-        // File
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
+            // File
+            else if ("file".equalsIgnoreCase(uri.getScheme())) {
+                return uri.getPath();
+            }
+        } else {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            return cursor.getString(cursor.getColumnIndex("_data"));
         }
 
         return null;
@@ -1003,9 +1068,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
-    public static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
-
+    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {
@@ -1024,6 +1087,98 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 cursor.close();
         }
         return null;
+    }
+
+    private static String copyFile(Context context, Uri uri) {
+
+        String filePath;
+        InputStream inputStream = null;
+        BufferedOutputStream outStream = null;
+        try {
+            inputStream = context.getContentResolver().openInputStream(uri);
+            File extDir = context.getExternalFilesDir(null);
+            filePath = extDir.getAbsolutePath() + "/IMG_" + UUID.randomUUID().toString() + ".jpg";
+            outStream = new BufferedOutputStream(new FileOutputStream(filePath));
+
+            byte[] buf = new byte[2048];
+            int len;
+            while ((len = inputStream.read(buf)) > 0) {
+                outStream.write(buf, 0, len);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            filePath = "";
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (outStream != null) {
+                    outStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return filePath;
+    }
+
+    public static File saveFileIntoExternalStorageByUri(Context context, Uri uri) throws Exception {
+        InputStream inputStream = context.getContentResolver().openInputStream(uri);
+        int originalSize = inputStream.available();
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        String fileName = getFileName(context, uri);
+        File file = makeEmptyFileIntoExternalStorageWithTitle(fileName);
+        bis = new BufferedInputStream(inputStream);
+        bos = new BufferedOutputStream(new FileOutputStream(
+                file, false));
+
+        byte[] buf = new byte[originalSize];
+        bis.read(buf);
+        do {
+            bos.write(buf);
+        } while (bis.read(buf) != -1);
+
+        bos.flush();
+        bos.close();
+        bis.close();
+
+        return file;
+    }
+
+    public static File makeEmptyFileIntoExternalStorageWithTitle(String title) {
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath();
+        return new File(root, title);
+    }
+
+    public static String getFileName(Context context, Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     /**
@@ -1050,4 +1205,27 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    public static boolean isGoogleOldPhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    public static boolean isGoogleNewPhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.contentprovider".equals(uri.getAuthority());
+    }
+
+    public static boolean isFileProviderUri(Uri uri) {
+        return uri.getAuthority().contains("fileprovider");
+    }
+
+    private static boolean isPicasaPhotoUri(Uri uri) {
+
+        return uri != null
+                && !TextUtils.isEmpty(uri.getAuthority())
+                && (uri.getAuthority().startsWith("com.android.gallery3d")
+                || uri.getAuthority().startsWith("com.google.android.gallery3d"));
+    }
+
+    public static boolean isGoogleDrive(Uri uri) {
+        return uri.getAuthority().equalsIgnoreCase("com.google.android.apps.docs.storage");
+    }
 }

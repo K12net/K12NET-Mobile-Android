@@ -244,6 +244,7 @@
     <string name="ok">Ok</string>
 
     <string name="confirmation">Uyarı</string>
+    <string name="fileNotFound">Dosya bulunamadı!</string>
     <string name="navToNotify">Bildirim sayfasına yönlendirilmek üzeresiniz. Bu sayfadan ayrılmak istediğinize emin misiniz?</string>
 
 </resources>

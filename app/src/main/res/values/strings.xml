@@ -244,6 +244,7 @@
     <string name="ok">Ok</string>
 
     <string name="confirmation">Confirmation</string>
+    <string name="fileNotFound">File not found!</string>
     <string name="navToNotify">You are about to navigate notification page. Do you really want to exit current view?</string>
 </resources>
 
