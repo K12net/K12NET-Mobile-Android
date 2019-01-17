@@ -2,7 +2,9 @@ package com.k12nt.k12netframe;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.ContentUris;
 import android.content.Context;
@@ -12,7 +14,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -52,12 +53,9 @@ import com.google.firebase.appindexing.builders.Actions;
 
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
-import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
-
-import org.apache.http.cookie.Cookie;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -68,6 +66,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,13 +77,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     public static String startUrl = "";
     public static String previousUrl = "";
-    public static Context ctx = null;
     WebView webview = null;
 
     private ValueCallback<Uri> mUploadMessage;
     private ValueCallback<Uri[]> mFilePathCallback;
     private final static int FILECHOOSER_RESULTCODE = 1;
     private Boolean isConfirmed = false;
+    private Dialog progress_dialog;
 
     boolean hasWriteAccess = false;
     boolean hasReadAccess = false;
@@ -134,7 +133,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     isConfirmed = true;
                     confirmation.run();
                 } else {
-                    setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + ctx.getString(R.string.navToNotify),confirmation);
+                    setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + this.getString(R.string.navToNotify),confirmation);
                 }
             }
         }
@@ -143,11 +142,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private void navigateTo(String url) {
         WebViewerActivity.startUrl = url;
 
-        if (LoginAsyncTask.isLogin) {
-            Intent intent = new Intent(ctx, WebViewerActivity.class);
-            ctx.startActivity(intent);
+        if (LoginActivity.isLogin) {
+            Intent intent = new Intent(this, WebViewerActivity.class);
+            this.startActivity(intent);
         } else {
-            Intent intent = new Intent(ctx, LoginActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
 
             final String portal = this.getIntent().getExtras().getString("portal","");
             final String query = this.getIntent().getExtras().getString("query","");
@@ -157,19 +156,19 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             intent.putExtra("portal", portal);
             intent.putExtra("query", query);
 
-            ctx.startActivity(intent);
+            this.startActivity(intent);
         }
     }
 
     private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
         isConfirmed = false;
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(false);
-        builder.setPositiveButton(ctx.getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isConfirmed = true;
@@ -178,7 +177,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
         });
 
-        builder.setNegativeButton(ctx.getString(R.string.no), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(this.getString(R.string.no), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isConfirmed = false;
@@ -299,8 +298,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         super.onCreate(savedInstanceState);
 
-        if(screenAlwaysOn) {
+        progress_dialog = new Dialog(this, R.style.K12NET_ModalLayout);
+        progress_dialog.setContentView(R.layout.loading_view_layout);
 
+        if(screenAlwaysOn) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
@@ -366,10 +367,31 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             { WebView.setWebContentsDebuggingEnabled(true); }
         }
 
+        final Activity ctx = this;
+
         webview.setWebViewClient(new WebViewClient() {
+
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+
+                if(!ctx.isFinishing())
+                {
+                    progress_dialog.show();
+                }
+
+            }
 
             public void onPageFinished(WebView view, String url) {
                 Log.i("WEB", "Finished loading URL: " + url);
+
+                if(progress_dialog != null && progress_dialog.isShowing()) {
+                    try {
+                        progress_dialog.dismiss();
+                    }
+                    catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
                 if (url.toLowerCase().contains("login.aspx")) {
                     finish();
                 }
@@ -407,30 +429,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             @Override
             public void onReceivedHttpError(WebView view,
                                             WebResourceRequest request, WebResourceResponse errorResponse) {
-
-               /* Toast.makeText(getActivity(),
-                        "WebView Error" + errorResponse.getReasonPhrase(),
-                        Toast.LENGTH_SHORT).show();*/
-
-
                 super.onReceivedHttpError(view, request, errorResponse);
             }
-            /*
-             * Added in API level 23 replacing :-
-             *
-             * onReceivedError(WebView view, int errorCode, String description, String failingUrl)
-             */
-   /*@Override
-   public void onReceivedError(WebView view, WebResourceRequest request,
-                               WebResourceError error) {
-
-       Toast.makeText(getActivity(),
-               "WebView Error" + error.getDescription(),
-               Toast.LENGTH_SHORT).show();
-
-       super.onReceivedError(view, request, error);
-
-   }*/
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("tel:")) {
@@ -507,18 +507,24 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         });
 
-        List<Cookie> cookies = K12NetHttpClient.getCookieList();
-        Cookie sessionInfo = null;
+        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
+        HttpCookie sessionInfo = null;
 
         if (cookies != null && !cookies.isEmpty()) {
-            CookieSyncManager.createInstance(getApplicationContext());
             CookieManager cookieManager = CookieManager.getInstance();
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                CookieSyncManager.createInstance(getApplicationContext());
+            }
+            cookieManager.setAcceptCookie(true);
 
-            for (Cookie cookie : cookies) {
+            for (HttpCookie cookie : cookies) {
                 sessionInfo = cookie;
                 String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
                 cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-                CookieSyncManager.getInstance().sync();
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    CookieSyncManager.getInstance().sync();
+                }
             }
 
             Log.d("LNG", webview.getContext().getString(R.string.localString));
@@ -731,8 +737,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.loadUrl(startUrl);
         mainLayout.removeAllViews();
         mainLayout.addView(webview);
-
-        ctx = this;
 
         this.onNewIntent(this.getIntent());
     }
@@ -1082,6 +1086,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 final int column_index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(column_index);
             }
+
+        } catch (Exception ex){
+            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_LONG).show();
         } finally {
             if (cursor != null)
                 cursor.close();

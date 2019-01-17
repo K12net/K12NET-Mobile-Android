@@ -8,22 +8,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
+import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
+import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
+import java.net.URL;
 import java.util.Locale;
 import android.content.res.Resources;
-import android.content.res.Configuration;
 import android.content.Intent;
-import android.app.Activity;
 import android.os.Build;
 
-import android.content.res.Resources;
-import android.content.res.Configuration;
-import android.content.Intent;
-import android.app.Activity;
-import android.os.Build;
+import org.json.JSONObject;
 
-public class K12NetSettingsDialogView extends K12NetDailogView {
+public class K12NetSettingsDialogView extends K12NetDialogView {
 
     public static String TURKISH = "tr";
     public static String ENGLISH = "en";
@@ -147,22 +144,18 @@ public class K12NetSettingsDialogView extends K12NetDailogView {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
             configuration.setLocale(myLocale);
-        } else{
-            configuration.locale=myLocale;
         }
+
+        configuration.locale = myLocale;
 
         Locale.setDefault(myLocale);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             context.createConfigurationContext(configuration);
-        } else {
-            res.updateConfiguration(configuration,res.getDisplayMetrics());
         }
 
+        res.updateConfiguration(configuration,res.getDisplayMetrics());
+
     }
 
-    @Override
-    protected CharSequence getToolbarSubtitle() {
-        return "";
-    }
 }

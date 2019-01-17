@@ -31,10 +31,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.google.firebase:firebase-messaging:17.0.0'
-    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'me.leolin:ShortcutBadger:1.1.6@aar'
-    implementation 'com.google.firebase:firebase-appindexing:16.0.1'
+    implementation 'com.google.firebase:firebase-appindexing:17.1.0'
     implementation 'org.jsoup:jsoup:1.9.2'
     // https://mvnrepository.com/artifact/com.android.tools.lint/lint-gradle-api
     //compile 'com.android.tools.lint:lint-gradle-api:26.1.3'

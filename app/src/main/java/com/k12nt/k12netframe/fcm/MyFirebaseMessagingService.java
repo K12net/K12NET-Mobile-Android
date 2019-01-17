@@ -4,32 +4,30 @@ package com.k12nt.k12netframe.fcm;
  * Created by tarikcanturk on 21/09/16.
  */
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
-import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
-
-import java.util.Locale;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-
-    public static int NOTIFICATION_ID = 1453;
+    private static final String ChannelID = "M_CH_ID_K12net";
 
     /**
      * Called when message is received.
@@ -90,7 +88,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         K12NetUserReferences.initUserReferences(this);
         K12NetUserReferences.increaseBadgeNumber();
-        ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
 
         sendNotification(msg,title,intent,portal,query);
 
@@ -119,19 +116,50 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ChannelID)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setSmallIcon(R.drawable.k12net_logo)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
                 .setContentTitle(title)
+                .setChannelId(ChannelID)
                 .setContentText(messageBody)
-                .setAutoCancel(true)
+                .setAutoCancel(true).setContentIntent(pendingIntent)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setNumber(K12NetUserReferences.getBadgeCount())
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis());
+
+        Notification notification = null;
+
+        if (Build.VERSION.SDK_INT > 15) {// for some reason Notification.PRIORITY_DEFAULT doesn't show the counter
+            builder.setPriority(Notification.PRIORITY_HIGH);
+            notification= builder.build();
+        } else {
+            notification = builder.getNotification();
+        }
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (notificationManager.getNotificationChannel(ChannelID) == null) {
+                createChannel(title,notificationManager);
+            }
+        }
+
+        notificationManager.notify(K12NetUserReferences.getBadgeCount(), notification);
+
+        ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createChannel(String channelTitle, NotificationManager notificationManager ) {
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel notificationChannel = new NotificationChannel(ChannelID, channelTitle, importance);
+        notificationChannel.setShowBadge(true);
+        notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+        notificationManager.createNotificationChannel(notificationChannel);
+    }
+
 }

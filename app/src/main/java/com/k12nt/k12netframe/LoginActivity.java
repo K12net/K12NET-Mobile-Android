@@ -8,29 +8,31 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 
-import org.apache.http.cookie.Cookie;
 import android.webkit.CookieManager;
+import android.widget.Toast;
 
+import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import com.k12nt.k12netframe.async_tasks.LoginAsyncTask;
+import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
+import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
+import com.k12nt.k12netframe.fcm.MyFirebaseInstanceIDService;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -39,9 +41,8 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity implements AsyncCompleteListener {
 
     final Context context = this;
 
@@ -89,7 +90,7 @@ public class LoginActivity extends Activity {
             K12NetUserReferences.setLanguage(this.getString(R.string.localString));
         }
 
-        K12NetHttpClient.resetBrowser(getApplicationContext());
+        K12NetHttpClient.resetBrowser();
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
 
         setContentView(R.layout.k12net_login_layout);
@@ -104,8 +105,6 @@ public class LoginActivity extends Activity {
         if (chkRememberMe.isChecked()) {
             password.setText(K12NetUserReferences.getPassword());
         }
-
-        ImageView img_logo = (ImageView) findViewById(R.id.img_login_icon);
 
         Button login_button = (Button) findViewById(R.id.btn_login_submit);
 
@@ -188,12 +187,13 @@ public class LoginActivity extends Activity {
         K12NetUserReferences.setPassword(password.getText().toString());
         K12NetUserReferences.setRememberMe(chkRememberMe.isChecked());
 
-        K12NetHttpClient.resetBrowser(getApplicationContext());
+        K12NetHttpClient.resetBrowser();
 
         CookieManager cookieManager = CookieManager.getInstance();
-        List<Cookie> cookies = K12NetHttpClient.getCookieList();
+
+        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
         if (cookies != null) {
-            for (Cookie cookie : cookies) {
+            for (HttpCookie cookie : cookies) {
                 if (cookie.getName().contains("NotCompletedPollCount")){
                     String cookieString = cookie.getName() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT" + "; Domain=" + cookie.getDomain();
                     cookieManager.setCookie(cookie.getDomain(), cookieString);
@@ -209,8 +209,168 @@ public class LoginActivity extends Activity {
         K12NetHttpClient.setCookie("UICulture", K12NetUserReferences.getLanguageCode(), strUTCDate);
         K12NetHttpClient.setCookie("Culture", K12NetUserReferences.getLanguageCode(), strUTCDate);
 
-        LoginAsyncTask loginTasAsyncTask = new LoginAsyncTask(context, username.getText().toString(), password.getText().toString(), LoginActivity.this);
-        loginTasAsyncTask.execute();
+        this.login();
+    }
+
+    public static Boolean isLogin = false;
+    public void login() {
+        try {
+            isLogin = false;
+
+            String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/Login";
+            HTTPAsyncTask loginTask = new HTTPAsyncTask(context, connString, "Login");
+
+            loginTask.setHeader("Content-type", "application/json;charset=UTF-8");
+            loginTask.setHeader("Atlas-DeviceID", K12NetUserReferences.getDeviceToken());
+            loginTask.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
+
+            loginTask.setJson("userName", K12NetUserReferences.getUsername());
+            loginTask.setJson("password", K12NetUserReferences.getPassword());
+            loginTask.setJson("createPersistentCookie", "false");
+
+            loginTask.setOnCompleteListener(this);
+
+            loginTask.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void asyncTaskCompleted(HTTPAsyncTask completedTask){
+        String taskName = completedTask.GetName();
+
+        if(taskName == "Login") {
+            try {
+                JSONObject responseJSON = new JSONObject(completedTask.GetResult());
+
+                isLogin = responseJSON.optBoolean("d", false);
+
+                this.LoginCompleted();
+
+                if(isLogin && K12NetUserReferences.LANG_UPDATED) {
+                    String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/SetLanguage";
+
+                    HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
+
+                    langTask.setHeader("LanguageCode", K12NetUserReferences.getLanguageCode());
+
+                    List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
+
+                    if(cookies != null) {
+                        for (String cookie : cookies) {
+                            if(cookie.startsWith(".")) {//Set Authentication cookie
+                                langTask.GetConnection().setRequestProperty("Cookie", cookie.replaceAll("; HttpOnly","").replaceAll("HttpOnly",""));
+                            }
+                        }
+                    }
+
+                    langTask.setOnCompleteListener(this);
+
+                    langTask.execute();
+
+                    K12NetUserReferences.LANG_UPDATED = false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            //Toast.makeText(context, completedTask.GetResult(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private Boolean isConfirmed = false;
+    private void LoginCompleted() {
+        if (isLogin == false) {
+            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
+        } else {
+            MyFirebaseInstanceIDService firebaseInstanceIDService = new MyFirebaseInstanceIDService();
+            firebaseInstanceIDService.onTokenRefresh();
+
+            final Activity currentActivity = LoginActivity.this;
+            Intent intentOfLogin = currentActivity.getIntent();
+            String startUrl = K12NetUserReferences.getConnectionAddress();
+
+            WebViewerActivity.previousUrl = null;
+            if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
+                final String intent = intentOfLogin.getExtras().getString("intent","");
+
+                if(intent != "") {
+                    final String portal = intentOfLogin.getExtras().getString("portal","");
+                    final String query = intentOfLogin.getExtras().getString("query","");
+                    final String body = intentOfLogin.getExtras().getString("body","");
+                    final String title = intentOfLogin.getExtras().getString("title","");
+
+                    Runnable confirmCompleted = new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intentOfLogin = currentActivity.getIntent();
+                            String url = K12NetUserReferences.getConnectionAddress();
+
+                            intentOfLogin.putExtra("intent","");
+                            intentOfLogin.putExtra("portal","");
+                            intentOfLogin.putExtra("query","");
+                            intentOfLogin.putExtra("body","");
+                            intentOfLogin.putExtra("title","");
+
+                            if (isConfirmed) {
+                                url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
+                                WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+
+                                navigateTo(url + "/Logon.aspx");
+                            }
+                        }
+                    };
+
+                    if (WebViewerActivity.startUrl == startUrl) {
+                        isConfirmed = true;
+                        confirmCompleted.run();
+                    } else {
+                        setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + context.getString(R.string.navToNotify),confirmCompleted);
+                    }
+
+                    return;
+                }
+            }
+
+            navigateTo(startUrl + "/Logon.aspx");
+        }
+    }
+
+    private void navigateTo(String url) {
+        WebViewerActivity.startUrl = url;
+        Intent intent = new Intent(context, WebViewerActivity.class);
+        context.startActivity(intent);
+    }
+
+    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+        isConfirmed = false;
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setCancelable(false);
+        builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = true;
+
+                func.run();
+            }
+        });
+
+        builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                isConfirmed = false;
+
+                func.run();
+            }
+        });
+
+        builder.show();
     }
 
     private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {

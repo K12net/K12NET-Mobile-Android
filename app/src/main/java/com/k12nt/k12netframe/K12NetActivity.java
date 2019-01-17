@@ -152,7 +152,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 		mainLayout.addView(loadView);
 		
 		buildCustomView();
-		
+
 		atask = getAsyncTask();
 		if(atask != null && atask.getStatus() != Status.RUNNING) {
 			atask.setOnLoadComplete(this);

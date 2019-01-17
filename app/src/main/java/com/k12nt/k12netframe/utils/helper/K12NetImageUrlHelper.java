@@ -52,10 +52,8 @@ public class K12NetImageUrlHelper {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			
-		//	AsistoHelper.logHeap("img download basladi");
+
 			loadBitmap();
-	//		AsistoHelper.logHeap("img download bitti");
 			
 			return null;
 		}

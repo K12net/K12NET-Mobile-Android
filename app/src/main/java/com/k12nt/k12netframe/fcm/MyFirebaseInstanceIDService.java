@@ -5,11 +5,7 @@ package com.k12nt.k12netframe.fcm;
  */
 import android.util.Log;
 
-import com.k12nt.k12netframe.LoginActivity;
-import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
-import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
-import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
