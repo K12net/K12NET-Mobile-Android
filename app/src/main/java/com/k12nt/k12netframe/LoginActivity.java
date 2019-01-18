@@ -13,11 +13,9 @@ import android.content.res.Configuration;
 
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -178,7 +176,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
         K12NetUserReferences.setWarnedVersionString(currentVersion);
 
-        new GetLatestVersion(context).execute();
+        new GetLatestVersion(this).execute();
 
     }
 
@@ -397,7 +395,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             try {
 //It retrieves the latest version by scraping the content of current version from play store at runtime
 
-                Document doc = Jsoup.connect("http://fs.k12net.com/mobile/files/versions.k12net.txt").get();
+                Document doc = Jsoup.connect("http://fs.k12net.com/mobile/files/versions.k12net.txt").userAgent("Mozilla").header("Cache-control", "no-cache").header("Cache-store", "no-store").timeout(4000).get();
 
                 if(doc.getElementsByTag("android").size() > 0) {
                     latestVersion = doc.getElementsByTag("android").first().attr("version");
@@ -418,7 +416,6 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
-
             if(progress_dialog.isShowing()) {
                 try {
                     progress_dialog.dismiss();
@@ -435,16 +432,13 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
                 if (currentVersionInt[1] < latestVersionInt[1] || currentVersionInt[0] < latestVersionInt[0]){
                     isUptoDate = false;
-                    if(!isFinishing()){ //This would help to check the context of whether activity is running or not, otherwise you'd get bind error sometimes
-                        showUpdateDialog();
-                    }
-                }
 
+                    showUpdateDialog();
+                }
                 else if (currentVersionInt[2] < latestVersionInt[2]){
                     isUptoDate = true;
-                    if(!isFinishing()){ //This would help to check the context of whether activity is running or not, otherwise you'd get bind error sometimes
-                        showWarningDialog(latestVersion);
-                    }
+
+                    showWarningDialog(latestVersion);
                 }
                 else {
                     StartLoginOperation();
@@ -453,6 +447,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             else {
                 StartLoginOperation();
             }
+
             super.onPostExecute(jsonObject);
         }
 
@@ -467,34 +462,11 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     }
 
     private void showUpdateDialog(){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.appName);
-        builder.setMessage(R.string.newUpdateAvailable);
-        builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
-                        (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
-                dialog.dismiss();
-            }
-        });
+        try {
 
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //background.start();
-            }
-        });
-
-        builder.setCancelable(false);
-        dialog = builder.show();
-    }
-
-    private void showWarningDialog(final String latestVersion){
-        if(K12NetUserReferences.getWarnedVersionString().compareTo(latestVersion) != 1) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.appName);
-            builder.setMessage(R.string.newUpdateAvailableWarning);
+            builder.setMessage(R.string.newUpdateAvailable);
             builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -504,31 +476,52 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                 }
             });
 
-            builder.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    K12NetUserReferences.setWarnedVersionString(latestVersion);
-                    StartLoginOperation();
+                    //background.start();
                 }
             });
 
             builder.setCancelable(false);
             dialog = builder.show();
+
+        } catch (Exception e) {
+            StartLoginOperation();
         }
     }
 
-    private void showAlertDialog(int alertText){
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(alertText);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+    private void showWarningDialog(final String latestVersion){
+        try {
 
-        builder.setCancelable(false);
-        builder.show();
+            if(K12NetUserReferences.getWarnedVersionString().compareTo(latestVersion) != 1) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.appName);
+                builder.setMessage(R.string.newUpdateAvailableWarning);
+                builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                                (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        K12NetUserReferences.setWarnedVersionString(latestVersion);
+                        StartLoginOperation();
+                    }
+                });
+
+                builder.setCancelable(false);
+                dialog = builder.show();
+            }
+
+        } catch (Exception e) {
+            StartLoginOperation();
+        }
     }
 
 }

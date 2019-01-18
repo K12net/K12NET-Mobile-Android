@@ -15,7 +15,14 @@ public class K12NetHttpClient {
     }
 
     public static List<HttpCookie> getCookieList(){
-        List<HttpCookie> cookies = ((CookieManager) CookieManager.getDefault()).getCookieStore().getCookies();
+        CookieManager cookieManager = ((CookieManager) CookieManager.getDefault());
+
+        if(cookieManager == null) {
+            resetBrowser();
+            cookieManager = ((CookieManager) CookieManager.getDefault());
+        }
+
+        List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
 
         return  cookies;
     }
