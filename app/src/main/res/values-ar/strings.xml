@@ -6,10 +6,10 @@
     <string name="username">كلمة السر</string>
     <string name="password">كلمة السر</string>
     <string name="login">دخول</string>
-    <string name="welcome">Hoşgeldiniz</string>
-    <string name="loading">Yükleniyor...</string>
-    <string name="assessment_result">Sınav Sonuçları</string>
-    <string name="achievement_guide">Başarı Haritası</string>
+    <string name="welcome">Welcome</string>
+    <string name="loading">Loading...</string>
+    <string name="assessment_result">Assessment Result</string>
+    <string name="achievement_guide">Achievement Guide</string>
     <string name="absence">Devamsızlık</string>
     <string name="homeworks">Ödevler</string>
     <string name="courses">Dersler</string>

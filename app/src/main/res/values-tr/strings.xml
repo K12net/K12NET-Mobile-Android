@@ -7,7 +7,7 @@
     <string name="username">Kullanıcı Adı</string>
     <string name="password">Şifre</string>
     <string name="login">Giriş</string>
-    <string name="welcome">Hoşgeldiniz</string>
+    <string name="welcome">Hoş Geldiniz</string>
     <string name="loading">Yükleniyor...</string>
     <string name="assessment_result">Sınav Sonuçları</string>
     <string name="achievement_guide">Başarı Haritası</string>

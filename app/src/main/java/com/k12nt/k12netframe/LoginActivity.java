@@ -28,9 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
-import com.k12nt.k12netframe.fcm.MyFirebaseInstanceIDService;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -78,6 +78,12 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(LoginActivity.this, instanceIdResult -> {
+            String newToken = instanceIdResult.getToken();
+
+            K12NetUserReferences.setDeviceToken(newToken);
+        });
 
         //Remove title bar
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -283,9 +289,6 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         if (isLogin == false) {
             Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
         } else {
-            MyFirebaseInstanceIDService firebaseInstanceIDService = new MyFirebaseInstanceIDService();
-            firebaseInstanceIDService.onTokenRefresh();
-
             final Activity currentActivity = LoginActivity.this;
             Intent intentOfLogin = currentActivity.getIntent();
             String startUrl = K12NetUserReferences.getConnectionAddress();

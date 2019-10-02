@@ -12,9 +12,10 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
@@ -28,6 +29,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
     private static final String ChannelID = "M_CH_ID_K12net";
+
+    @Override
+    public void onNewToken(String s) {
+        super.onNewToken(s);
+        K12NetUserReferences.setDeviceToken(s);
+    }
 
     /**
      * Called when message is received.

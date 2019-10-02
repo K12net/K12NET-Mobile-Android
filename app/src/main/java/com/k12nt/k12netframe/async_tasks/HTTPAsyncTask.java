@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.k12nt.k12netframe.R;
 
@@ -13,10 +12,11 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.DataOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,16 +121,16 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     }
 
     private void sendData(HttpURLConnection con, String data) throws IOException {
-        DataOutputStream wr = null;
+        BufferedWriter bw = null;
         try {
-            wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(data);
-            wr.flush();
-            wr.close();
+            bw = new BufferedWriter(new OutputStreamWriter(con.getOutputStream(), "UTF-8"));
+            bw.write(data);
+            bw.flush();
+            bw.close();
         } catch(IOException exception) {
             throw exception;
         } finally {
-            this.closeQuietly(wr);
+            this.closeQuietly(bw);
         }
     }
 

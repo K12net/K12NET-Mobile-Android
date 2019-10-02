@@ -22,8 +22,6 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -34,6 +32,7 @@ import android.webkit.CookieSyncManager;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -47,10 +46,12 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
-
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
@@ -85,6 +86,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private Boolean isConfirmed = false;
     private Dialog progress_dialog;
 
+    private static final String TAG = "WebViewerActivity";
     boolean hasWriteAccess = false;
     boolean hasReadAccess = false;
     static boolean screenAlwaysOn = false;
@@ -583,8 +585,30 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setLoadWithOverviewMode(true);
         webview.getSettings().setUseWideViewPort(true);
         webview.getSettings().setGeolocationEnabled(true);
+        webview.getSettings().setUserAgentString("Android Mozilla/5.0 AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
+        webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        webview.getSettings().setAllowContentAccess(true);
+        webview.getSettings().setAllowFileAccessFromFileURLs(true);
+        webview.getSettings().setAllowUniversalAccessFromFileURLs(true);
+
+        if (!checkCameraPermission()) {
+            requestCameraPermission();
+        }
 
         webview.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    request.grant(request.getResources());
+                }
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                super.onPermissionRequestCanceled(request);
+                Toast.makeText(WebViewerActivity.this,"Permission Denied",Toast.LENGTH_SHORT).show();
+            }
 
             public void onGeolocationPermissionsShowPrompt(
                     String origin,
@@ -853,6 +877,26 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
+    protected boolean checkCameraPermission() {
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    protected void requestCameraPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            Toast.makeText(this, R.string.readAccessAppSettings, Toast.LENGTH_LONG).show();
+        } else {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, 103);
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -875,6 +919,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use gps location .");
+                }
+                break;
+            case 103:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    Log.e("value", "Permission Denied, You cannot use camera to take photo .");
                 }
                 break;
         }
