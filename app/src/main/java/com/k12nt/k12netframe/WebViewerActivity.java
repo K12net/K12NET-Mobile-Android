@@ -1036,10 +1036,45 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             return id.replaceFirst("raw:", "");
                         }
                         try {
-                            final Uri contentUri = ContentUris.withAppendedId(
-                                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                            //Uri contentUri = ContentUris.withAppendedId(
+                               //     Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
-                            return getDataColumn(context, contentUri, null, null);
+                            //return getDataColumn(context, contentUri, null, null);
+                            String[] contentUriPrefixesToTry = new String[]{
+                                    "content://downloads/public_downloads",
+                                    "content://downloads/my_downloads",
+                                    "content://downloads/all_downloads"
+                            };
+
+                            String path = null;
+
+                            for(int i = 0; i < contentUriPrefixesToTry.length;i++) {
+                                String contentUriPrefix = contentUriPrefixesToTry[i];
+                                Uri contentUri = ContentUris.withAppendedId(
+                                        Uri.parse(contentUriPrefix), Long.valueOf(id));
+
+                                path = getDataColumn(context, contentUri, null, null);
+
+                                if (!TextUtils.isEmpty(path))
+                                    return path;
+                            }
+
+                            // path could not be retrieved using ContentResolver, therefore copy file to accessible cache using streams
+                            String fileName = getFileName(context, uri);
+                            File cacheDir = getDocumentCacheDir(context);
+                            File file = generateFileName(fileName, cacheDir);
+
+                            if (file != null)
+                            {
+                                path = file.getAbsolutePath();
+                                saveFileFromUri(context, uri, path);
+                            }
+
+                            // last try
+                            if (TextUtils.isEmpty(path))
+                                return Environment.getExternalStorageDirectory().getPath() + "/Download/" + getFileName(context, uri);
+
+                            return path;
                         } catch (NumberFormatException e) {
                             return null;
                         }
@@ -1113,6 +1148,94 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return null;
     }
 
+    private static void saveFileFromUri(Context context, Uri uri, String destinationPath)
+    {
+        BufferedOutputStream bos = null;
+        InputStream stream = null;
+
+        try
+        {
+            stream = context.getContentResolver().openInputStream(uri);
+            bos = new BufferedOutputStream(new FileOutputStream(destinationPath));
+
+            int bufferSize = 1024 * 4;
+            byte[] buffer = new byte[bufferSize];
+
+            while (true)
+            {
+                int len = stream.read(buffer, 0, bufferSize);
+                if (len == 0)
+                    break;
+                bos.write(buffer, 0, len);
+            }
+
+        }
+        catch (Exception ex)
+        {
+        }
+        finally
+        {
+            try
+            {
+                if (stream != null) stream.close();
+                if (bos != null) bos.close();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+    }
+
+    private static File getDocumentCacheDir(Context context)
+    {
+        File dir = new File(context.getCacheDir(), "documents");
+
+        if (!dir.exists())
+            dir.mkdirs();
+
+        return dir;
+    }
+
+    public static File generateFileName(String name, File directory)
+    {
+        if (name == null) return null;
+
+        File file = new File(directory, name);
+
+        if (file.exists())
+        {
+            String fileName = name;
+            String extension = "";
+            int dotIndex = name.lastIndexOf('.');
+            if (dotIndex > 0)
+            {
+                fileName = name.substring(0, dotIndex);
+                extension = name.substring(dotIndex);
+
+                int index = 0;
+
+                while (file.exists())
+                {
+                    index++;
+                    name = String.format("%1$s(%2$s)%3$s",fileName,index,extension);
+                    file = new File(directory, name);
+                }
+            }
+        }
+
+        try
+        {
+            if (!file.createNewFile())
+                return null;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+
+        return file;
+    }
+
     /**
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
@@ -1139,7 +1262,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
 
         } catch (Exception ex){
-            Toast.makeText(context, ex.getMessage(), Toast.LENGTH_LONG).show();
+
         } finally {
             if (cursor != null)
                 cursor.close();
