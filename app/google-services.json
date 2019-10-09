@@ -1,39 +1,37 @@
 {
   "project_info": {
-    "project_number": "736044553290",
-    "firebase_url": "https://k12nt-frame.firebaseio.com",
-    "project_id": "k12nt-frame",
-    "storage_bucket": "k12nt-frame.appspot.com"
+    "project_number": "431473652245",
+    "firebase_url": "https://k12net-mobil.firebaseio.com",
+    "project_id": "k12net-mobil",
+    "storage_bucket": "k12net-mobil.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:736044553290:android:7e2fec5e792efc4c",
+        "mobilesdk_app_id": "1:431473652245:android:b740522c679e47d19e141c",
         "android_client_info": {
           "package_name": "com.k12nt.k12netframe"
         }
       },
       "oauth_client": [
         {
-          "client_id": "736044553290-h2547s4b4slpqlsa9mm20bh9n2jtqh48.apps.googleusercontent.com",
+          "client_id": "431473652245-gto5vkrmro0gji5k5j2eh2r8cttgrefq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCbzeIZznYtC-Y25LOGJ2Xf0h8lFEFvwsg"
+          "current_key": "AIzaSyCZX36ptuJgatelOaIxaPTgEVvS2PAjJeI"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431473652245-gto5vkrmro0gji5k5j2eh2r8cttgrefq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

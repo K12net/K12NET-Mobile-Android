@@ -438,7 +438,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
                     showUpdateDialog();
                 }
-                else if (currentVersionInt[2] < latestVersionInt[2]){
+                else if (currentVersionInt[2] < latestVersionInt[2] && currentVersionInt[1] <= latestVersionInt[1] && currentVersionInt[0] <= latestVersionInt[0]){
                     isUptoDate = true;
 
                     showWarningDialog(latestVersion);
