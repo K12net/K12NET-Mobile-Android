@@ -151,7 +151,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             public void onClick(View arg0) {
                 Intent webIntent = new Intent(arg0.getContext(), WebViewerActivity.class);
                 webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                WebViewerActivity.startUrl = "https://okul.k12net.com/ResetPassword.aspx";
+                WebViewerActivity.startUrl = K12NetUserReferences.getConnectionAddress() + "/ResetPassword.aspx";
                 arg0.getContext().startActivity(webIntent);
             }
         });
@@ -217,6 +217,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     }
 
     public static Boolean isLogin = false;
+    public static Boolean isLoginRetry = false;
     public void login() {
         try {
             isLogin = false;
@@ -250,6 +251,24 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                 JSONObject responseJSON = new JSONObject(completedTask.GetResult());
 
                 isLogin = responseJSON.optBoolean("d", false);
+
+                if(!isLogin && !isLoginRetry) {
+                    isLoginRetry = true;
+
+                    String connString = K12NetUserReferences.getConnectionAddress();
+
+                    if (connString == "https://okul.k12net.com") {
+                        K12NetUserReferences.setConnectionAddress("https://azure.k12net.com");
+                        K12NetUserReferences.setLanguage("en");
+                    } else {
+                        K12NetUserReferences.setConnectionAddress("https://okul.k12net.com");
+                        K12NetUserReferences.setLanguage("tr");
+                    }
+
+                    this.login();
+
+                    return;
+                }
 
                 this.LoginCompleted();
 

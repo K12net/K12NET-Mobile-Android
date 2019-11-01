@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
+import java.util.Locale;
+
 public class K12NetUserReferences {
 	
 	public static String DATA_FILE_PATH = Environment.getExternalStorageDirectory() + "/MobiDers/context/";
@@ -19,7 +21,7 @@ public class K12NetUserReferences {
 	private static final String SETTINGS_FILE_NAME = "userSettings";
 	private static final String USERNAME = "username";
 	private static final String PASSWORD = "password";
-    private static final String LANGAUGE = "language";
+    private static final String LANGAUGE = "languageCode";
 	private static final String CONNECTION_ADDRESS = "connectionAddress";
     private static final String FILE_SERVER_ADDRESS = "fileServerAddress";
 	private static final String REMEMBER_PASSWORD = "rememberPassword";
@@ -49,14 +51,46 @@ public class K12NetUserReferences {
 		settings = context.getSharedPreferences(SETTINGS_FILE_NAME, Context.MODE_PRIVATE);
 		username = settings.getString(USERNAME, null);
 		password = settings.getString(PASSWORD, null);
-		connectionString = settings.getString(CONNECTION_ADDRESS, "https://okul.k12net.com");
+        languageCode = settings.getString(LANGAUGE, null);
+        connectionString = settings.getString(CONNECTION_ADDRESS, null);
+
+        if (connectionString == null) {
+
+            String language = Locale.getDefault().getLanguage();
+
+            if(language != null) {
+                language = language.split("_")[0].split("-")[0].toLowerCase();
+
+                if(language.equals("tr")) {
+                    languageCode = "tr";
+                    connectionString = "https://okul.k12net.com";
+                    fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
+                } else {
+                    connectionString = "https://azure.k12net.com";
+                    fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.azure.k12net.com/FS/");
+                }
+            } else {
+                languageCode = "en";
+                connectionString = "https://okul.k12net.com";
+                fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
+            }
+
+        }
+
+        if(languageCode == null) {
+            if(connectionString.equals("https://okul.k12net.com")) {
+                languageCode = "tr";
+            } else {
+                languageCode = "en";
+            }
+        }
+
         fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
 		rememberPassword = settings.getBoolean(REMEMBER_PASSWORD, false);
         appRegisterId = settings.getString(PROPERTY_REG_ID, "");
         appVersionNo = settings.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         calendarProviderId = settings.getInt(CALENDAR_PROVIDER_ID, 1);
         badgeNumber = settings.getInt(BADGENUMBER, 0);
-        languageCode = settings.getString(LANGAUGE, null);
         warnedVersion = settings.getString(WARNVERSION, null);
         token = settings.getString(TOKEN, "");
 	}
@@ -174,13 +208,23 @@ public class K12NetUserReferences {
     }
 
     public static void setLanguage(String languageCode) {
-        LANG_UPDATED = LANG_UPDATED || (references.languageCode != languageCode);
+        LANG_UPDATED = LANG_UPDATED || references.languageCode == null || !references.languageCode.equals(languageCode);
 
         references.languageCode = languageCode;
         references.storeString(LANGAUGE, references.languageCode);
     }
 
     public static String getLanguageCode(){
+	    if (references.languageCode == null) {
+            setLanguage("en");
+
+            String language = Locale.getDefault().getLanguage();
+
+            if(language != null) {
+                language = language.split("_")[0].split("-")[0].toLowerCase();
+                setLanguage(language);
+            }
+        }
         return references.languageCode;
     }
 

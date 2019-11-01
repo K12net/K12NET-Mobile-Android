@@ -6,10 +6,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -32,6 +34,7 @@ import android.webkit.CookieSyncManager;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
@@ -195,8 +198,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
     @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent intent) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -296,6 +298,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(onDownloadComplete);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -306,6 +314,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if(screenAlwaysOn) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+
+        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
@@ -409,7 +419,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             @Override
             @SuppressWarnings("deprecation")
             public void onReceivedError(WebView view, int errorCod,String description, String failingUrl) {
-                Toast.makeText(getApplicationContext(), "Your Internet Connection May not be active Or " + description , Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "Your Internet Connection May not be active Or " + description , Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -417,9 +427,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             public void onReceivedError(WebView view, WebResourceRequest request,
                                         WebResourceError error) {
 
-                Toast.makeText(getApplicationContext(),
+               /* Toast.makeText(getApplicationContext(),
                         "WebView Error" + error.getDescription(),
-                        Toast.LENGTH_SHORT).show();
+                        Toast.LENGTH_SHORT).show();*/
 
                 super.onReceivedError(view, request, error);
 
@@ -1007,7 +1017,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
-    public static String getPath(final Context context, final Uri uri) {
+    public String getPath(final Context context, final Uri uri) {
 
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -1036,10 +1046,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             return id.replaceFirst("raw:", "");
                         }
                         try {
-                            //Uri contentUri = ContentUris.withAppendedId(
-                               //     Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                            //return getDataColumn(context, contentUri, null, null);
                             String[] contentUriPrefixesToTry = new String[]{
                                     "content://downloads/public_downloads",
                                     "content://downloads/my_downloads",
@@ -1148,42 +1154,97 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return null;
     }
 
-    private static void saveFileFromUri(Context context, Uri uri, String destinationPath)
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
+
+    private long downloadID;
+    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Fetching the download id received with the broadcast
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            //Checking if the received broadcast is for our enqueued download by matching download id
+            if (downloadID == id) {
+                Toast.makeText(getApplicationContext(), "Download Completed", Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
+    private void saveFileFromUri(Context context, Uri uri, String destinationPath)
     {
-        BufferedOutputStream bos = null;
-        InputStream stream = null;
+        downloadID = 0;
 
-        try
-        {
-            stream = context.getContentResolver().openInputStream(uri);
-            bos = new BufferedOutputStream(new FileOutputStream(destinationPath));
+        DownloadManager downloadManager= (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
-            int bufferSize = 1024 * 4;
-            byte[] buffer = new byte[bufferSize];
+        if (downloadManager != null) {
+            DownloadManager.Request request = new DownloadManager.Request(uri)
+                    .setTitle("Dummy File")// Title of the Download Notification
+                    .setDescription("Downloading")// Description of the Download Notification
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)// Visibility of the download Notification
+                    .setDestinationUri(Uri.parse(destinationPath))// Uri of the destination file
+                    .setAllowedOverMetered(true)// Set if download is allowed on Mobile network
+                    .setAllowedOverRoaming(true);
 
-            while (true)
-            {
-                int len = stream.read(buffer, 0, bufferSize);
-                if (len == 0)
-                    break;
-                bos.write(buffer, 0, len);
+            request.allowScanningByMediaScanner();
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                request.setRequiresCharging(false);
             }
 
-        }
-        catch (Exception ex)
-        {
-        }
-        finally
-        {
+            String mimeType = getMimeType(uri.toString());
+
+            if(mimeType != null) {
+                request.setMimeType(mimeType);
+            }
+
+           String cookies = CookieManager.getInstance().getCookie(startUrl);
+           request.addRequestHeader("Cookie", cookies);
+           request.addRequestHeader("User-Agent", "Android Mozilla/5.0 AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
+
+            downloadID = downloadManager.enqueue(request);
+        } else {
+            BufferedOutputStream bos = null;
+            InputStream stream = null;
+
             try
             {
-                if (stream != null) stream.close();
-                if (bos != null) bos.close();
+                stream = context.getContentResolver().openInputStream(uri);
+                bos = new BufferedOutputStream(new FileOutputStream(destinationPath));
+
+                int bufferSize = 1024 * 4;
+                byte[] buffer = new byte[bufferSize];
+
+                while (true)
+                {
+                    int len = stream.read(buffer, 0, bufferSize);
+                    if (len == 0)
+                        break;
+                    bos.write(buffer, 0, len);
+                }
+
             }
             catch (Exception ex)
             {
             }
+            finally
+            {
+                try
+                {
+                    if (stream != null) stream.close();
+                    if (bos != null) bos.close();
+                }
+                catch (Exception ex)
+                {
+                }
+            }
         }
+
     }
 
     private static File getDocumentCacheDir(Context context)
