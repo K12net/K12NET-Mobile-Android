@@ -203,6 +203,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == FILECHOOSER_RESULTCODE) {
+
             String resultStr = contentStr;
             if(intent != null) {
                 resultStr = intent == null || resultCode != RESULT_OK ? null
@@ -215,8 +216,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             ArrayList<Uri> uriArray = new ArrayList<>();
 
             if (resultStr != null) {
+                Uri uri = Uri.parse(resultStr);
 
-                String filePath = getPath(this, Uri.parse(resultStr));// getFilePathFromContent(resultStr);
+                String filePath = getPath(this, uri);// getFilePathFromContent(resultStr);
 
                 if(filePath == null) {
                     Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
@@ -705,6 +707,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     hasReadAccess = true;
                 }
 
+                hasWriteAccess = false;
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                    if (checkWritePermission()) {
+                        hasWriteAccess = true;
+                    } else {
+                        requestWritePermission();
+                    }
+                } else {
+                    hasWriteAccess = true;
+                }
+
                 if (hasReadAccess) {
 
                     mFilePathCallback = filePathCallback;
@@ -712,6 +725,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     fileSelectorIntent.addCategory(Intent.CATEGORY_OPENABLE);
                     fileSelectorIntent.setType("*/*");
                     fileSelectorIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    fileSelectorIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
                     WebViewerActivity.this.startActivityForResult(Intent.createChooser(fileSelectorIntent, "File Chooser"), WebViewerActivity.FILECHOOSER_RESULTCODE);
 
                     return true;// super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
@@ -907,6 +922,30 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
+    protected boolean checkAccessAllDownloadsPermission() {
+        int result = ContextCompat.checkSelfPermission(this, "android.permission.ACCESS_ALL_DOWNLOADS");
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static String[] PERMISSIONS_STORAGE = {
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.ACCESS_ALL_DOWNLOADS",
+            "android.permission.WRITE_EXTERNAL_STORAGE" };
+
+    protected void requestAccessAllDownloadsPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, "android.permission.ACCESS_ALL_DOWNLOADS")) {
+            Toast.makeText(this, R.string.writeAccessAppSettings, Toast.LENGTH_LONG).show();
+        } else {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 104);
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -936,6 +975,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use camera to take photo .");
+                }
+                break;
+            case 104:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    Toast.makeText(this, "Permission Denied, You cannot use Access to All Downloads.", Toast.LENGTH_LONG).show();
                 }
                 break;
         }
@@ -1031,8 +1077,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     final String[] split = docId.split(":");
                     final String type = split[0];
 
-                    if ("primary".equalsIgnoreCase(type)) {
-                        return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    String fullPath = getPathFromExtSD(split);
+                    if (fullPath != "") {
+                        return fullPath;
+                    } else {
+                        return null;
                     }
 
                     // TODO handle non-primary volumes
@@ -1046,6 +1095,19 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             return id.replaceFirst("raw:", "");
                         }
                         try {
+
+                            if (!checkAccessAllDownloadsPermission()) {
+
+                                String provider = "com.android.providers.downloads.DownloadProvider";
+
+                                grantUriPermission(provider, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                grantUriPermission(provider, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                grantUriPermission(provider, uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
+                                requestAccessAllDownloadsPermission();
+
+                            }
+
                             String[] contentUriPrefixesToTry = new String[]{
                                     "content://downloads/public_downloads",
                                     "content://downloads/my_downloads",
@@ -1073,7 +1135,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             if (file != null)
                             {
                                 path = file.getAbsolutePath();
-                                saveFileFromUri(context, uri, path);
+                                try {
+                                    saveFileFromUri(context, uri, path);
+                                } catch (Exception ex) {
+                                    try {
+                                        file = saveFileIntoExternalStorageByUri(context, uri);
+
+                                        return  file.getPath();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
 
                             // last try
@@ -1130,6 +1202,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 } else if (isPicasaPhotoUri(uri)) {
                     // copy from uri. context.getContentResolver().openInputStream(uri);
                     return copyFile(context, uri);
+                } else if (isGoogleDrive(uri)) { // Google Drive
+                    try {
+                        File file = saveFileIntoExternalStorageByUri(context, uri);
+
+                        return  file.getPath();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 }
 
                 try{
@@ -1152,6 +1233,57 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         return null;
+    }
+
+    /**
+     * Get full file path from external storage
+     *
+     * @param pathData The storage type and the relative path
+     */
+    private static String getPathFromExtSD(String[] pathData) {
+        final String type = pathData[0];
+        final String relativePath = "/" + pathData[1];
+        String fullPath = "";
+
+        // on my Sony devices (4.4.4 & 5.1.1), `type` is a dynamic string
+        // something like "71F8-2C0A", some kind of unique id per storage
+        // don't know any API that can get the root path of that storage based on its id.
+        //
+        // so no "primary" type, but let the check here for other devices
+        if ("primary".equalsIgnoreCase(type)) {
+            fullPath = Environment.getExternalStorageDirectory() + relativePath;
+            if (fileExists(fullPath)) {
+                return fullPath;
+            }
+        }
+
+        // Environment.isExternalStorageRemovable() is `true` for external and internal storage
+        // so we cannot relay on it.
+        //
+        // instead, for each possible path, check if file exists
+        // we'll start with secondary storage as this could be our (physically) removable sd card
+        fullPath = System.getenv("SECONDARY_STORAGE") + relativePath;
+        if (fileExists(fullPath)) {
+            return fullPath;
+        }
+
+        fullPath = System.getenv("EXTERNAL_STORAGE") + relativePath;
+        if (fileExists(fullPath)) {
+            return fullPath;
+        }
+
+        return fullPath;
+    }
+
+    /**
+     * Check if a file exists on device
+     *
+     * @param filePath The absolute file path
+     */
+    private static boolean fileExists(String filePath) {
+        File file = new File(filePath);
+
+        return file.exists();
     }
 
     public static String getMimeType(String url) {
@@ -1323,7 +1455,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
 
         } catch (Exception ex){
-
+            ex.printStackTrace();
         } finally {
             if (cursor != null)
                 cursor.close();
@@ -1468,6 +1600,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     public static boolean isGoogleDrive(Uri uri) {
-        return uri.getAuthority().equalsIgnoreCase("com.google.android.apps.docs.storage");
+        return uri.getAuthority().equalsIgnoreCase("com.google.android.apps.docs.storage")  ||
+                "com.google.android.apps.docs.storage.legacy".equalsIgnoreCase(uri.getAuthority())  ||
+                uri.getAuthority().contains("com.google.android.apps.docs.storage");
     }
 }

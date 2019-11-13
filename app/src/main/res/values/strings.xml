@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="permlab_accessAllDownloads" msgid="2436240495424393717">"Access all system downloads"</string>
+    <string name="permdesc_accessAllDownloads" msgid="1871832254578267128">"Allows the app to view and modify all downloads initiated by any app on the system."</string>
+    <string name="read_attachment_desc">E-posta eklerinizi okumasına izin ver.</string>
+    <string name="read_attachment_label">E-posta eklerini oku</string>
+
     <string name="privacy_policy">Privacy Policy</string>
     <string name="app_name">K12NET Mobile</string>
     <string name="action_settings">Settings</string>

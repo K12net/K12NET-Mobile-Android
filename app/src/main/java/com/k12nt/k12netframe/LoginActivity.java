@@ -5,28 +5,21 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Configuration;
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-
-import android.webkit.CookieManager;
 import android.widget.Toast;
-
-import java.net.HttpCookie;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
@@ -39,6 +32,11 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import java.net.HttpCookie;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
 
 public class LoginActivity extends Activity implements AsyncCompleteListener {
 
@@ -116,6 +114,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
             @Override
             public void onClick(View arg0) {
+                isLoginRetry = false;
                 checkCurrentVersion();
             }
         });
@@ -257,12 +256,10 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
                     String connString = K12NetUserReferences.getConnectionAddress();
 
-                    if (connString == "https://okul.k12net.com") {
+                    if (connString.equals("https://okul.k12net.com")) {
                         K12NetUserReferences.setConnectionAddress("https://azure.k12net.com");
-                        K12NetUserReferences.setLanguage("en");
                     } else {
                         K12NetUserReferences.setConnectionAddress("https://okul.k12net.com");
-                        K12NetUserReferences.setLanguage("tr");
                     }
 
                     this.login();
@@ -272,28 +269,44 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
                 this.LoginCompleted();
 
-                if(isLogin && K12NetUserReferences.LANG_UPDATED) {
-                    String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/SetLanguage";
+                if(isLogin) {
 
-                    HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
+                    if (isLoginRetry) {
 
-                    langTask.setHeader("LanguageCode", K12NetUserReferences.getLanguageCode());
+                        String connString = K12NetUserReferences.getConnectionAddress();
 
-                    List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
-
-                    if(cookies != null) {
-                        for (String cookie : cookies) {
-                            if(cookie.startsWith(".")) {//Set Authentication cookie
-                                langTask.GetConnection().setRequestProperty("Cookie", cookie.replaceAll("; HttpOnly","").replaceAll("HttpOnly",""));
-                            }
+                        if (connString.equals("https://azure.k12net.com")) {
+                            if(K12NetUserReferences.getLanguageCode().equals("tr")) K12NetUserReferences.setLanguage("en");
+                        } else {
+                            K12NetUserReferences.setLanguage("tr");
                         }
+
                     }
 
-                    langTask.setOnCompleteListener(this);
+                    if (K12NetUserReferences.LANG_UPDATED) {
 
-                    langTask.execute();
+                        String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/SetLanguage";
 
-                    K12NetUserReferences.LANG_UPDATED = false;
+                        HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
+
+                        langTask.setHeader("LanguageCode", K12NetUserReferences.getLanguageCode());
+
+                        List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
+
+                        if(cookies != null) {
+                            for (String cookie : cookies) {
+                                if(cookie.startsWith(".")) {//Set Authentication cookie
+                                    langTask.GetConnection().setRequestProperty("Cookie", cookie.replaceAll("; HttpOnly","").replaceAll("HttpOnly",""));
+                                }
+                            }
+                        }
+
+                        langTask.setOnCompleteListener(this);
+
+                        langTask.execute();
+
+                        K12NetUserReferences.LANG_UPDATED = false;
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
