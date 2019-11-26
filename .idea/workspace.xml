@@ -51,14 +51,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="File download updated and some minor bugs are fixed.">
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/xml/file_provider_file_paths.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/androidTest/java/com/k12nt/k12netframe/test/ApplicationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/k12nt/k12netframe/test/ApplicationTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
     </list>
     <ignored path="K12NET-Frame-Android.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -108,14 +110,14 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="77" column="80" selection-start-line="77" selection-start-column="80" selection-end-line="77" selection-end-column="80" />
+            <state relative-caret-position="238">
+              <caret line="116" column="68" selection-start-line="116" selection-start-column="68" selection-end-line="116" selection-end-column="68" />
               <folding>
                 <element signature="e#456#492#0" expanded="true" />
                 <element signature="e#521#558#0" expanded="true" />
-                <element signature="e#805#835#0" expanded="true" />
-                <element signature="e#858#889#0" expanded="true" />
-                <element signature="e#5392#5431#0" expanded="true" />
+                <element signature="e#1097#1132#0" expanded="true" />
+                <element signature="e#1161#1197#0" expanded="true" />
+                <element signature="e#1449#1479#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -123,19 +125,42 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+        <entry file="file://$PROJECT_DIR$/app/app.iml">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="136">
-              <caret line="8" column="57" selection-start-line="8" selection-start-column="57" selection-end-line="8" selection-end-column="57" />
+              <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/androidTest/java/com/k12nt/k12netframe/test/ApplicationTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="119">
+              <caret line="7" column="3" lean-forward="true" selection-start-line="7" selection-start-column="3" selection-end-line="7" selection-end-column="3" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/xml/file_provider_file_paths.xml">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+            <state relative-caret-position="156">
+              <caret line="181" column="31" selection-start-line="181" selection-start-column="18" selection-end-line="181" selection-end-column="31" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="309">
+              <caret line="183" column="54" selection-start-line="183" selection-start-column="54" selection-end-line="183" selection-end-column="54" />
             </state>
           </provider>
         </entry>
@@ -143,61 +168,37 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="112">
-              <caret line="1123" column="86" selection-start-line="1123" selection-start-column="86" selection-end-line="1123" selection-end-column="86" />
+            <state relative-caret-position="198">
+              <caret line="802" column="21" selection-start-line="802" selection-start-column="21" selection-end-line="802" selection-end-column="21" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#8229#8250#0" expanded="true" />
-                <element signature="e#10638#10639#0" expanded="true" />
-                <element signature="e#10665#10666#0" expanded="true" />
-                <element signature="e#10717#10718#0" expanded="true" />
-                <element signature="e#10762#10763#0" expanded="true" />
-                <element signature="e#10815#10816#0" expanded="true" />
-                <element signature="e#10856#10857#0" expanded="true" />
-                <element signature="e#22041#22042#0" expanded="true" />
-                <element signature="e#22088#22089#0" expanded="true" />
-                <element signature="e#33097#33098#0" expanded="true" />
-                <element signature="e#33144#33145#0" expanded="true" />
+                <element signature="e#15895#15896#0" expanded="true" />
+                <element signature="e#15942#15943#0" expanded="true" />
+                <element signature="e#18761#18793#0" expanded="true" />
+                <element signature="e#22389#22413#0" expanded="true" />
+                <element signature="class#23828:29559" />
+                <element signature="e#28581#28605#0" expanded="true" />
+                <element signature="e#32745#32767#0" expanded="true" />
+                <element signature="e#35102#35133#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/Manifest.class">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3247">
-              <caret line="198" column="88" selection-start-line="198" selection-start-column="88" selection-end-line="198" selection-end-column="88" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="199">
-              <caret line="30" column="60" lean-forward="true" selection-start-line="30" selection-start-column="60" selection-end-line="30" selection-end-column="60" />
+            <state relative-caret-position="263">
+              <caret line="24" column="17" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/build.gradle">
+        <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/os/Environment.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
-              <caret line="39" column="56" selection-start-line="39" selection-start-column="56" selection-end-line="39" selection-end-column="56" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="272" selection-start-line="272" selection-end-line="272" />
-              <folding>
-                <element signature="method#getVersionList#0;class#GetLatestVersion#0;class#LoginActivity#0" />
-              </folding>
+            <state relative-caret-position="158">
+              <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -205,8 +206,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/async_tasks/HTTPAsyncTask.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="116" selection-start-line="116" selection-end-line="116" />
+            <state relative-caret-position="914">
+              <caret line="114" column="31" selection-start-line="114" selection-start-column="31" selection-end-line="114" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#read#0;class#HTTPAsyncTask#0" />
@@ -228,36 +229,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>all_D</find>
-      <find>com.android.providers.downloads</find>
-      <find>download</find>
-      <find>drive</find>
-      <find>android.permission.INTERNET</find>
-      <find>getcol</find>
-      <find>getPath</find>
-      <find>addFlags</find>
-      <find>ew Intent(Intent.</find>
-      <find>getPath(</find>
-      <find>new Intent(</find>
-      <find>setAllowFileAccess</find>
-      <find>ACCESS_DOWNLOAD_MANAGER</find>
-      <find>grantUriPermission</find>
-      <find>requestWritePermission</find>
-      <find>requestAccessAllDownloadsPermission</find>
-      <find>getDataColumn</find>
-      <find>WRITE_EXTERNAL_STORAGE</find>
-      <find>permdesc_accessAllDownloads</find>
-      <find>&lt;category android:name=</find>
-      <find>ACCESS_ALL_DOWNLOADS</find>
-      <find>FLAG_GRANT_READ_URI_PERMISSION</find>
-      <find>MANAGE_DOCUMENTS</find>
-      <find>FLAG_GRANT_READ_URI_PERMISSION</find>
-      <find>read_attachment_label</find>
-      <find>getpa</find>
-      <find>READ_EXTERNAL_STORAGE</find>
+      <find>readAccessCameraPermission</find>
       <find>isGoogleDrive</find>
-      <find>1.32</find>
-      <find>todo</find>
+      <find>WebChromeClient</find>
+      <find>findViewById</find>
+      <find>RelativeLayout</find>
+      <find>loadView =</find>
+      <find>onBackPressed</find>
+      <find>setJavaScriptEnabled</find>
+      <find>READ_EXTERNAL_STORAGE</find>
+      <find>should</find>
+      <find>split</find>
+      <find>getimage</find>
+      <find>1.32.5</find>
+      <find>WRITE_EXTERNAL_STORAGE</find>
+      <find>webview =</find>
+      <find>buildCustomView</find>
+      <find>setVewView</find>
+      <find>read_attachment_desc</find>
+      <find>webview</find>
+      <find>.setWebView</find>
+      <find>request.setDestinationInExternalPublicDir</find>
+      <find>platform.xml</find>
+      <find>signature</find>
+      <find>WRITE_MEDIA_STORAGE</find>
+      <find>applicationId</find>
+      <find>Downloading</find>
+      <find>download_file</find>
+      <find>Toast.makeText</find>
+      <find>getExternalStoragePublicDirectory</find>
+      <find>1.32.</find>
     </findStrings>
     <dirStrings>
       <dir>D:\TFS\Mobile\GitHub\K12NET\K12NET-Mobile-Android</dir>
@@ -312,27 +313,28 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" />
         <option value="$PROJECT_DIR$/app/build/generated/source/buildConfig/release/com/k12nt/k12netframe/BuildConfig.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml" />
         <option value="$PROJECT_DIR$/app/google-services.json" />
         <option value="$PROJECT_DIR$/app/src/main/res/xml/file_provider_file_paths.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" />
         <option value="$PROJECT_DIR$/app/build.gradle" />
+        <option value="$PROJECT_DIR$/app/release/output.json" />
         <option value="$PROJECT_DIR$/app/build/generated/source/buildConfig/debug/com/k12nt/k12netframe/BuildConfig.java" />
         <option value="$PROJECT_DIR$/app/build/generated/source/buildConfig/androidTest/debug/com/k12nt/k12netframe/test/BuildConfig.java" />
-        <option value="$PROJECT_DIR$/app/release/output.json" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" />
+        <option value="$PROJECT_DIR$/app/src/androidTest/java/com/k12nt/k12netframe/test/ApplicationTest.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1551" />
-    <option name="height" value="879" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -463,62 +465,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="k12netframe" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
-              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="k12netframe" type="462c0819:PsiDirectoryNode" />
-              <item name="fcm" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="AndroidView">
         <subPane>
           <expand>
@@ -542,6 +488,52 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="androidTest" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="androidTest" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="K12NET-Mobile-Android" type="b2602c69:ProjectViewProjectNode" />
+              <item name="K12NET-Mobile-Android" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="app" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="androidTest" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -811,6 +803,9 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="StructureViewFactory">
+    <option name="ACTIVE_ACTIONS" value=",VISIBILITY_SORTER" />
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -941,7 +936,14 @@
       <option name="project" value="LOCAL" />
       <updated>1572591698726</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="File download updated and some minor bugs are fixed.">
+      <created>1573660194519</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1573660194519</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -956,8 +958,8 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info active="true" id="Project" order="0" sideWeight="0.49384886" visible="true" weight="0.19936034" />
-      <window_info id="Structure" order="1" weight="0.25" />
+      <window_info active="true" id="Project" order="0" sideWeight="0.49384886" visible="true" weight="0.21002132" />
+      <window_info id="Structure" order="1" weight="0.24966443" />
       <window_info id="Captures" order="2" sideWeight="0.50615114" side_tool="true" weight="0.19936034" />
       <window_info id="Build Variants" order="3" sideWeight="0.50986844" side_tool="true" weight="0.20682302" />
       <window_info id="Favorites" order="4" sideWeight="0.5057283" side_tool="true" weight="0.15170941" />
@@ -969,17 +971,17 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49200428" weight="0.32719395" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.52665246" weight="0.32827735" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.728145" weight="0.38353196" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.7275168" weight="0.38136512" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49520257" weight="0.10184182" />
       <window_info anchor="bottom" id="Android Profiler" order="7" sideWeight="0.4978678" weight="0.32826087" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.47334754" side_tool="true" weight="0.32827735" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.27248323" side_tool="true" weight="0.50141644" />
       <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49946696" weight="0.3261105" />
       <window_info anchor="bottom" id="Logcat" order="10" sideWeight="0.4978678" weight="0.32717392" />
-      <window_info anchor="bottom" id="Build" order="11" sideWeight="0.5522388" weight="0.2881907" />
+      <window_info anchor="bottom" id="Build" order="11" sideWeight="0.5378465" visible="true" weight="0.37594798" />
       <window_info anchor="bottom" id="Android Monitor" order="12" sideWeight="0.49351272" weight="0.32894737" />
-      <window_info anchor="bottom" id="Messages" order="13" sideWeight="0.4983181" visible="true" weight="0.32827735" />
+      <window_info anchor="bottom" id="Messages" order="13" sideWeight="0.4983181" weight="0.32827735" />
       <window_info anchor="bottom" id="Gradle Console" order="14" sideWeight="0.50233644" side_tool="true" weight="0.32976973" />
       <window_info anchor="bottom" id="Version Control" order="15" sideWeight="0.5804904" weight="0.3261105" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -992,7 +994,7 @@
       <window_info anchor="right" id="Android Model" order="7" side_tool="true" />
       <window_info anchor="right" id="Gradle" order="8" weight="0.32995737" />
       <window_info anchor="right" id="Theme Preview" order="9" />
-      <window_info anchor="right" id="Assistant" order="10" weight="0.32942432" />
+      <window_info anchor="right" id="Assistant" order="10" weight="0.4147651" />
       <window_info anchor="right" x="68" y="282" width="1732" height="847" id="Documentation" order="11" type="FLOATING" />
     </layout>
   </component>
@@ -1104,19 +1106,19 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>160</line>
+          <line>161</line>
           <properties />
           <option name="timeStamp" value="219" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>139</line>
+          <line>140</line>
           <properties />
           <option name="timeStamp" value="220" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>130</line>
+          <line>131</line>
           <properties />
           <option name="timeStamp" value="221" />
         </line-breakpoint>
@@ -1128,157 +1130,85 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>195</line>
+          <line>196</line>
           <properties />
           <option name="timeStamp" value="234" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>638</line>
-          <properties />
-          <option name="timeStamp" value="235" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>651</line>
-          <properties />
-          <option name="timeStamp" value="248" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>431</line>
-          <properties />
-          <option name="timeStamp" value="266" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>386</line>
-          <properties />
-          <option name="timeStamp" value="316" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>100</line>
+          <line>101</line>
           <properties />
           <option name="timeStamp" value="327" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>326</line>
+          <line>327</line>
           <properties />
           <option name="timeStamp" value="332" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>666</line>
-          <properties />
-          <option name="timeStamp" value="337" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>676</line>
-          <properties />
-          <option name="timeStamp" value="338" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>687</line>
-          <properties />
-          <option name="timeStamp" value="339" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>485</line>
-          <properties />
-          <option name="timeStamp" value="343" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>474</line>
-          <properties />
-          <option name="timeStamp" value="344" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>464</line>
-          <properties />
-          <option name="timeStamp" value="345" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>620</line>
-          <properties />
-          <option name="timeStamp" value="356" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>955</line>
+          <line>983</line>
           <properties />
           <option name="timeStamp" value="357" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>962</line>
+          <line>990</line>
           <properties />
           <option name="timeStamp" value="358" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>969</line>
+          <line>997</line>
           <properties />
           <option name="timeStamp" value="359" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>976</line>
+          <line>1004</line>
           <properties />
           <option name="timeStamp" value="360" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>274</line>
+          <line>275</line>
           <properties />
           <option name="timeStamp" value="363" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>223</line>
+          <line>224</line>
           <properties />
           <option name="timeStamp" value="365" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>236</line>
+          <line>237</line>
           <properties />
           <option name="timeStamp" value="367" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>423</line>
-          <properties />
-          <option name="timeStamp" value="368" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>856</line>
+          <line>884</line>
           <properties />
           <option name="timeStamp" value="370" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>876</line>
+          <line>904</line>
           <properties />
           <option name="timeStamp" value="371" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>896</line>
+          <line>924</line>
           <properties />
           <option name="timeStamp" value="372" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>916</line>
+          <line>944</line>
           <properties />
           <option name="timeStamp" value="373" />
         </line-breakpoint>
@@ -1290,13 +1220,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1343</line>
+          <line>1376</line>
           <properties />
           <option name="timeStamp" value="381" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1338</line>
+          <line>1371</line>
           <properties />
           <option name="timeStamp" value="382" />
         </line-breakpoint>
@@ -1308,31 +1238,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1325</line>
+          <line>1358</line>
           <properties />
           <option name="timeStamp" value="397" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>496</line>
-          <properties />
-          <option name="timeStamp" value="422" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>714</line>
-          <properties />
-          <option name="timeStamp" value="425" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>703</line>
-          <properties />
-          <option name="timeStamp" value="426" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1206</line>
+          <line>1239</line>
           <properties />
           <option name="timeStamp" value="435" />
         </line-breakpoint>
@@ -1360,6 +1272,24 @@
           <properties />
           <option name="timeStamp" value="441" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
+          <line>657</line>
+          <properties />
+          <option name="timeStamp" value="445" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
+          <line>671</line>
+          <properties />
+          <option name="timeStamp" value="446" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
+          <line>792</line>
+          <properties />
+          <option name="timeStamp" value="451" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -1367,7 +1297,7 @@
         <watch expression="request.getResources()" language="JAVA" />
         <watch expression="PermissionRequest.RESOURCE_VIDEO_CAPTURE" language="JAVA" />
         <watch expression="request.getUrl()" language="JAVA" />
-        <watch expression="super.shouldInterceptRequest(view,request)" language="JAVA" />
+        <watch expression="url.split(&quot;?v=&quot;)" language="JAVA" />
         <watch expression="cookie.split(&quot;;&quot;,2)[0]" language="JAVA" />
         <watch expression="conn.getContent()" language="JAVA" />
         <watch expression="conn.getHeaderFields()" language="JAVA" />
@@ -1384,6 +1314,21 @@
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="watch">
+      <expression>
+        <expression-string>url.split(&quot;?v=&quot;)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>url.split(&quot;v=&quot;)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>url.split(&quot;=&quot;)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>contentUriPrefix=&quot;content://com.android.providers.downloads.documents/document&quot;</expression-string>
         <language-id>JAVA</language-id>
@@ -1416,21 +1361,6 @@
       </expression>
       <expression>
         <expression-string>country</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>country == &quot;TUR&quot;</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>connectionString=null</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>languageCode=null</expression-string>
         <language-id>JAVA</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -1516,16 +1446,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/GoogleDriveClient.java" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseInstanceIDService.java" />
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/test/ApplicationTest.java" />
-    <entry file="file://$PROJECT_DIR$/app/manifest-merger-release-report.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="19" column="35" selection-start-line="19" selection-start-column="35" selection-end-line="19" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://D:/Windows/Android/Sdk/platforms/android-28/android.jar!/java/lang/RuntimeException.class" />
     <entry file="jar://D:/Windows/Android/Sdk/platforms/android-28/android.jar!/android/app/Activity.class" />
     <entry file="jar://D:/Windows/Android/Sdk/platforms/android-28/android.jar!/android/Manifest.class" />
@@ -1541,27 +1461,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="374">
           <caret line="26" column="24" selection-start-line="26" selection-start-column="24" selection-end-line="26" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="24" column="17" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="39" selection-start-line="9" selection-start-column="39" selection-end-line="9" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="13" column="45" lean-forward="true" selection-start-line="13" selection-start-column="45" selection-end-line="13" selection-end-column="45" />
         </state>
       </provider>
     </entry>
@@ -1608,24 +1507,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/webkit/WebSettings.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="239" column="39" selection-start-line="239" selection-start-column="39" selection-end-line="239" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/os/Environment.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="191">
-          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
-          <folding>
-            <element signature="e#2006#2007#0" expanded="true" />
-            <element signature="e#2057#2058#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/webkit/URLUtil.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="404">
@@ -1634,12 +1515,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/k12net_setting_layout.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="68" column="19" selection-start-line="68" selection-start-column="19" selection-end-line="68" selection-end-column="19" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/K12NetSettingsDialogView.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -1674,12 +1555,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml">
-      <provider editor-type-id="android-designer2" />
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
           <caret line="1" column="24" selection-start-line="1" selection-start-column="1" selection-end-line="1" selection-end-column="24" />
         </state>
       </provider>
+      <provider editor-type-id="android-designer2" />
     </entry>
     <entry file="file://$PROJECT_DIR$/app/build/generated/source/buildConfig/debug/com/k12nt/k12netframe/BuildConfig.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -1692,13 +1573,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="104" selection-start-column="99" selection-end-column="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
         </state>
       </provider>
     </entry>
@@ -1755,9 +1629,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/app.iml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/app/Activity.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="8279">
@@ -1772,53 +1643,76 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/view/View.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="39" column="56" selection-start-line="39" selection-start-column="56" selection-end-line="39" selection-end-column="56" />
+        <state relative-caret-position="181">
+          <caret line="2442" column="16" selection-start-line="2442" selection-start-column="16" selection-end-line="2442" selection-end-column="16" />
+          <folding>
+            <element signature="e#70102#70103#0" expanded="true" />
+            <element signature="e#70153#70154#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/build/intermediates/merged_manifests/debug/AndroidManifest.xml">
+    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/webkit/WebSettings.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" column="17" lean-forward="true" selection-start-line="16" selection-start-column="17" selection-end-line="16" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="57" selection-start-line="8" selection-start-column="57" selection-end-line="8" selection-end-column="57" />
+        <state relative-caret-position="350">
+          <caret line="189" column="25" selection-start-line="189" selection-start-column="25" selection-end-line="189" selection-end-column="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/xml/file_provider_file_paths.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+        <state relative-caret-position="17">
+          <caret line="1" column="7" selection-start-line="1" selection-start-column="7" selection-end-line="1" selection-end-column="7" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="77" column="80" selection-start-line="77" selection-start-column="80" selection-end-line="77" selection-end-column="80" />
+        <state relative-caret-position="2244">
+          <caret line="152" column="17" selection-start-line="152" selection-start-column="17" selection-end-line="152" selection-end-column="17" />
           <folding>
-            <element signature="e#456#492#0" expanded="true" />
-            <element signature="e#521#558#0" expanded="true" />
-            <element signature="e#805#835#0" expanded="true" />
-            <element signature="e#858#889#0" expanded="true" />
-            <element signature="e#5392#5431#0" expanded="true" />
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
-      <provider editor-type-id="android-manifest" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/K12NetActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2074">
+          <caret line="150" column="16" selection-start-line="150" selection-start-column="8" selection-end-line="150" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="30" column="60" selection-start-line="30" selection-start-column="60" selection-end-line="30" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4488">
+          <caret line="300" column="29" selection-start-line="300" selection-start-column="29" selection-end-line="300" selection-end-column="29" />
+          <folding>
+            <element signature="method#getVersionList#0;class#GetLatestVersion#0;class#LoginActivity#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values-ar/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="477">
+          <caret line="237" column="45" selection-start-line="237" selection-start-column="45" selection-end-line="237" selection-end-column="45" />
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/async_tasks/HTTPAsyncTask.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="116" selection-start-line="116" selection-end-line="116" />
+        <state relative-caret-position="914">
+          <caret line="114" column="31" selection-start-line="114" selection-start-column="31" selection-end-line="114" selection-end-column="31" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#read#0;class#HTTPAsyncTask#0" />
@@ -1827,41 +1721,95 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/build/intermediates/merged_manifests/debug/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="268">
+          <caret line="20" selection-start-line="20" selection-end-line="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="181" column="31" selection-start-line="181" selection-start-column="18" selection-end-line="181" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values-tr/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="183" column="54" selection-start-line="183" selection-start-column="54" selection-end-line="183" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/os/Environment.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="158">
+          <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/AppData/Local/Android/Sdk/platforms/android-29/android.jar!/android/content/Context.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="256" column="25" selection-start-line="256" selection-start-column="25" selection-end-line="256" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="1123" column="86" selection-start-line="1123" selection-start-column="86" selection-end-line="1123" selection-end-column="86" />
+        <state relative-caret-position="198">
+          <caret line="802" column="21" selection-start-line="802" selection-start-column="21" selection-end-line="802" selection-end-column="21" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#8229#8250#0" expanded="true" />
-            <element signature="e#10638#10639#0" expanded="true" />
-            <element signature="e#10665#10666#0" expanded="true" />
-            <element signature="e#10717#10718#0" expanded="true" />
-            <element signature="e#10762#10763#0" expanded="true" />
-            <element signature="e#10815#10816#0" expanded="true" />
-            <element signature="e#10856#10857#0" expanded="true" />
-            <element signature="e#22041#22042#0" expanded="true" />
-            <element signature="e#22088#22089#0" expanded="true" />
-            <element signature="e#33097#33098#0" expanded="true" />
-            <element signature="e#33144#33145#0" expanded="true" />
+            <element signature="e#15895#15896#0" expanded="true" />
+            <element signature="e#15942#15943#0" expanded="true" />
+            <element signature="e#18761#18793#0" expanded="true" />
+            <element signature="e#22389#22413#0" expanded="true" />
+            <element signature="class#23828:29559" />
+            <element signature="e#28581#28605#0" expanded="true" />
+            <element signature="e#32745#32767#0" expanded="true" />
+            <element signature="e#35102#35133#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java">
+    <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="272" selection-start-line="272" selection-end-line="272" />
+        <state relative-caret-position="263">
+          <caret line="24" column="17" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="116" column="68" selection-start-line="116" selection-start-column="68" selection-end-line="116" selection-end-column="68" />
           <folding>
-            <element signature="method#getVersionList#0;class#GetLatestVersion#0;class#LoginActivity#0" />
+            <element signature="e#456#492#0" expanded="true" />
+            <element signature="e#521#558#0" expanded="true" />
+            <element signature="e#1097#1132#0" expanded="true" />
+            <element signature="e#1161#1197#0" expanded="true" />
+            <element signature="e#1449#1479#0" expanded="true" />
           </folding>
         </state>
       </provider>
+      <provider editor-type-id="android-manifest" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java">
+    <entry file="file://$PROJECT_DIR$/app/app.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="30" column="60" lean-forward="true" selection-start-line="30" selection-start-column="60" selection-end-line="30" selection-end-column="60" />
+        <state relative-caret-position="136">
+          <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/androidTest/java/com/k12nt/k12netframe/test/ApplicationTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="3" lean-forward="true" selection-start-line="7" selection-start-column="3" selection-end-line="7" selection-end-column="3" />
         </state>
       </provider>
     </entry>

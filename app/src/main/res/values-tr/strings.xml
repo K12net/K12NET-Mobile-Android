@@ -235,6 +235,7 @@
     <string name="k12netCrashSendReport">K12Net bir hata ile karşılaştı.\nRapor göndererek bu sorunu çözmemizde yardımcı olur musunuz?</string>
     <string name="writeAccessAppSettings">Eklentileri indirebilmek için "Yazma" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Yazma" yetkisini açın.</string>
     <string name="readAccessAppSettings">Eklentileri yükleyebilmek için "Okuma" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Okuma" yetkisini açın.</string>
+    <string name="readAccessCameraPermission">Fotograf çekip kullanabilmek için "Kamera" yetkisi verilmelidir. Lütfen Android ayarlar kısmından "Kamera" yetkisini açın.</string>
     <string name="locationAccessAppSettings">Güncel pozisyonu kaydedebilmek için "Konum Erişim" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Konum Erişim" yetkisini açın.</string>
     <string name="resetPassword">Şifremi Unuttum</string>
     <string name="newUpdateAvailable">Yeni güncelleme bulunmaktadır. Devam etmeden önce lütfen güncelleyiniz.</string>

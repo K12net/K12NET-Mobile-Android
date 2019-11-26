@@ -5,6 +5,8 @@
     <string name="permdesc_accessAllDownloads" msgid="1871832254578267128">"Allows the app to view and modify all downloads initiated by any app on the system."</string>
     <string name="read_attachment_desc">E-posta eklerinizi okumasına izin ver.</string>
     <string name="read_attachment_label">E-posta eklerini oku</string>
+    <string name="permlab_mediaStorageWrite">Modify/delete internal media storage contents</string>
+    <string name="permdesc_mediaStorageWrite">Allows an application to modify the contents of the internal media storage.</string>
 
     <string name="privacy_policy">Privacy Policy</string>
     <string name="app_name">K12NET Mobile</string>
@@ -240,6 +242,7 @@
     <string name="k12netCrashSendReport">K12Net has crashed. Please send us a problem description so we can resolve this issue.</string>
     <string name="writeAccessAppSettings">Write External Storage permission allows us to do store images. Please allow this permission in App Settings.</string>
     <string name="readAccessAppSettings">Read External Storage permission allows us to read stored images. Please allow this permission in App Settings.</string>
+    <string name="readAccessCameraPermission">Camera permission allows us to take photos. Please allow this permission in App Settings.</string>
     <string name="locationAccessAppSettings">Getting Location permission allows us to read current position and record if you want. Please allow this permission in App Settings.</string>
     <string name="resetPassword">Forgot Password</string>
     <string name="newUpdateAvailable">A new update is available. Please update before continue.</string>

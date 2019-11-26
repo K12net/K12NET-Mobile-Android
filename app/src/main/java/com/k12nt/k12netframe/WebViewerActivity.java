@@ -46,7 +46,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -82,6 +81,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     public static String startUrl = "";
     public static String previousUrl = "";
     WebView webview = null;
+    WebView main_webview = null;
+    WebView popup_webview = null;
 
     private ValueCallback<Uri> mUploadMessage;
     private ValueCallback<Uri[]> mFilePathCallback;
@@ -373,15 +374,89 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         K12NetUserReferences.resetBadgeNumber();
         ShortcutBadger.applyCount(this, K12NetUserReferences.getBadgeCount());
 
+        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
+        HttpCookie sessionInfo = null;
+
+        if (cookies != null && !cookies.isEmpty()) {
+            CookieManager cookieManager = CookieManager.getInstance();
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                CookieSyncManager.createInstance(getApplicationContext());
+            }
+            cookieManager.setAcceptCookie(true);
+
+            for (HttpCookie cookie : cookies) {
+                sessionInfo = cookie;
+                String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
+                cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    CookieSyncManager.getInstance().sync();
+                }
+            }
+
+            String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+            cookieString = "Culture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+            cookieString = "AppID" + "=" + K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+        }
+
+        View back_button = (View) findViewById(R.id.lyt_back);
+        back_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        View next_button = (View) findViewById(R.id.lyt_next);
+        next_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (popup_webview != null) return;
+
+                if (webview.canGoForward()) {
+                    webview.goForward();
+                }
+            }
+        });
+
+        View refresh_button = (View) findViewById(R.id.lyt_refresh);
+        refresh_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                webview.reload();
+            }
+        });
+
+        View home_button = (View) findViewById(R.id.lyt_home);
+        home_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                webview.loadUrl(K12NetUserReferences.getConnectionAddress());
+            }
+        });
+
+        main_webview = this.setWebView(this);
+        popup_webview = null;
+        webview.loadUrl(startUrl);
+
+        this.onNewIntent(this.getIntent());
+    }
+
+    private WebView setWebView(final Activity ctx) {
         webview = new WebView(WebViewerActivity.this);
-        webview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        webview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
             { WebView.setWebContentsDebuggingEnabled(true); }
         }
-
-        final Activity ctx = this;
 
         webview.setWebViewClient(new WebViewClient() {
 
@@ -447,12 +522,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.contains("tel:")) {
+                if (url.contains("impersonate=true")) {
+                    popup_webview = setWebView(ctx);
+
+                    webview.loadUrl(url);
+                    return true;
+                } else if (url.contains("tel:")) {
                     if (url.startsWith("tel:")) {
                         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
                         startActivity(intent);
                         return true;
                     }
+                } else if (url.contains("www.youtube.com/watch")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
                 }
                 return false;
             }
@@ -521,75 +604,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         });
 
-        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
-        HttpCookie sessionInfo = null;
-
-        if (cookies != null && !cookies.isEmpty()) {
-            CookieManager cookieManager = CookieManager.getInstance();
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                CookieSyncManager.createInstance(getApplicationContext());
-            }
-            cookieManager.setAcceptCookie(true);
-
-            for (HttpCookie cookie : cookies) {
-                sessionInfo = cookie;
-                String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
-                cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    CookieSyncManager.getInstance().sync();
-                }
-            }
-
-            Log.d("LNG", webview.getContext().getString(R.string.localString));
-
-            String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-            cookieString = "Culture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-            cookieString = "AppID" + "=" + K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-        }
-
-        View back_button = (View) findViewById(R.id.lyt_back);
-        back_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-        View next_button = (View) findViewById(R.id.lyt_next);
-        next_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (webview.canGoForward()) {
-                    webview.goForward();
-                }
-            }
-        });
-
-        View refresh_button = (View) findViewById(R.id.lyt_refresh);
-        refresh_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                webview.reload();
-            }
-        });
-
-        View home_button = (View) findViewById(R.id.lyt_home);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                webview.loadUrl(K12NetUserReferences.getConnectionAddress());
-            }
-        });
-
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
@@ -602,6 +616,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setAllowContentAccess(true);
         webview.getSettings().setAllowFileAccessFromFileURLs(true);
         webview.getSettings().setAllowUniversalAccessFromFileURLs(true);
+
+        if (Build.VERSION.SDK_INT > 7) {
+            webview.getSettings().setPluginState(WebSettings.PluginState.ON);
+        } else {
+            //webview.getSettings().setPluginsEnabled(true);
+        }
 
         if (!checkCameraPermission()) {
             requestCameraPermission();
@@ -768,11 +788,24 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     request.allowScanningByMediaScanner();
                     request.setMimeType(mimetype);
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, possibleFileName);
+
+                    try {
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, possibleFileName);
+                    } catch (IllegalStateException e) {
+
+                        try {
+                            request.setDestinationInExternalPublicDir(getApplicationContext().getFilesDir().getAbsolutePath(), possibleFileName);
+                        } catch (IllegalStateException ex) {
+                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+
+                            return;
+                        }
+                    }
 
                     DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
                     dm.enqueue(request);
-                    Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
+
+                    Toast.makeText(getApplicationContext(), R.string.download_file, Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -783,11 +816,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         K12NetMobileJavaScriptInterface javaInterface = new K12NetMobileJavaScriptInterface();
         webview.addJavascriptInterface(javaInterface, "HTMLOUT");
 
-        webview.loadUrl(startUrl);
         mainLayout.removeAllViews();
         mainLayout.addView(webview);
 
-        this.onNewIntent(this.getIntent());
+        return webview;
     }
 
     private void enableHTML5AppCache(WebView webView) {
@@ -816,21 +848,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     @Override
     public void buildCustomView() {
 
-        LinearLayout back_button = (LinearLayout) findViewById(R.id.lyt_back);
-        back_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-        LinearLayout lyt_toolbar = (LinearLayout) findViewById(R.id.lyt_option_buttons);
-
     }
 
     @Override
     public void onBackPressed() {
-        if (previousUrl != null) {
+        if(popup_webview != null) {
+            popup_webview = null;
+            webview = main_webview;
+
+            mainLayout.removeAllViews();
+            mainLayout.addView(webview);
+        } else if (previousUrl != null) {
             webview.loadUrl(previousUrl);
         } else if (webview.canGoBack()) {
             webview.goBack();
@@ -914,7 +942,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     protected void requestCameraPermission() {
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            Toast.makeText(this, R.string.readAccessAppSettings, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.readAccessCameraPermission, Toast.LENGTH_LONG).show();
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, 103);
@@ -1000,7 +1028,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         https://firebase.google.com/docs/app-indexing/android/personal-content#update-the-index for
         adding content to the index */
         //FirebaseAppIndex.getInstance().update(getIndexable());
-        FirebaseUserActions.getInstance().start(getAction());
+        try {
+            Action indexAction = getAction();
+            if(indexAction != null) FirebaseUserActions.getInstance().start(indexAction);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
