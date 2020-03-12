@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="permlab_accessAllDownloads">Tüm sistem indirmelerine izin verir</string>
+    <string name="permdesc_accessAllDownloads">Uygulamaya, tüm indirme işlemlerini görüntüleme ve değiştirme izni verir.</string>
+    <string name="read_attachment_desc">E-posta eklerinizi okumasına izin ver.</string>
+    <string name="read_attachment_label">E-posta eklerini oku</string>
+    <string name="permlab_mediaStorageWrite">Dahili ortam depolama içeriğini değiştirme / silme izni verir</string>
+    <string name="permdesc_mediaStorageWrite">Dahili ortam depolama içeriğini değiştirme / silme izni verir</string>
+
     <string name="privacy_policy">Gizlilik Politikası</string>
     <string name="app_name">K12NET Mobil</string>
     <string name="action_settings">Ayarlar</string>

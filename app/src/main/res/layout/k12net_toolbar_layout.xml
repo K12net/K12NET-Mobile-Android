@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="40dp"
-    android:background="#2d76a1">
+    android:background="#2d76a1"
+    android:layoutDirection="ltr">
 
     <LinearLayout
         android:id="@+id/lyt_back"
@@ -10,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
@@ -28,10 +29,10 @@
         android:id="@+id/lyt_home"
         android:layout_width="60dp"
         android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/lyt_back"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_toRightOf="@+id/lyt_back"
+        android:orientation="vertical"
         android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
@@ -39,52 +40,52 @@
             android:id="@+id/btn_home"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/home_white"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
+            android:paddingRight="5dp"
+            android:src="@drawable/home_white" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/lyt_next"
         android:layout_width="60dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="60dp"
+        android:layout_toEndOf="@+id/lyt_back"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_toRightOf="@+id/lyt_back"
+        android:orientation="vertical"
         android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:layout_marginLeft="60dp">
+        android:paddingBottom="6dp">
 
         <ImageView
             android:id="@+id/btn_next"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/arrow_next_white"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
+            android:paddingRight="5dp"
+            android:src="@drawable/arrow_next_white" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/lyt_refresh"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dashmenuIconSize"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:gravity="center|left"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/torquese_button_flat"
+        android:gravity="center|start"
         android:orientation="vertical"
-        android:layout_marginRight="5dp"
         android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:background="@drawable/torquese_button_flat">
+        android:paddingBottom="6dp">
 
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/reload"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
+            android:paddingRight="5dp"
+            android:src="@drawable/reload" />
     </LinearLayout>
 
 </RelativeLayout>

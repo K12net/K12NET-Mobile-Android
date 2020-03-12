@@ -802,10 +802,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         }
                     }
 
-                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                    dm.enqueue(request);
+                    try {
+                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                        dm.enqueue(request);
 
-                    Toast.makeText(getApplicationContext(), R.string.download_file, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.download_file, Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+                        Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+
+                        return;
+                    }
                 }
             }
         });
