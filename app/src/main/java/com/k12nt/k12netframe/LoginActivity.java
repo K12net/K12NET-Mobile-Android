@@ -209,8 +209,8 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         String strUTCDate = dateFormatter.format(cal.getTime());
 
-        K12NetHttpClient.setCookie("UICulture", K12NetUserReferences.getLanguageCode(), strUTCDate);
-        K12NetHttpClient.setCookie("Culture", K12NetUserReferences.getLanguageCode(), strUTCDate);
+        K12NetHttpClient.setCookie("UICulture", K12NetUserReferences.getNormalizedLanguageCode(), strUTCDate);
+        K12NetHttpClient.setCookie("Culture", K12NetUserReferences.getNormalizedLanguageCode(), strUTCDate);
 
         this.login();
     }
@@ -289,7 +289,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
                         HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
 
-                        langTask.setHeader("LanguageCode", K12NetUserReferences.getLanguageCode());
+                        langTask.setHeader("LanguageCode", K12NetUserReferences.getNormalizedLanguageCode());
 
                         List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
 

@@ -16,7 +16,7 @@
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_mediaStorageWrite"
         android:description="@string/permdesc_mediaStorageWrite"
-    android:protectionLevel="signatureOrSystem" />
+        android:protectionLevel="signature" />
     <uses-permission android:name="${applicationId}.permission.WRITE_MEDIA_STORAGE"/>
 
     <permission
@@ -70,7 +70,8 @@
          android:supportsRtl="true"
          android:label="@string/app_name"
          android:theme="@style/AppTheme"
-         android:requestLegacyExternalStorage="true">
+         android:requestLegacyExternalStorage="true"
+         android:hardwareAccelerated="true">
 
          <activity
              android:launchMode="singleTop"

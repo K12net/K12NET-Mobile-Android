@@ -70,6 +70,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -394,10 +395,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
             }
 
-            String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            String cookieString = "UICulture" + "=" + K12NetUserReferences.getNormalizedLanguageCode() + "; domain=" + sessionInfo.getDomain();
             cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
 
-            cookieString = "Culture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            cookieString = "Culture" + "=" + K12NetUserReferences.getNormalizedLanguageCode() + "; domain=" + sessionInfo.getDomain();
             cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
 
             cookieString = "AppID" + "=" + K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID + "; domain=" + sessionInfo.getDomain();
@@ -490,6 +491,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 else {
                     webview.loadUrl("javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
                 }
+
                 startUrl = url;
             }
 
@@ -508,8 +510,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         "WebView Error" + error.getDescription(),
                         Toast.LENGTH_SHORT).show();*/
 
+                webview.stopLoading();
+
                 super.onReceivedError(view, request, error);
 
+                Runnable confirmation = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isConfirmed) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)));
+                        }
+                    }
+                };
+
+                setConfirmDialog(ctx.getString(R.string.error),ctx.getString(R.string.error_open_page),confirmation);
             }
 
             /*
@@ -533,9 +547,26 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         startActivity(intent);
                         return true;
                     }
-                } else if (url.contains("www.youtube.com/watch")) {
+                } else if (url.contains("www.youtube.com/")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
+                } else if (url.contains("meet.google.com") || url.contains("teams.microsoft.com") || url.contains(".zoom.")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                } else if (url.contains("drive.")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                } else if (url.startsWith("intent://")) {
+                    try {
+                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                        if (fallbackUrl != null) {
+                            webview.loadUrl(fallbackUrl);
+                            return true;
+                        }
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return false;
             }
@@ -604,6 +635,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         });
 
+        //webview.getSettings().setDomStorageEnabled(true);
+
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
@@ -617,11 +650,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setAllowFileAccessFromFileURLs(true);
         webview.getSettings().setAllowUniversalAccessFromFileURLs(true);
 
+        //webview.getSettings().setAppCacheEnabled(true);
+        //webview.setInitialScale(1);
+        //webview.getSettings().setLoadWithOverviewMode(true);
+       // webview.getSettings().setUseWideViewPort(true);
+
         if (Build.VERSION.SDK_INT > 7) {
             webview.getSettings().setPluginState(WebSettings.PluginState.ON);
         } else {
             //webview.getSettings().setPluginsEnabled(true);
         }
+
+        //if (android.os.Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        //    CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
+        //}
 
         if (!checkCameraPermission()) {
             requestCameraPermission();

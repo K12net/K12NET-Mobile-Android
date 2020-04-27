@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
+import com.k12nt.k12netframe.K12NetSettingsDialogView;
+
 import java.util.Locale;
 
 public class K12NetUserReferences {
@@ -212,6 +214,16 @@ public class K12NetUserReferences {
 
         references.languageCode = languageCode;
         references.storeString(LANGAUGE, references.languageCode);
+    }
+
+    public static String getNormalizedLanguageCode(){
+        String languageCode = getLanguageCode();
+
+        if(languageCode == K12NetSettingsDialogView.ARABIC) {
+            return "ar-AE";
+        }
+
+        return  languageCode;
     }
 
     public static String getLanguageCode(){

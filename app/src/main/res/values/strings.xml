@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="error">Error</string>
+    <string name="error_open_page">This page not opened! Would you like to open outside from app?</string>
     <string name="permlab_accessAllDownloads">Access all system downloads</string>
     <string name="permdesc_accessAllDownloads">Allows the app to view and modify all downloads initiated by any app on the system.</string>
     <string name="read_attachment_desc">Allows read your e-mail attachments.</string>
