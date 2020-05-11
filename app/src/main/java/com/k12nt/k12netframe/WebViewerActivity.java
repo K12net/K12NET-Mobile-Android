@@ -506,24 +506,33 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             public void onReceivedError(WebView view, WebResourceRequest request,
                                         WebResourceError error) {
 
-               /* Toast.makeText(getApplicationContext(),
-                        "WebView Error" + error.getDescription(),
-                        Toast.LENGTH_SHORT).show();*/
+                if(error.getDescription() == "net::ERR_CONNECTION_REFUSED") {
+                    Toast.makeText(getApplicationContext(),
+                            "Check Internet Connection : " + error.getDescription(),
+                            Toast.LENGTH_SHORT).show();
+                }
 
-                webview.stopLoading();
+                String domain = K12NetUserReferences.getConnectionAddressDomain();
+                String url = view.getOriginalUrl();
 
-                super.onReceivedError(view, request, error);
+                if (url != null && url.contains(domain)) {
+                    super.onReceivedError(view, request, error);
+                } else {
+                    webview.stopLoading();
 
-                Runnable confirmation = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isConfirmed) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)));
+                    super.onReceivedError(view, request, error);
+
+                    Runnable confirmation = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isConfirmed) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)));
+                            }
                         }
-                    }
-                };
+                    };
 
-                setConfirmDialog(ctx.getString(R.string.error),ctx.getString(R.string.error_open_page),confirmation);
+                    setConfirmDialog(ctx.getString(R.string.error),ctx.getString(R.string.error_open_page),confirmation);
+                }
             }
 
             /*

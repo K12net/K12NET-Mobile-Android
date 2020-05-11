@@ -136,6 +136,17 @@ public class K12NetUserReferences {
 		}
 		return http_address;
 	}
+
+    public static String getConnectionAddressDomain(){
+        String[] parts = getConnectionAddress().split("://");
+        String domain = getConnectionAddress();
+
+        if(parts.length == 2) {
+            domain = parts[1].split("/")[0];
+        }
+
+        return domain;
+    }
 	
 	public static String getUsername(){
 		return references.username;
