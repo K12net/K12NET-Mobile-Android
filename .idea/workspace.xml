@@ -50,12 +50,10 @@
     <last-search-timestamp>1561535141736</last-search-timestamp>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Android 10 supported and some minor bugs are fixed.">
+    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Some minor bugs are fixed.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -610,7 +608,14 @@
       <option name="project" value="LOCAL" />
       <updated>1588031327872</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Some minor bugs are fixed.">
+      <created>1589188283932</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1589188283932</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -687,7 +692,8 @@
     <MESSAGE value="manifest permissions changed" />
     <MESSAGE value="File download updated and some minor bugs are fixed." />
     <MESSAGE value="Android 10 supported and some minor bugs are fixed." />
-    <option name="LAST_COMMIT_MESSAGE" value="Android 10 supported and some minor bugs are fixed." />
+    <MESSAGE value="Some minor bugs are fixed." />
+    <option name="LAST_COMMIT_MESSAGE" value="Some minor bugs are fixed." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

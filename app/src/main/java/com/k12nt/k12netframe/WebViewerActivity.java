@@ -559,7 +559,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 } else if (url.contains("www.youtube.com/")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
-                } else if (url.contains("meet.google.com") || url.contains("teams.microsoft.com") || url.contains(".zoom.")) {
+                } else if (url.contains("meet.google.com") || url.contains("teams.microsoft.com") || url.contains(".zoom.") || url.contains("//zoom.")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 } else if (url.contains("drive.")) {
