@@ -644,7 +644,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         });
 
-        //webview.getSettings().setDomStorageEnabled(true);
+        webview.getSettings().setDomStorageEnabled(true);
 
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setBuiltInZoomControls(true);
