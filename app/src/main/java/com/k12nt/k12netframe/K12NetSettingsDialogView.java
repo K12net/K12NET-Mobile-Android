@@ -1,36 +1,33 @@
 package com.k12nt.k12netframe;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
-import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
-import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
-import java.net.URL;
 import java.util.Locale;
-import android.content.res.Resources;
-import android.content.Intent;
-import android.os.Build;
-
-import org.json.JSONObject;
 
 public class K12NetSettingsDialogView extends K12NetDialogView {
 
     public static String TURKISH = "tr";
     public static String ENGLISH = "en";
     public static String ARABIC = "ar";
+    public static String FRENCH = "fr";
+    public static String RUSSIAN = "ru";
 
 	public K12NetSettingsDialogView(Context context) {
 		super(context);
 	}
 
-    ToggleButton[] language_btn_list = new ToggleButton[3];
+    ToggleButton[] language_btn_list = new ToggleButton[5];
 	
 	protected int getToolbarIcon() {
 		return R.drawable.k12net_logo;
@@ -83,10 +80,14 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
         ToggleButton btn_tr = (ToggleButton) view.findViewById(R.id.btn_tr);
         ToggleButton btn_en = (ToggleButton) view.findViewById(R.id.btn_en);
         ToggleButton btn_ar = (ToggleButton) view.findViewById(R.id.btn_ar);
+        ToggleButton btn_fr = (ToggleButton) view.findViewById(R.id.btn_fr);
+        ToggleButton btn_ru = (ToggleButton) view.findViewById(R.id.btn_ru);
 
         language_btn_list[0] = btn_tr;
         language_btn_list[1] = btn_en;
         language_btn_list[2] = btn_ar;
+        language_btn_list[3] = btn_fr;
+        language_btn_list[4] = btn_ru;
 
         btn_tr.setOnClickListener(new View.OnClickListener() {
 
@@ -112,6 +113,22 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
             }
         });
 
+        btn_fr.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                updateLanguage(3, FRENCH);
+            }
+        });
+
+        btn_ru.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                updateLanguage(4, RUSSIAN);
+            }
+        });
+
         if(K12NetUserReferences.getLanguageCode().equals(TURKISH))  {
             updateLanguage(0, TURKISH);
         }
@@ -120,6 +137,12 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
         }
         else if(K12NetUserReferences.getLanguageCode().equals(ARABIC)) {
             updateLanguage(2, ARABIC);
+        }
+        else if(K12NetUserReferences.getLanguageCode().equals(FRENCH)) {
+            updateLanguage(3, FRENCH);
+        }
+        else if(K12NetUserReferences.getLanguageCode().equals(RUSSIAN)) {
+            updateLanguage(4, RUSSIAN);
         }
 
 		return view;

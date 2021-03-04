@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+
+
+    <string name="error">Error</string>
+
+    <string name="error_open_page">Cette page n\'est pas ouverte ! Voulez-vous ouvrir en dehors de l\'application ?</string>
+
+    <string name="permlab_accessAllDownloads">Accéder à tous les téléchargements du système</string>
+
+    <string name="permdesc_accessAllDownloads">Autoriser l\'application à visualiser et à modifier tous les téléchargements initiés par n\'importe quelle application sur le système.</string>
+
+    <string name="read_attachment_desc">Autoriser la lecture des pièces jointes à vos e-mails.</string>
+
+    <string name="read_attachment_label">Autoriser la lecture des pièces jointes à vos e-mails.</string>
+
+    <string name="permlab_mediaStorageWrite">Modifier/supprimer le contenu des supports de stockage internes</string>
+
+    <string name="permdesc_mediaStorageWrite">Autoriser une application à modifier le contenu du media interne de stockage.</string>
+
+
+
+    <string name="privacy_policy">Politique de confidentialité</string>
+
+    <string name="app_name">K12NET Mobile</string>
+
+    <string name="action_settings">Paramètres</string>
+
+    <string name="username">Nom d\'utilisateur</string>
+
+    <string name="password">Mot de passe</string>
+
+    <string name="login">Connexion</string>
+
+    <string name="welcome">Bienvenue</string>
+
+    <string name="loading">Chargement...</string>
+
+    <string name="assessment_result">Résultat de l\'évaluation</string>
+
+    <string name="achievement_guide">Guide de réalisation</string>
+
+    <string name="absence">Absence</string>
+
+    <string name="homeworks">Devoirs</string>
+
+    <string name="courses">Cours</string>
+
+    <string name="announcement">Annonce</string>
+
+    <string name="example">Exemple</string>
+
+    <string name="showAll">Tout afficher</string>
+
+    <string name="complete">Terminé</string>
+
+    <string name="incomplete">Incomplet</string>
+
+    <string name="partial">Partiel</string>
+
+    <string name="active">Actif</string>
+
+    <string name="mail">Messages</string>
+
+    <string name="details">Details</string>
+
+    <string name="loading_please_wait">Chargement, veuillez patienter...</string>
+
+    <string name="blank">Vide</string>
+
+    <string name="student_list">Liste des élèves</string>
+
+    <string name="grade">Niveau</string>
+
+    <string name="appName">K12NET Mobile</string>
+
+    <string name="unknown">Inconnu</string>
+
+    <string name="passive">Passif</string>
+
+    <string name="title">Titre</string>
+
+    <string name="startDate">Date de début</string>
+
+    <string name="endDate">Date limite</string>
+
+    <string name="status">Statut</string>
+
+    <string name="teacher">Enseignant</string>
+
+    <string name="description">Description</string>
+
+    <string name="attachment">Pièce jointe</string>
+
+    <string name="noItem">Il n\'y a pas d\'article</string>
+
+    <string name="noHomework">Il n\'y a pas de devoirs</string>
+
+    <string name="hw_stat_complete">Terminé</string>
+
+    <string name="hw_stat_partial">Partiel</string>
+
+    <string name="hw_stat_notComplete">incomplète</string>
+
+    <string name="hw_stat_noReturn">Aucun retour</string>
+
+    <string name="hw_stat_stuAbsent">Stu. Absent</string>
+
+    <string name="hw_stat_late">Retard</string>
+
+    <string name="hw_stat_unknown">Inconnu</string>
+
+    <string name="hw_stat_active">Actif</string>
+
+    <string name="noAnnouncement">Il n\'y a pas d\'annonce</string>
+
+    <string name="sender">Expéditeur</string>
+
+    <string name="noMail">Il n\'y a pas de courrier</string>
+
+    <string name="sendDate">Date d\'envoi</string>
+
+    <string name="replyMessageHint">Répondre</string>
+
+    <string name="writeMessageHint">Écrivez votre message</string>
+
+    <string name="sendMessageHint">Envoyer</string>
+
+    <string name="deleteMessageHint">Supprimer</string>
+
+    <string name="unreadMessageHint">Non lu</string>
+
+    <string name="shortDateFormat">MMMM dd</string>
+
+    <string name="longDateFormat">MMMM dd, yyyy</string>
+
+    <string name="fullDateFormat">EEEE, MMMM dd, yyyy</string>
+
+    <string name="noAssessment">Il n\'y a pas d\'informations sur l\'évaluation</string>
+
+    <string name="getMoreResult">Obtenir plus de résultats</string>
+
+    <string name="messageType">Type de message</string>
+
+    <string name="noConnection">Il n\'y a pas de connexion internet</string>
+
+    <string name="noAchievement">Il n\'y a pas d\'information sur les réalisations</string>
+
+    <string name="rememberMe">Se souvenir</string>
+
+    <string name="section">Section</string>
+
+    <string name="noSection">Il n\'y a pas d\'informations sur le section</string>
+
+    <string name="success">Succès</string>
+
+    <string name="monday">Lundi</string>
+
+    <string name="tuesday">Mardi</string>
+
+    <string name="wednesday">Mercredi</string>
+
+    <string name="thursday">Jeudi</string>
+
+    <string name="friday">Vendredi</string>
+
+    <string name="saturday">Samedi</string>
+
+    <string name="sunday">Dimanche</string>
+
+    <string name="results">Résultats</string>
+
+    <string name="reports">Rapports</string>
+
+    <string name="assessment">Évaluation</string>
+
+    <string name="noSelection">Veuillez sélectionner une évaluation</string>
+
+    <string name="date">Date</string>
+
+    <string name="loginError">Erreur de connexion, veuillez vérifier le nom d\'utilisateur, le mot de passe et les paramètres de connexion au réseau et réessayer.</string>
+
+    <string name="appServerUrl">URL du serveur d\'application</string>
+
+    <string name="fileServerUrl">File Server URL</string>
+
+    <string name="save">Sauvegarder</string>
+
+    <string name="correct">Correct</string>
+
+    <string name="incorrect">Incorrect</string>
+
+    <string name="notAnswered">Pas de réponse</string>
+
+    <string name="correctScorePercentage">%Correct</string>
+
+    <string name="maxPossibleScore">Total</string>
+
+    <string name="back">Retour</string>
+
+    <string name="createReport">Créer un rapport</string>
+
+    <string name="create">Créer</string>ƒunre
+
+    <string name="assessmentNoSelected">L\'évaluation doit être sélectionnée</string>
+
+    <string name="formNoSelected">Le formulaire d\'évaluation doit être sélectionné</string>
+
+    <string name="courseName">Cours</string>
+
+    <string name="sectionName">Section</string>
+
+    <string name="weeklyHour">Heure hebdomadaire</string>
+
+    <string name="login_failed">Connexion refusée, veuillez réessayer après avoir vérifié le nom d\'utilisateur, le mot de passe et les paramètres de connexion</string>
+
+    <string name="progress">Progrès</string>
+
+    <string name="score_card">Bulletin de notes</string>
+
+    <string name="term_marks">Notes sur les périodes</string>
+
+    <string name="fullDateTimeFormat">EEEE, MMMM dd, yyyy hh:mm:ss</string>
+
+    <string name="sms">SMS</string>
+
+    <string name="asisto_mail">Fenêtre du message</string>
+
+    <string name="receive_message">Echec de l\'envoi du message</string>
+
+    <string name="receive_homework">Asisto a de nouvelles informations sur les devoirs</string>
+
+    <string name="receive_announcement">Asisto a une nouvelle annonce</string>
+
+    <string name="receive_assessment">Asisto dispose de nouvelles informations d\'évaluation</string>
+
+    <string name="receive_achievement_guide">Asisto a de nouvelles informations sur le guide de réalisation</string>
+
+    <string name="receive_section">Asisto a de nouvelles informations sur la section</string>
+
+    <string name="receive_error">Les données reçues contiennent des erreurs</string>
+
+    <string name="section_scores">Notes de la section</string>
+
+    <string name="gcm_register_ok">Le registre des notifications est complété avec succès.</string>
+
+    <string name="message_send_ok">Le message est envoyé avec succès</string>
+
+    <string name="message_send_fail">Echec de l\'envoi du message</string>
+
+    <string name="noData">Aucune donnée</string>
+
+    <string name="login_name_school_database_fail">Le nom ou les informations sur l\'école ne peuvent pas être lus dans la base de données</string>
+
+    <string name="noNetwork">La connexion au réseau n\'est pas trouvée</string>
+
+    <string name="submitMessageFail">Échec de l\'envoi du message</string>
+
+    <string name="setUnread">Le message est défini comme non lu</string>
+
+    <string name="messageDeleted">Le message est supprimé</string>
+
+    <string name="homeworkSubmitFailed">Échec de la soumission des devoirs.</string>
+
+    <string name="assessment_report_failed">Le rapport d\'évaluation ne peut pas être lancé</string>
+
+    <string name="assessment_report_ok">Le rapport d\'évaluation est lancé avec succès</string>
+
+    <string name="error_gcm_installplayservices">Veuillez installer les services Google Play pour recevoir les notifications</string>
+
+    <string name="error_gcm_devicenotsupported">Votre appareil n\'est pas pris en charge pour recevoir la notification</string>
+
+    <string name="noAttendance">Il n\'y a aucune présence</string>
+
+    <string name="attendance">Présence</string>
+
+    <string name="sentByAsisto">Envoyer par Asisto ...</string>
+
+    <string name="calendar">Calendrier</string>
+
+    <string name="logout">Déconnexion</string>
+
+    <string name="noCalendarInfo">Il n\'y a pas d\'informations sur le calendrier</string>
+
+    <string name="total">Total</string>
+
+    <string name="microDateTimeFormat">MMM dd</string>
+
+    <string name="noCalenderItem">Il n\'y a pas de calendrier pour ce jour</string>
+
+    <string name="daily">Quotidien</string>
+
+    <string name="period">Période</string>
+
+    <string name="noAttendanceInMonth">Il n\'y a pas de fiche de présence pour ce mois</string>
+
+    <string name="calendarAssignmentType">Devoirs</string>
+
+    <string name="startingDate">Date début</string>
+
+    <string name="startingTime">Heure de début</string>
+
+    <string name="location">Localisation</string>
+
+    <string name="eventType">Type d\'événement</string>
+
+    <string name="endingDate">Date de fin</string>
+
+    <string name="endingTime">Heure de fin</string>
+
+    <string name="logoutWarningMessage">Votre session sera fermée. Vous êtes sûr ?</string>
+
+    <string name="yes">Oui</string>
+
+    <string name="no">Non</string>
+
+    <string name="localString">en</string>
+
+    <string name="webViewer">Visionneuse Web Asisto</string>
+
+    <string name="videoDershane">Salle de classe vidéo</string>
+
+    <string name="videoDersler">Cours vidéo</string>
+
+    <string name="assessment_type">Nom de l\'évaluation</string>
+
+    <string name="grading_assignment_type">Type d\'affectation des notes</string>
+
+    <string name="publish_date">Date de publication</string>
+
+    <string name="assesment_date">Date d\'évaluation</string>
+
+    <string name="max_score">Note max</string>
+
+    <string name="weight">Poids</string>
+
+    <string name="form">Formulaire</string>
+
+    <string name="application">Administration</string>
+
+    <string name="classroom">Numéro de la salle</string>
+
+    <string name="observer">personnel</string>
+
+    <string name="duration">Durée</string>
+
+    <string name="course_code">Code du cours </string>
+
+    <string name="course_name">Nom du cours</string>
+
+    <string name="tutoring">Tutorat</string>
+
+    <string name="term">Période scolaire</string>
+
+    <string name="remindMe">Rappeler plus tard</string>
+
+    <string name="calendarPermissionMessage">Les données du calendrier seront synchronisées avec votre appareil. Vous voulez continuer ?</string>
+
+    <string name="calendarSyncStart">La synchronisation du calendrier est lancée</string>
+
+    <string name="calendarSyncEnd">La synchronisation du calendrier est terminée</string>
+
+    <string name="asisto_calendar">Asisto\'s Calendrier</string>
+
+    <string name="download_file">Téléchargement du fichier. Veuillez patienter...</string>
+
+    <string name="download_location">Emplacement du téléchargement</string>
+
+    <string name="clubs">Clubs</string>
+
+    <string name="noRoleDefined">Aucun rôle défini</string>
+
+    <string name="activeDate">Date d\'activation</string>
+
+    <string name="role">Rôle</string>
+
+    <string name="participationComment">Commentaires</string>
+
+    <string name="duplicateSARequest">Il existe un double de la demande d\'activité de l\'élève. Veuillez choisir une seule valeur pour chaque sélection.</string>
+
+    <string name="selectOne">Sélectionnez un élément</string>
+
+    <string name="SARequestFail">La demande d\'activité de l\'élève n\'a pas été enregistrée.</string>
+
+    <string name="SARequestSuccess">La demande d\'activité des étudiants a été sauvegardée avec succès.</string>
+
+    <string name="newClubRequest">Demande de nouveau club</string>
+
+    <string name="noActiveClub">Il n\'y a pas de participation active des élèves aux activités.</string>
+
+    <string name="touchToRequest">Cliquez sur pour demander la participation à une activité des élèves.</string>
+
+    <string name="downloadFailed">L\'opération de téléchargement a échoué.</string>
+
+    <string name="saMandatoryNotSatisfied">La valeur la moins élevée en %d doit être sélectionnée.</string>
+
+    <string name="studentActivityDetail">Détails de l\'activité des élèves</string>
+
+    <string name="attendanceInfo">Informations sur les présences</string>
+
+    <string name="noStudentActivityParticipation">Il n\'y a pas de participation active des élèves aux activités.</string>
+
+    <string name="sendNewStudentActivityRequest">Cliquer pour demander la présence d\'un élève à une activité.</string>
+
+    <string name="noParticipationComment">Aucun commentaire des participants</string>
+
+    <string name="noActivityDescription">La description de l\'activité n\'est pas disponible.</string>
+
+    <string name="attendanceName">Nom des participants</string>
+
+    <string name="enterExit">Temps d\'entrée et de sortie</string>
+
+    <string name="value">Valeur de l\'absence</string>
+
+    <string name="typeStatus">Type/statut</string>
+
+    <string name="name">Nom</string>
+
+    <string name="activityTypeLevel">Type/niveau d\'activité</string>
+
+    <string name="programType">Type de cursus</string>
+
+    <string name="gradeLevel">Niveaux scolaires</string>
+
+    <string name="locationType">Type de localisation</string>
+
+    <string name="documentStartToDownload">Préparation de l\'affichage des documents</string>
+
+    <string name="applications">Applications</string>
+
+    <string name="receive_calendar">Asisto a de nouvelles informations sur le calendrier</string>
+
+    <string name="receive_activity">Asisto a de nouvelles informations sur les activités du club </string>
+
+    <string name="receive_behavior_assessment">Asisto a de nouvelles informations sur l\'évaluation du comportement </string>
+
+    <string name="behavior_assessment">Évaluation du comportement</string>
+
+    <string name="tag">Libellé</string>
+
+    <string name="item">Article</string>
+
+    <string name="observationDate">Date d\'observation</string>
+
+    <string name="score">Note</string>
+
+    <string name="answer">Réponse</string>
+
+    <string name="answerDescription">Description de la réponse</string>
+
+    <string name="type">Type</string>
+
+    <string name="attendanceValue">Valeur de la présence</string>
+
+    <string name="attendanceCode">Code de présence</string>
+
+    <string name="timeIn">Temps de sortie</string>
+
+    <string name="timeOut">Temps de sortie</string>
+
+    <string name="note">Note</string>
+
+    <string name="day">Jour</string>
+
+    <string name="enter">Entrer</string>
+
+    <string name="exit">Sortie</string>
+
+    <string name="rubrikReport">Rapport sur les rubriques</string>
+
+    <string name="remarkReport">Formulaire d\'observation</string>
+
+    <string name="remarkRubricSelection">Veuillez sélectionner un type de rapport à afficher</string>
+
+    <string name="english">Anglais</string>
+
+    <string name="arabic">Arabe</string>
+
+    <string name="turkish">Turc</string>
+
+    <string name="k12netCrashed">K12Net a planté ...</string>
+
+    <string name="k12netCrashHelp">K12Net s\'est planté. Veuillez nous aider à résoudre ce problème. Décrivez en détail vos dernières actions et envoyez-nous un rapport afin que nous puissions résoudre le problème. N\'effacez pas les codes suivants.</string>
+
+    <string name="k12netCrashSendReport">K12Net s\'est planté. Veuillez nous envoyer une description du problème afin que nous puissions le résoudre.</string>
+
+    <string name="writeAccessAppSettings">L\'autorisation de stockage externe en écriture nous permet de faire du stockage d\'images. Veuillez autoriser cette permission dans les paramètres de l\'application.</string>
+
+    <string name="readAccessAppSettings">L\'autorisation de lecture du stockage externe nous permet de lire les images stockées. Veuillez autoriser cette permission dans les paramètres de l\'application.</string>
+
+    <string name="readAccessCameraPermission">L\'autorisation de l\'appareil photo nous permet de prendre des photos. Veuillez autoriser cette permission dans les paramètres de l\'application.</string>
+
+    <string name="locationAccessAppSettings">Obtenir l\'autorisation de localisation nous permet de lire la position actuelle et de l\'enregistrer si vous le souhaitez. Veuillez autoriser cette permission dans les Paramètres de l\'application.</string>
+
+    <string name="resetPassword">Mot de passe oublié</string>
+
+    <string name="newUpdateAvailable">Une nouvelle mise à jour est disponible. Veuillez mettre à jour avant de continuer.</string>
+
+    <string name="update">Mise à jour</string>
+
+    <string name="cancel">Annuler</string>
+
+    <string name="newUpdateAvailableWarning">Une nouvelle mise à jour est disponible. Vous pouvez mettre à jour votre demande plus tard si vous le souhaitez.</string>
+
+    <string name="ok">Ok</string>
+
+
+
+    <string name="confirmation">Confirmation</string>
+
+    <string name="fileNotFound">Fichier non trouvé !</string>
+
+    <string name="navToNotify">Vous êtes sur le point de naviguer sur la page de notification. Voulez-vous vraiment quitter la vue actuelle ?</string>
+
+</resources>

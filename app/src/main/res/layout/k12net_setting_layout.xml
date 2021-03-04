@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/login_background_repeat">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center|top"
@@ -53,35 +53,54 @@
             android:visibility="visible">
 
             <ToggleButton
-                style="@style/Asisto_SmallButton"
                 android:id="@+id/btn_tr"
-                android:gravity="center"
-                android:text="@string/turkish"
-                android:layout_width="wrap_content"
+                style="@style/Asisto_SmallButton"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:textOff="@string/turkish"
-                android:textOn="@string/turkish" />
+                android:gravity="center"
+                android:text="TR"
+                android:textOff="TR"
+                android:textOn="TR" />
 
             <ToggleButton
-                style="@style/Asisto_SmallButton"
                 android:id="@+id/btn_en"
-                android:gravity="center"
-                android:text="@string/english"
-                android:layout_width="wrap_content"
+                style="@style/Asisto_SmallButton"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:textOff="@string/english"
-                android:textOn="@string/english" />
+                android:gravity="center"
+                android:text="EN"
+                android:textOff="EN"
+                android:textOn="EN" />
 
             <ToggleButton
-                style="@style/Asisto_SmallButton"
                 android:id="@+id/btn_ar"
-                android:gravity="center"
-                android:text="@string/arabic"
-                android:layout_width="wrap_content"
+                style="@style/Asisto_SmallButton"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:textOff="@string/arabic"
-                android:textOn="@string/arabic"
-                android:checked="false" />
+                android:gravity="center"
+                android:text=" ع "
+                android:textOff=" ع "
+                android:textOn=" ع " />
+
+            <ToggleButton
+                android:id="@+id/btn_fr"
+                style="@style/Asisto_SmallButton"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="FR"
+                android:textOff="FR"
+                android:textOn="FR" />
+
+            <ToggleButton
+                android:id="@+id/btn_ru"
+                style="@style/Asisto_SmallButton"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="RU"
+                android:textOff="RU"
+                android:textOn="RU" />
 
         </LinearLayout>
 
