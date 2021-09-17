@@ -21,7 +21,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
@@ -77,10 +77,8 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(LoginActivity.this, instanceIdResult -> {
-            String newToken = instanceIdResult.getToken();
-
-            K12NetUserReferences.setDeviceToken(newToken);
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
         });
 
         //Remove title bar
@@ -327,13 +325,19 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
             WebViewerActivity.previousUrl = null;
             if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
-                final String intent = intentOfLogin.getExtras().getString("intent","");
+                WebViewerActivity.intent = intentOfLogin.getExtras().getString("intent","");
 
-                if(intent != "") {
-                    final String portal = intentOfLogin.getExtras().getString("portal","");
-                    final String query = intentOfLogin.getExtras().getString("query","");
-                    final String body = intentOfLogin.getExtras().getString("body","");
-                    final String title = intentOfLogin.getExtras().getString("title","");
+                if(WebViewerActivity.intent != "") {
+                    WebViewerActivity.portal = intentOfLogin.getExtras().getString("portal","");
+                    WebViewerActivity.query = intentOfLogin.getExtras().getString("query","");
+                    WebViewerActivity.body = intentOfLogin.getExtras().getString("body","");
+                    WebViewerActivity.title = intentOfLogin.getExtras().getString("title","");
+
+                    final String intent = WebViewerActivity.intent;
+                    final String portal = WebViewerActivity.portal;
+                    final String query = WebViewerActivity.query;
+                    final String body = WebViewerActivity.body;
+                    final String title = WebViewerActivity.title;
 
                     Runnable confirmCompleted = new Runnable() {
                         @Override
@@ -351,7 +355,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                                 url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
                                 WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
 
-                                navigateTo(url + "/Logon.aspx");
+                                navigateTo(url);
                             }
                         }
                     };

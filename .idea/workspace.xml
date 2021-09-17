@@ -9,6 +9,9 @@
     <option name="TOOL_WINDOW_LOG_LEVEL" value="info" />
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
   </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
   <component name="AvailableLibraryUpdateStorage">
     <library-updates>
       <library-update>
@@ -50,9 +53,64 @@
     </library-updates>
     <last-search-timestamp>1561535141736</last-search-timestamp>
   </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="French and Russion localizations added">
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/values-ru/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/ShortcutBadger_1_1_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/animated_vector_drawable_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/bolts_android_1_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_analytics_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_analytics_impl_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_common_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_core_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_iid_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/firebase_messaging_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/org_apache_http_legacy_android_24.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_appindexing_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_base_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_basement_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_tasks_9_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_compat_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_core_ui_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_core_utils_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_fragment_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_media_compat_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_vector_drawable_24_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +123,7 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Pixel_3_API_29" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[VirtualDevicePath@C:\Users\hkn\.android\avd\Pixel_3a_API_30.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -88,9 +146,6 @@
       </state>
     </system>
   </component>
-  <component name="FavoritesManager">
-    <favorites_list name="K12NET-Frame-Android" />
-  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -101,10 +156,9 @@
   </component>
   <component name="GenerateSignedApkSettings">
     <option name="EXPORT_PRIVATE_KEY" value="false" />
-    <option name="KEY_STORE_PATH" value="$PROJECT_DIR$/../k12net_frame_android.jks" />
+    <option name="KEY_STORE_PATH" value="D:\TFS\Mobile\GitHub\K12NET\k12net_frame_android.jks" />
     <option name="KEY_ALIAS" value="k12net" />
     <option name="REMEMBER_PASSWORDS" value="true" />
-    <option name="BUILD_TARGET_KEY" value="apk" />
   </component>
   <component name="Git.Settings">
     <option name="PREVIOUS_COMMIT_AUTHORS">
@@ -181,32 +235,31 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="ApkExportedModule" value="app" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Pixel_3_API_29" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2020-07-29T09:17:43.147Z" />
+    <property name="ApkExportedModule" value="K12NET-Mobile-Android.app" />
+    <property name="BundleExportedModule" value="K12NET-Mobile-Android.app" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="VirtualDevicePath@C:\Users\hkn\.android\avd\Pixel_3a_API_30.avd" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-07-07T15:17:38.374360200Z" />
     <property name="ExportApk.ApkPath" value="D:\TFS\Mobile\GitHub\K12NET\K12NET-Mobile-Android\app" />
     <property name="ExportApk.BuildType" value="release" />
     <property name="ExportApk.BuildVariants" value="release" />
     <property name="ExportApk.Flavors" value="" />
-    <property name="ExportApk.SignV1" value="true" />
-    <property name="ExportApk.SignV2" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SelectDeploymentTargetsDialog.selectedDevices" value="VirtualDevicePath@C:\Users\hkn\.android\avd\Pixel_3a_API_30.avd" />
     <property name="android.profiler.active" value="true" />
     <property name="android.project.structure.last.selected" value="app" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
     <property name="device.picker.selection" value="Android_Accelerated_x86_Oreo" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/app/src/main/res" />
-    <property name="project.structure.last.edited" value="Build Variants" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../k12net_frame_android.jks" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="android.sdk-updates" />
+    <property name="settings.editor.selected.configurable" value="emulator" />
   </component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Signing Configs" />
@@ -278,13 +331,15 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="WebViewerActivity" type="AndroidRunConfigurationType" factoryName="Android App" temporary="true">
-      <module name="app" />
+    <configuration name="WebViewerActivity" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false" temporary="true">
+      <module name="K12NET-Mobile-Android.app" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
       <option name="ARTIFACT_NAME" value="" />
       <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
       <option name="ACTIVITY_EXTRA_FLAGS" value="" />
       <option name="MODE" value="specific_activity" />
@@ -320,22 +375,29 @@
       </Native>
       <Profilers>
         <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
       </Profilers>
       <option name="DEEP_LINK" value="" />
       <option name="ACTIVITY_CLASS" value="com.k12nt.k12netframe.WebViewerActivity" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
-      <module name="app" />
+      <module name="K12NET-Mobile-Android.app" />
       <option name="DEPLOY" value="true" />
-      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="true" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
       <option name="ARTIFACT_NAME" value="" />
       <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
       <option name="ACTIVITY_EXTRA_FLAGS" value="" />
       <option name="MODE" value="default_activity" />
@@ -371,11 +433,16 @@
       </Native>
       <Profilers>
         <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
       </Profilers>
       <option name="DEEP_LINK" value="" />
       <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
@@ -439,9 +506,7 @@
       </list>
     </recent_temporary>
   </component>
-  <component name="StructureViewFactory">
-    <option name="ACTIVE_ACTIONS" value=",VISIBILITY_SORTER" />
-  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -628,7 +693,14 @@
       <option name="project" value="LOCAL" />
       <updated>1614843847383</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="French and Russion localizations added">
+      <created>1615183734528</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1615183734528</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -646,9 +718,7 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -667,6 +737,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -703,81 +774,102 @@
     <option name="LAST_COMMIT_MESSAGE" value="French and Russion localizations added" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="679" y="164" key="#app" timestamp="1609160337626">
+    <state x="520" y="236" key="#Notifications" timestamp="1625750280433">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="520" y="236" key="#Notifications/0.0.1536.824@0.0.1536.824" timestamp="1625750280433" />
+    <state x="286" y="158" key="#PSD" timestamp="1625752118241">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="286" y="158" key="#PSD/0.0.1536.824@0.0.1536.824" timestamp="1625752118241" />
+    <state x="279" y="85" width="1089" height="713" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1626104165575">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="679" y="164" key="#app/0.0.1920.1040@0.0.1920.1040" timestamp="1609160337626" />
-    <state x="0" y="5" width="1536" height="819" key="CommitChangelistDialog2" timestamp="1614843846559">
+    <state x="223" y="67" width="1089" height="713" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1625749249194" />
+    <state x="279" y="85" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1626104165575" />
+    <state x="512" y="203" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1625663074377">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="0" y="5" width="1536" height="819" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1614843846559" />
-    <state x="360" y="9" width="1319" height="915" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1608726644358" />
-    <state width="460" height="466" key="DebuggerActiveHint" timestamp="1614593095546">
+    <state x="512" y="203" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1536.824@0.0.1536.824" timestamp="1625663074377" />
+    <state x="74" y="73" width="1060" height="679" key="AVDManager" timestamp="1630475365953">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="74" y="73" width="1060" height="679" key="AVDManager/0.0.1536.824@0.0.1536.824" timestamp="1630475365953" />
+    <state x="92" y="92" width="1736" height="856" key="AVDManager/0.0.1920.1040@0.0.1920.1040" timestamp="1626100014601" />
+    <state x="559" y="159" key="AndroidProcessChooserDialog" timestamp="1625671010997">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="559" y="159" key="AndroidProcessChooserDialog/0.0.1536.824@0.0.1536.824" timestamp="1625671010997" />
+    <state width="468" height="466" key="DebuggerActiveHint" timestamp="1625747671123">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="468" height="466" key="DebuggerActiveHint/0.0.1536.824@0.0.1536.824" timestamp="1625747671123" />
+    <state x="93" y="93" width="1350" height="638" key="DiffContextDialog" timestamp="1630475365953">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="93" y="93" width="1350" height="638" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1630475365953" />
+    <state x="116" y="117" width="1688" height="806" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1626103939299" />
+    <state x="590" y="168" key="FileChooserDialogImpl" timestamp="1625751582695">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="590" y="168" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1625751582695" />
+    <state width="737" height="303" key="GridCell.Tab.0.bottom" timestamp="1630998155685">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="460" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1614593095546" />
-    <state x="147" y="67" key="DiffContextDialog" timestamp="1614843677012">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state x="147" y="67" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1614843677012" />
-    <state width="1486" height="272" key="GridCell.Tab.0.bottom" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456572" />
-    <state width="1486" height="272" key="GridCell.Tab.0.center" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456572" />
-    <state width="1486" height="272" key="GridCell.Tab.0.left" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456572" />
-    <state width="1486" height="272" key="GridCell.Tab.0.right" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456572" />
-    <state width="1486" height="272" key="GridCell.Tab.1.bottom" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456573" />
-    <state width="1486" height="272" key="GridCell.Tab.1.center" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456573" />
-    <state width="1486" height="272" key="GridCell.Tab.1.left" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456573" />
-    <state width="1486" height="272" key="GridCell.Tab.1.right" timestamp="1614872601961">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state width="1486" height="272" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1614872601961" />
-    <state width="1877" height="272" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1614838456573" />
-    <state x="442" y="200" key="Vcs.Push.Dialog.v2" timestamp="1614843853358">
-      <screen x="0" y="0" width="1536" height="824" />
-    </state>
-    <state x="442" y="200" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1614843853358" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1608726653480" />
-    <state x="92" y="92" width="1736" height="856" key="com.android.tools.idea.avdmanager.AvdListDialog" timestamp="1614351168102">
+    <state width="737" height="303" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1630412709865" />
+    <state width="737" height="303" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155685" />
+    <state width="737" height="303" key="GridCell.Tab.0.center" timestamp="1630998155683">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="92" y="92" width="1736" height="856" key="com.android.tools.idea.avdmanager.AvdListDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614351168102" />
-    <state x="655" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1614583767479">
+    <state width="737" height="303" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1630412709865" />
+    <state width="737" height="303" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155683" />
+    <state width="737" height="303" key="GridCell.Tab.0.left" timestamp="1630998155682">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="655" y="344" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1614583767479" />
-    <state x="657" y="252" width="967" height="536" key="find.popup" timestamp="1614957453538">
+    <state width="737" height="303" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1630412709864" />
+    <state width="737" height="303" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155682" />
+    <state width="737" height="303" key="GridCell.Tab.0.right" timestamp="1630998155684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="526" y="200" width="611" height="536" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1614843594168" />
-    <state x="657" y="252" width="967" height="536" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1614957453538" />
+    <state width="737" height="303" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1630412709865" />
+    <state width="737" height="303" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155684" />
+    <state width="737" height="303" key="GridCell.Tab.1.bottom" timestamp="1630998155687">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="737" height="303" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1630411921893" />
+    <state width="737" height="303" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155687" />
+    <state width="737" height="303" key="GridCell.Tab.1.center" timestamp="1630998155686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="737" height="303" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1630411921893" />
+    <state width="737" height="303" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155686" />
+    <state width="737" height="303" key="GridCell.Tab.1.left" timestamp="1630998155686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="737" height="303" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1630411921892" />
+    <state width="737" height="303" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155686" />
+    <state width="737" height="303" key="GridCell.Tab.1.right" timestamp="1630998155687">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="737" height="303" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1630411921893" />
+    <state width="737" height="303" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1630998155687" />
+    <state x="369" y="115" key="SettingsEditor" timestamp="1625752092667">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="369" y="115" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1625752092667" />
+    <state x="452" y="110" key="VCS.ChangeListViewerDialog" timestamp="1630412644669">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="452" y="110" key="VCS.ChangeListViewerDialog/0.0.1536.824@0.0.1536.824" timestamp="1630412644669" />
+    <state x="471" y="221" key="com.android.tools.idea.run.deployment.SelectMultipleDevicesDialog" timestamp="1625671053385">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="471" y="221" key="com.android.tools.idea.run.deployment.SelectMultipleDevicesDialog/0.0.1536.824@0.0.1536.824" timestamp="1625671053385" />
+    <state x="701" y="148" width="774" height="534" key="find.popup" timestamp="1631863111167">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="701" y="148" width="774" height="534" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1631863111167" />
+    <state x="657" y="252" width="967" height="536" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1629360862384" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -798,88 +890,73 @@
           <option name="timeStamp" value="194" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>162</line>
-          <option name="timeStamp" value="219" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>239</line>
+          <line>237</line>
           <option name="timeStamp" value="232" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>197</line>
+          <line>213</line>
           <option name="timeStamp" value="234" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>328</line>
+          <line>344</line>
           <option name="timeStamp" value="332" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1040</line>
-          <option name="timeStamp" value="357" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1047</line>
-          <option name="timeStamp" value="358" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1061</line>
+          <line>1077</line>
           <option name="timeStamp" value="360" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>276</line>
+          <line>292</line>
           <option name="timeStamp" value="363" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>225</line>
+          <line>241</line>
           <option name="timeStamp" value="365" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>238</line>
+          <line>254</line>
           <option name="timeStamp" value="367" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>941</line>
+          <line>957</line>
           <option name="timeStamp" value="370" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>961</line>
+          <line>977</line>
           <option name="timeStamp" value="371" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>981</line>
+          <line>997</line>
           <option name="timeStamp" value="372" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1001</line>
+          <line>1017</line>
           <option name="timeStamp" value="373" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>501</line>
+          <line>505</line>
           <option name="timeStamp" value="378" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1433</line>
+          <line>1449</line>
           <option name="timeStamp" value="381" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1428</line>
+          <line>1444</line>
           <option name="timeStamp" value="382" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -889,137 +966,129 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1415</line>
+          <line>1431</line>
           <option name="timeStamp" value="397" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1296</line>
+          <line>1312</line>
           <option name="timeStamp" value="435" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>708</line>
+          <line>724</line>
           <option name="timeStamp" value="445" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>722</line>
+          <line>738</line>
           <option name="timeStamp" value="446" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>847</line>
+          <line>863</line>
           <option name="timeStamp" value="452" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>619</line>
+          <line>635</line>
           <option name="timeStamp" value="454" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>691</line>
+          <line>707</line>
           <option name="timeStamp" value="460" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>737</line>
+          <line>753</line>
           <option name="timeStamp" value="461" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>747</line>
+          <line>763</line>
           <option name="timeStamp" value="462" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>758</line>
+          <line>774</line>
           <option name="timeStamp" value="463" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>480</line>
+          <line>496</line>
           <option name="timeStamp" value="465" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>716</line>
+          <line>732</line>
           <option name="timeStamp" value="468" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>569</line>
+          <line>585</line>
           <option name="timeStamp" value="479" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>576</line>
+          <line>592</line>
           <option name="timeStamp" value="481" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>110</line>
-          <option name="timeStamp" value="482" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>332</line>
+          <line>336</line>
           <option name="timeStamp" value="483" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>608</line>
+          <line>624</line>
           <option name="timeStamp" value="487" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>597</line>
+          <line>613</line>
           <option name="timeStamp" value="488" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>587</line>
+          <line>603</line>
           <option name="timeStamp" value="489" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>149</line>
-          <option name="timeStamp" value="496" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>543</line>
-          <option name="timeStamp" value="498" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>508</line>
+          <line>524</line>
           <option name="timeStamp" value="499" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>500</line>
+          <line>516</line>
           <option name="timeStamp" value="500" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java</url>
-          <line>263</line>
-          <option name="timeStamp" value="503" />
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java</url>
+          <line>34</line>
+          <option name="timeStamp" value="514" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>130</line>
-          <option name="timeStamp" value="505" />
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
+          <line>357</line>
+          <option name="timeStamp" value="517" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
+          <line>373</line>
+          <option name="timeStamp" value="519" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="app">
         <watch expression="WebViewerActivity.startUrl" language="JAVA" />
+        <watch expression="errorResponse.getReasonPhrase()" language="JAVA" />
         <watch expression="ctx" />
         <watch expression="error.getDescription()" language="JAVA" />
         <watch expression="url" />
+        <watch expression="Build.VERSION.SDK_INT" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>

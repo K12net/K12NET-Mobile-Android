@@ -81,6 +81,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     public static String startUrl = "";
     public static String previousUrl = "";
+
+    public static String intent = "";
+    public static String portal = "";
+    public static String query = "";
+    public static String body = "";
+    public static String title = "";
+
     WebView webview = null;
     WebView main_webview = null;
     WebView popup_webview = null;
@@ -105,14 +112,19 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             super.onNewIntent(intent);
             this.setIntent(intent);
 
-            final String uri = intent.getExtras().getString("intent","");
+            WebViewerActivity.intent = intent.getExtras().getString("intent","");
 
-            if(uri != "") {
-                final String portal = intent.getExtras().getString("portal","");
-                final String query = intent.getExtras().getString("query","");
-                final String webPart = intent.getExtras().getString("intent","");
-                final String body = intent.getExtras().getString("body","");
-                final String title = intent.getExtras().getString("title","");
+            if(WebViewerActivity.intent != "") {
+                WebViewerActivity.portal = intent.getExtras().getString("portal","");
+                WebViewerActivity.query = intent.getExtras().getString("query","");
+                WebViewerActivity.body = intent.getExtras().getString("body","");
+                WebViewerActivity.title = intent.getExtras().getString("title","");
+
+                final String webPart = WebViewerActivity.intent;
+                final String portal = WebViewerActivity.portal;
+                final String query = WebViewerActivity.query;
+                final String body = WebViewerActivity.body;
+                final String title = WebViewerActivity.title;
 
                 final Intent intentOfLogin = this.getIntent();
 
@@ -155,13 +167,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         } else {
             Intent intent = new Intent(this, LoginActivity.class);
 
-            final String portal = this.getIntent().getExtras().getString("portal","");
-            final String query = this.getIntent().getExtras().getString("query","");
-            final String webPart = this.getIntent().getExtras().getString("intent","");
+            final String webPart = WebViewerActivity.intent;
+            final String portal = WebViewerActivity.portal;
+            final String query = WebViewerActivity.query;
+            final String body = WebViewerActivity.body;
+            final String title = WebViewerActivity.title;
 
             intent.putExtra("intent",webPart);
             intent.putExtra("portal", portal);
             intent.putExtra("query", query);
+            intent.putExtra("body", body);
+            intent.putExtra("title", title);
 
             this.startActivity(intent);
         }
@@ -218,7 +234,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             ArrayList<Uri> uriArray = new ArrayList<>();
 
             if (resultStr != null) {
-                Uri uri = Uri.parse(resultStr);
+                Uri uri = Uri.parse(resultStr.trim());
 
                 String filePath = getPath(this, uri);// getFilePathFromContent(resultStr);
 
@@ -824,7 +840,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 if (hasWriteAccess) {
 
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url.trim()));
                     request.setDescription("Download file...");
 
                     String possibleFileName = "";
@@ -1087,7 +1103,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         //FirebaseAppIndex.getInstance().update(getIndexable());
         try {
             Action indexAction = getAction();
-            if(indexAction != null) FirebaseUserActions.getInstance().start(indexAction);
+            if(indexAction != null) FirebaseUserActions.getInstance(getApplicationContext()).start(indexAction);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1110,7 +1126,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onStop() {
-        FirebaseUserActions.getInstance().end(getAction());
+        FirebaseUserActions.getInstance(getApplicationContext()).end(getAction());
         super.onStop();
     }
 
