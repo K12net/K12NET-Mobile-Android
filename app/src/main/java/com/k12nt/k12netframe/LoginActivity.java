@@ -60,6 +60,15 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             super.onNewIntent(intent);
             this.setIntent(intent);
 
+            if(intent != null && intent.getExtras() != null) {
+                final String confirm = intent.getExtras().getString("confirm","");
+                final String query = intent.getExtras().getString("query","");
+
+                if(confirm == "yes") {
+                } else if(confirm == "no") {
+                }
+            }
+
             if (chkRememberMe.isChecked()) {
                 StartLoginOperation();
             }
@@ -77,9 +86,12 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
-        });
+        try {
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
+            });
+        } catch (Exception e) {
+        }
 
         //Remove title bar
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);

@@ -3,6 +3,7 @@ package com.k12nt.k12netframe;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
@@ -14,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -323,10 +325,29 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         unregisterReceiver(onDownloadComplete);
     }
 
+    private String getProcessName(Context context) {
+        if (context == null) return null;
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == android.os.Process.myPid()) {
+                return processInfo.processName;
+            }
+        }
+        return null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            String processName = getProcessName(this);
+            String packageName = this.getPackageName();
+            if (processName != null && packageName != null && !packageName.equals(processName)) {
+                WebView.setDataDirectorySuffix(processName);
+            }
+        }
 
         progress_dialog = new Dialog(this, R.style.K12NET_ModalLayout);
         progress_dialog.setContentView(R.layout.loading_view_layout);
@@ -522,16 +543,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             public void onReceivedError(WebView view, WebResourceRequest request,
                                         WebResourceError error) {
 
-                if(error.getDescription() == "net::ERR_CONNECTION_REFUSED") {
-                    Toast.makeText(getApplicationContext(),
-                            "Check Internet Connection : " + error.getDescription(),
-                            Toast.LENGTH_SHORT).show();
-                }
-
                 String domain = K12NetUserReferences.getConnectionAddressDomain();
                 String url = view.getOriginalUrl();
 
-                if (url != null && url.contains(domain)) {
+                if("net::ERR_CONNECTION_REFUSED".equals(error.getDescription())) {
+                    Toast.makeText(getApplicationContext(),
+                            "Check Internet Connection : " + error.getDescription(),
+                            Toast.LENGTH_SHORT).show();
+                } else if(url != null && (url.toLowerCase().contains("kidsaz")) && "net::ERR_UNKNOWN_URL_SCHEME".equals(error.getDescription())) {
+                    view.stopLoading();
+                    view.goBack();
+                    return;
+                }
+
+                if (url != null && (url.contains(domain) || url.toLowerCase().contains("sso.globed.co"))) {
                     super.onReceivedError(view, request, error);
                 } else {
                     webview.stopLoading();
@@ -542,7 +567,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         @Override
                         public void run() {
                             if (isConfirmed) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)));
+                                try {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)));
+                                } catch (Exception e) {
+                                    try {
+                                        if (!startUrl.startsWith("http://") && !startUrl.startsWith("https://")) {
+                                            Uri webpage = Uri.parse("http://" + startUrl);
+                                            Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+                                            if (intent.resolveActivity(getPackageManager()) != null) {
+                                                startActivity(intent);
+                                            } else {
+                                                startActivity(Intent.createChooser(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)) , "Open With..."));
+                                            }
+                                        } else {
+                                            startActivity(Intent.createChooser(new Intent(Intent.ACTION_VIEW, Uri.parse(startUrl)) , "Open With..."));
+
+                                        }
+                                    } catch (Exception ex) {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Not Permitted : " + startUrl,
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
                             }
                         }
                     };
@@ -560,7 +606,56 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 super.onReceivedHttpError(view, request, errorResponse);
             }
 
+            private boolean isAppInstalled(String uri) {
+                final PackageManager pm = getPackageManager();
+                try {
+                    if(uri.contains("kidsaz://kidsaz.app")) uri = "com.learninga_z.onyourown";
+
+                    pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+                    return true;
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                return false;
+            }
+
+            private boolean isAppInstalled(Intent intent) {
+                final PackageManager mgr  = getPackageManager();
+                try {
+                    List<ResolveInfo> list =
+                            mgr.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                    if(list.size() > 0) return true;
+                    if (intent.resolveActivity(mgr) != null) return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return false;
+            }
+
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if(!url.startsWith("http") && url.contains("://")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        webview.stopLoading();
+                        Toast.makeText(WebViewerActivity.this,url.split("://")[0] + ": Require app install!",Toast.LENGTH_SHORT).show();
+                        //webview.goBack();
+                        return false;
+                    }
+                    /*if(isAppInstalled(url) || isAppInstalled(intent)) {
+                        startActivity( intent );
+                        return true;
+                    } else {
+                        webview.stopLoading();
+                        Toast.makeText(WebViewerActivity.this,url.split("://")[0] + ": Require app install!",Toast.LENGTH_SHORT).show();
+                        //webview.goBack();
+                        return false;
+                    }*/
+                }
+
                 if (url.contains("impersonate=true")) {
                     popup_webview = setWebView(ctx);
 
@@ -575,7 +670,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 } else if (url.contains("www.youtube.com/")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
-                } else if (url.contains("meet.google.com") || url.contains("teams.microsoft.com") || url.contains(".zoom.") || url.contains("//zoom.")) {
+                } else if (url.toLowerCase().contains("browse=newtab") || url.contains("meet.google.com") || url.contains("teams.microsoft.com") || url.contains(".zoom.") || url.contains("//zoom.")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 } else if (url.contains("drive.")) {
@@ -1049,40 +1144,46 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        boolean garanted = true;
+        for (int i = 0; i < grantResults.length; i++) {
+            if(grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                garanted = false;
+            }
+        }
         switch (requestCode) {
             case 100:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (garanted) {
                     hasWriteAccess = true;
                 } else {
                     Log.e("value", "Permission Denied, You cannot use local drive .");
                 }
                 break;
             case 101:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (garanted) {
                     hasReadAccess = true;
                 } else {
                     Log.e("value", "Permission Denied, You cannot use local drive .");
                 }
                 break;
             case 102:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (garanted) {
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use gps location .");
                 }
                 break;
             case 103:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (garanted) {
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use camera to take photo .");
                 }
                 break;
             case 104:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (garanted) {
 
                 } else {
-                    Toast.makeText(this, "Permission Denied, You cannot use Access to All Downloads.", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, "Permission Denied, You cannot use Access to All Downloads.", Toast.LENGTH_LONG).show();
                 }
                 break;
         }
@@ -1170,8 +1271,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     public String getPath(final Context context, final Uri uri) {
+        if(uri == null || context == null) return  null;
 
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+        final boolean isKitKat = Build.VERSION.SDK_INT >= VERSION_CODES.KITKAT;
 
         if(isKitKat) {
 
@@ -1197,7 +1299,62 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     final String id = DocumentsContract.getDocumentId(uri);
 
                     if (!TextUtils.isEmpty(id)) {
-                        if (id.startsWith("raw:")) {
+                        if(id.startsWith("msf:")) {
+
+                            /*final File file = new File(context.getCacheDir(), getFileName(context, uri));
+                            try (final InputStream inputStream = context.getContentResolver().openInputStream(uri);
+                                 OutputStream output = new FileOutputStream(file)) {
+                                // You may need to change buffer size. I use large buffer size to help loading large file , but be ware of
+                                //  OutOfMemory Exception
+                                final byte[] buffer = new byte[8 * 1024];
+                                int read;
+
+                                while ((read = inputStream.read(buffer)) != -1) {
+                                    output.write(buffer, 0, read);
+                                }
+
+                                output.flush();
+                                return file.getPath();
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }*/
+                            /*Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+                            String path = null;
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                String document_id = cursor.getString(0);
+                                document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
+                                cursor.close();
+
+                                cursor = context.getContentResolver().query(
+                                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+                                if (cursor != null) {
+                                    cursor.moveToFirst();
+                                    path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                                    cursor.close();
+                                }
+                            }
+                            return  path;*/
+
+                           /* final String[] split = id.split(":");
+                            final String selection = "_id=?";
+                            final String[] selectionArgs = new String[] { split[1] };
+
+                            if (Build.VERSION.SDK_INT >= VERSION_CODES.Q) {
+                                return getDataColumn(context, MediaStore.Downloads.EXTERNAL_CONTENT_URI, selection, selectionArgs);
+                            }*/
+                            //return  getRealPathFromURI_API19(context, uri);
+                            /*String fileName = getFilePath(context, uri);
+                            if (fileName != null) {
+                                return Environment.getExternalStorageDirectory().toString() + "/Download/" + fileName;
+                            }*/
+
+                            /*Uri contentUri = ContentUris.withAppendedId(
+                                    Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id)
+                            );
+                            return getDataColumn(context, contentUri, null, null);*/
+                        } else if (id.startsWith("raw:")) {
                             return id.replaceFirst("raw:", "");
                         }
                         try {
@@ -1222,15 +1379,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                             String path = null;
 
-                            for(int i = 0; i < contentUriPrefixesToTry.length;i++) {
-                                String contentUriPrefix = contentUriPrefixesToTry[i];
-                                Uri contentUri = ContentUris.withAppendedId(
-                                        Uri.parse(contentUriPrefix), Long.valueOf(id));
+                            if(id.startsWith("msf:") == false) {
+                                for(int i = 0; i < contentUriPrefixesToTry.length;i++) {
+                                    String contentUriPrefix = contentUriPrefixesToTry[i];
+                                    Uri contentUri = ContentUris.withAppendedId(
+                                            Uri.parse(contentUriPrefix), Long.valueOf(id));
 
-                                path = getDataColumn(context, contentUri, null, null);
+                                    path = getDataColumn(context, contentUri, null, null);
 
-                                if (!TextUtils.isEmpty(path))
-                                    return path;
+                                    if (!TextUtils.isEmpty(path))
+                                        return path;
+                                }
                             }
 
                             // path could not be retrieved using ContentResolver, therefore copy file to accessible cache using streams
@@ -1242,7 +1401,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             {
                                 path = file.getAbsolutePath();
                                 try {
-                                    saveFileFromUri(context, uri, path);
+                                    saveFileFromUri(context, uri, path, id.startsWith("msf:"));
                                 } catch (Exception ex) {
                                     try {
                                         file = saveFileIntoExternalStorageByUri(context, uri);
@@ -1414,13 +1573,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     };
 
-    private void saveFileFromUri(Context context, Uri uri, String destinationPath)
+    private void saveFileFromUri(Context context, Uri uri, String destinationPath, boolean ignoreManager)
     {
         downloadID = 0;
 
         DownloadManager downloadManager= (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
-        if (downloadManager != null) {
+        if (downloadManager != null && ignoreManager == false) {
             DownloadManager.Request request = new DownloadManager.Request(uri)
                     .setTitle("Dummy File")// Title of the Download Notification
                     .setDescription("Downloading")// Description of the Download Notification
@@ -1533,6 +1692,82 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         return file;
+    }
+
+    /**
+     * Get a file path from a Uri. This will get the the path for Storage Access
+     * Framework Documents, as well as the _data field for the MediaStore and
+     * other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri     The Uri to query.
+     * @author paulburke
+     */
+    public static String getRealPathFromURI_API19(final Context context, final Uri uri) {
+
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+
+                // TODO handle non-primary volumes
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                return getDataColumn(context, contentUri, null, null);
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[]{
+                        split[1]
+                };
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            // Return the remote address
+            if (isGooglePhotosUri(uri))
+                return uri.getLastPathSegment();
+
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
     }
 
     /**
@@ -1691,6 +1926,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     public static boolean isGoogleNewPhotosUri(Uri uri) {
         return "com.google.android.apps.photos.contentprovider".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    public static boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
     public static boolean isFileProviderUri(Uri uri) {

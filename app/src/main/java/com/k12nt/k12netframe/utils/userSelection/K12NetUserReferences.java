@@ -15,7 +15,7 @@ public class K12NetUserReferences {
 	public static final String IMG_FILE_PATH = DATA_FILE_PATH + "temp_img/";
 	public static String FILE_ENCODING_CHARSET = "UTF-8";
 
-    public static boolean LANG_UPDATED = false;
+    public static boolean LANG_UPDATED = true;
 
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";

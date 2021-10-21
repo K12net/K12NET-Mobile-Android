@@ -7,8 +7,8 @@
         
     <style name="AppTheme"  parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
-        <!--  <item name="android:colorPrimary">#005555</item>-->
-      <!--    <item name="android:colorPrimaryDark">#04b7bb</item>-->
+       <item name="android:colorPrimary">#005555</item>
+      <item name="android:colorPrimaryDark">#04b7bb</item>
     </style>
 
     <style name="Asisto_Button">

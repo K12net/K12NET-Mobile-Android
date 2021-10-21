@@ -47,11 +47,12 @@
     <uses-permission android:name="android.webkit.PermissionRequest" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <!--
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />  -->
+      <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+          tools:ignore="ScopedStorage" />  -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_GPS" />
@@ -65,7 +66,6 @@
     <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS"/>
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-
 
     <!-- android:networkSecurityConfig="@xml/network_security_config" -->
      <application
@@ -90,6 +90,11 @@
              </intent-filter>
          </activity>
 
+         <receiver
+             android:name="com.k12nt.k12netframe.fcm.NotificationReceiver"
+             android:enabled="true"
+             android:exported="false">
+         </receiver>
          <!-- [START firebase_service] -->
         <service
             android:name="com.k12nt.k12netframe.fcm.MyFirebaseMessagingService">
@@ -108,7 +113,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
          <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data
