@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/res/layout/k12net_login_layout.xml" value="0.15217391304347827" />
+        <entry key="..\:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/res/layout/k12net_setting_layout.xml" value="0.15217391304347827" />
         <entry key="..\:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/res/layout/k12net_toolbar_layout.xml" value="0.1265625" />
       </map>
     </option>

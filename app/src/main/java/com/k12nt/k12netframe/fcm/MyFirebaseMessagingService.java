@@ -10,6 +10,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.RingtoneManager;
@@ -19,6 +21,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -26,6 +29,8 @@ import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
+
+import java.util.Locale;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
@@ -194,6 +199,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         intent.putExtra("query", query);
         intent.putExtra("body", messageBody);
         intent.putExtra("title", title);
+        if("confirm".equals(intentStr)) {
+            intent.putExtra("requestID", requestID);
+        }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -214,19 +222,38 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setWhen(System.currentTimeMillis());
 
         if("confirm".equals(intentStr)) {
+            builder.setColor(ContextCompat.getColor(this, R.color.cardview_dark_background));
+
+            String culture =query.split(";")[0];
+            Locale myLocale = new Locale(culture);
+            Resources res = this.getResources();
+            Configuration configuration = res.getConfiguration();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+                configuration.setLocale(myLocale);
+            }
+
+            configuration.locale = myLocale;
+            Locale.setDefault(myLocale);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+                this.createConfigurationContext(configuration);
+            }
+
+            res.updateConfiguration(configuration,res.getDisplayMetrics());
+
             Intent yesAction = new Intent(this, NotificationReceiver.class);
             yesAction.putExtra("confirm","1");
             yesAction.putExtra("portal",portal);
             yesAction.putExtra("query",query);
             yesAction.putExtra("id", requestID);
-            PendingIntent yesPendingAction = PendingIntent.getBroadcast(this, 1 , yesAction, PendingIntent.FLAG_ONE_SHOT);
+            PendingIntent yesPendingAction = PendingIntent.getBroadcast(this, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Intent noAction = new Intent(this, NotificationReceiver.class);
             noAction.putExtra("confirm","0");
             noAction.putExtra("query",query);
             noAction.putExtra("portal",portal);
             noAction.putExtra("id", requestID);
-            PendingIntent noPendingAction = PendingIntent.getBroadcast(this, 0 , noAction, PendingIntent.FLAG_ONE_SHOT);
+            PendingIntent noPendingAction = PendingIntent.getBroadcast(this, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT);
 
             if("auth".equals(portal)) {
                 builder = builder.addAction(0,"✅ " + this.getString(R.string.yes),yesPendingAction);

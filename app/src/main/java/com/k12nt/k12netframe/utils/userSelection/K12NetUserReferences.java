@@ -241,11 +241,13 @@ public class K12NetUserReferences {
 	    if (references.languageCode == null) {
             setLanguage("en");
 
-            String language = Locale.getDefault().getLanguage();
+            if(Locale.getDefault() != null) {
+                String language = Locale.getDefault().getLanguage();
 
-            if(language != null) {
-                language = language.split("_")[0].split("-")[0].toLowerCase();
-                setLanguage(language);
+                if(language != null) {
+                    language = language.split("_")[0].split("-")[0].toLowerCase();
+                    setLanguage(language);
+                }
             }
         }
         return references.languageCode;

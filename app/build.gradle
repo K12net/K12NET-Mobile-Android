@@ -9,8 +9,8 @@ android {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 22
         targetSdkVersion 30
-        versionCode 67
-        versionName "1.32.23"
+        versionCode 70
+        versionName "1.32.26"
     }
     buildTypes {
         release {
@@ -59,7 +59,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
 
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
-    implementation 'com.google.firebase:firebase-core:19.0.1'
+    implementation 'com.google.firebase:firebase-core:19.0.2'
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'

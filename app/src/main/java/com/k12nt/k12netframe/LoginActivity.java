@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -87,10 +88,18 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         super.onCreate(savedInstanceState);
 
         try {
-            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-                if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
-            });
+            String manufacturer = Build.MANUFACTURER;
+
+            if(manufacturer != null && (manufacturer.toLowerCase().contains("huawe") || "huawe".equalsIgnoreCase(manufacturer))) {
+
+            } else {
+                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                    if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
+                });
+            }
+
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Remove title bar

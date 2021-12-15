@@ -7,6 +7,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -58,6 +59,7 @@ import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
+import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -75,6 +77,7 @@ import java.net.HttpCookie;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
@@ -113,6 +116,38 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if(intent != null && intent.getExtras() != null) {
             super.onNewIntent(intent);
             this.setIntent(intent);
+
+            if (intent.getExtras().getInt("requestID",0) != 0) {
+                WebViewerActivity.body = intent.getExtras().getString("body","");
+                WebViewerActivity.title = intent.getExtras().getString("title","");
+
+                final String body = WebViewerActivity.body;
+                final String title = WebViewerActivity.title;
+                final String query = intent.getStringExtra("query");
+                final Intent intentOfLogin = this.getIntent();
+
+                NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.cancel(intent.getExtras().getInt("requestID",0));
+
+                Runnable confirmation = new Runnable() {
+                    @Override
+                    public void run() {
+                        String url = K12NetUserReferences.getConnectionAddress();
+
+                        intentOfLogin.putExtra("intent","");
+                        intentOfLogin.putExtra("portal","");
+                        intentOfLogin.putExtra("query","");
+                        intentOfLogin.putExtra("body","");
+                        intentOfLogin.putExtra("title","");
+
+                        new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
+                    }
+                };
+
+                setConfirmDialog(title,body,confirmation);
+
+                return;
+            }
 
             WebViewerActivity.intent = intent.getExtras().getString("intent","");
 
@@ -417,6 +452,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         if (cookies != null && !cookies.isEmpty()) {
             CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.removeAllCookies(null);
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 CookieSyncManager.createInstance(getApplicationContext());
             }
@@ -634,6 +671,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 return false;
             }
 
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return  shouldOverrideUrlLoading(view,request.getUrl().toString());
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if(!url.startsWith("http") && url.contains("://")) {
                     try {
@@ -660,6 +703,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     popup_webview = setWebView(ctx);
 
                     webview.loadUrl(url);
+                    return true;
+                } else if (url.toLowerCase().startsWith("mailto:")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
                     return true;
                 } else if (url.contains("tel:")) {
                     if (url.startsWith("tel:")) {
@@ -755,6 +802,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         });
 
+        //webview.getSettings().setDatabaseEnabled(true);
         webview.getSettings().setDomStorageEnabled(true);
 
         webview.getSettings().setJavaScriptEnabled(true);
@@ -769,6 +817,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setAllowContentAccess(true);
         webview.getSettings().setAllowFileAccessFromFileURLs(true);
         webview.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        //webview.getSettings().setSupportMultipleWindows(true);
+        webview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
 
         //webview.getSettings().setAppCacheEnabled(true);
         //webview.setInitialScale(1);
@@ -790,6 +840,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         webview.setWebChromeClient(new WebChromeClient() {
+            /*@Override
+            public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg)
+            {
+                WebView.HitTestResult result = view.getHitTestResult();
+                String data = result.getExtra();
+
+                view.loadUrl(Uri.parse(data).toString());
+                return false;
+            }*/
 
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -935,44 +994,50 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 if (hasWriteAccess) {
 
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url.trim()));
-                    request.setDescription("Download file...");
+                    url = url.trim();
 
-                    String possibleFileName = "";
-                    if(url.contains("name=")) {
-                        possibleFileName = url.substring(url.indexOf("name=")+5);
-                    }
-                    else {
-                        possibleFileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                    }
-                    request.setTitle(possibleFileName);
+                    if(url.startsWith("blob")) {
+                        webview.loadUrl(getBase64StringFromBlobUrl(url));
+                    } else {
+                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url.trim()));
+                        request.setDescription("Download file...");
 
-                    request.allowScanningByMediaScanner();
-                    request.setMimeType(mimetype);
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
+                        String possibleFileName = "";
+                        if(url.contains("name=")) {
+                            possibleFileName = url.substring(url.indexOf("name=")+5);
+                        }
+                        else {
+                            possibleFileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
+                        }
+                        request.setTitle(possibleFileName);
 
-                    try {
-                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, possibleFileName);
-                    } catch (IllegalStateException e) {
+                        request.allowScanningByMediaScanner();
+                        request.setMimeType(mimetype);
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
 
                         try {
-                            request.setDestinationInExternalPublicDir(getApplicationContext().getFilesDir().getAbsolutePath(), possibleFileName);
-                        } catch (IllegalStateException ex) {
+                            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, possibleFileName);
+                        } catch (IllegalStateException e) {
+
+                            try {
+                                request.setDestinationInExternalPublicDir(getApplicationContext().getFilesDir().getAbsolutePath(), possibleFileName);
+                            } catch (IllegalStateException ex) {
+                                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+
+                                return;
+                            }
+                        }
+
+                        try {
+                            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                            dm.enqueue(request);
+
+                            Toast.makeText(getApplicationContext(), R.string.download_file, Toast.LENGTH_LONG).show();
+                        } catch (Exception ex) {
                             Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
 
                             return;
                         }
-                    }
-
-                    try {
-                        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                        dm.enqueue(request);
-
-                        Toast.makeText(getApplicationContext(), R.string.download_file, Toast.LENGTH_LONG).show();
-                    } catch (Exception ex) {
-                        Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-
-                        return;
                     }
                 }
             }
@@ -988,6 +1053,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         mainLayout.addView(webview);
 
         return webview;
+    }
+
+    public static String getBase64StringFromBlobUrl(String blobUrl) {
+        if(blobUrl.startsWith("blob")){
+            return "javascript: var xhr = new XMLHttpRequest();" +
+                    "xhr.open('GET', '"+ blobUrl +"', true);" +
+                    "xhr.setRequestHeader('Content-type','application/pdf');" +
+                    "xhr.responseType = 'blob';" +
+                    "xhr.onload = function(e) {" +
+                    "    if (this.status == 200) {" +
+                    "        var blobPdf = this.response;" +
+                    "        var reader = new FileReader();" +
+                    "        reader.readAsDataURL(blobPdf);" +
+                    "        reader.onloadend = function() {" +
+                    "            base64data = reader.result;" +
+                    "            HTMLOUT.htmlCallback(base64data);" +
+                    "        }" +
+                    "    }" +
+                    "};" +
+                    "xhr.send();";
+        }
+        return "javascript: console.log('It is not a Blob URL');";
     }
 
     private void enableHTML5AppCache(WebView webView) {
@@ -1247,6 +1334,66 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     class K12NetMobileJavaScriptInterface {
+
+        private void convertBase64StringToPdfAndStoreIt(String base64PDf) throws IOException {
+            final int notificationId = 1;
+            long currentDateTime = (new Random()).nextLong();
+            final File dwldsPath = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS) + "/K12net_" + currentDateTime + "_.pdf");
+            byte[] pdfAsBytes = Base64.decode(base64PDf.replaceFirst("^data:application/pdf;base64,", ""), 0);
+            FileOutputStream os;
+            os = new FileOutputStream(dwldsPath, false);
+            os.write(pdfAsBytes);
+            os.flush();
+/*
+        if (dwldsPath.exists()) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            Uri apkURI = FileProvider.getUriForFile(this,this.getApplicationContext().getPackageName() + ".provider", dwldsPath);
+            intent.setDataAndType(apkURI, MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf"));
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            String CHANNEL_ID = "MYCHANNEL";
+            final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                NotificationChannel notificationChannel= new NotificationChannel(CHANNEL_ID,"name", NotificationManager.IMPORTANCE_LOW);
+                Notification notification = new Notification.Builder(this,CHANNEL_ID)
+                        .setContentText("You have got something new!")
+                        .setContentTitle("File downloaded")
+                        .setContentIntent(pendingIntent)
+                        .setChannelId(CHANNEL_ID)
+                        .setSmallIcon(android.R.drawable.sym_action_chat)
+                        .build();
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(notificationChannel);
+                    notificationManager.notify(notificationId, notification);
+                }
+
+            } else {
+                NotificationCompat.Builder b = new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setWhen(System.currentTimeMillis())
+                        .setSmallIcon(android.R.drawable.sym_action_chat)
+                        //.setContentIntent(pendingIntent)
+                        .setContentTitle("MY TITLE")
+                        .setContentText("MY TEXT CONTENT");
+
+                if (notificationManager != null) {
+                    notificationManager.notify(notificationId, b.build());
+                    Handler h = new Handler();
+                    long delayInMilliseconds = 1000;
+                    h.postDelayed(new Runnable() {
+                        public void run() {
+                            notificationManager.cancel(notificationId);
+                        }
+                    }, delayInMilliseconds);
+                }
+            }
+        }*/
+            //Toast.makeText(this, "PDF FILE DOWNLOADED!", Toast.LENGTH_SHORT).show();
+        }
+
         @JavascriptInterface
         public void htmlCallback(String jsResult) {
             if(jsResult.contains("atlas-mobile-web-app-no-sleep")) {
@@ -1261,8 +1408,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
             }
+            else if(jsResult.contains("blob")) {
+                screenAlwaysOn = false;
+                try {
+                    convertBase64StringToPdfAndStoreIt(jsResult);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             else {
-
                 screenAlwaysOn = false;
                 //webview.setKeepScreenOn(false);
                // getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
