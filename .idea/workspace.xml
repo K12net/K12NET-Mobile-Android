@@ -72,16 +72,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Minor bugs fixed. 2 factor Auth added">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-    </list>
+    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Minor bugs fixed. 2 factor Auth added" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -724,7 +715,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639557583371</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Minor bugs fixed. 2 factor Auth added">
+      <created>1646395831083</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1646395831083</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
