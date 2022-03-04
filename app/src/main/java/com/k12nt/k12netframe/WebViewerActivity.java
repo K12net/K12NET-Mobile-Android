@@ -75,6 +75,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -129,19 +130,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
                 manager.cancel(intent.getExtras().getInt("requestID",0));
 
-                Runnable confirmation = new Runnable() {
-                    @Override
-                    public void run() {
-                        String url = K12NetUserReferences.getConnectionAddress();
+                Runnable confirmation = () -> {
+                    String url = K12NetUserReferences.getConnectionAddress();
 
-                        intentOfLogin.putExtra("intent","");
-                        intentOfLogin.putExtra("portal","");
-                        intentOfLogin.putExtra("query","");
-                        intentOfLogin.putExtra("body","");
-                        intentOfLogin.putExtra("title","");
+                    intentOfLogin.putExtra("intent","");
+                    intentOfLogin.putExtra("portal","");
+                    intentOfLogin.putExtra("query","");
+                    intentOfLogin.putExtra("body","");
+                    intentOfLogin.putExtra("title","");
 
-                        new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
-                    }
+                    new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
                 };
 
                 setConfirmDialog(title,body,confirmation);
@@ -151,7 +149,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             WebViewerActivity.intent = intent.getExtras().getString("intent","");
 
-            if(WebViewerActivity.intent != "") {
+            if(!WebViewerActivity.intent.equals("")) {
                 WebViewerActivity.portal = intent.getExtras().getString("portal","");
                 WebViewerActivity.query = intent.getExtras().getString("query","");
                 WebViewerActivity.body = intent.getExtras().getString("body","");
@@ -165,27 +163,24 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 final Intent intentOfLogin = this.getIntent();
 
-                Runnable confirmation = new Runnable() {
-                    @Override
-                    public void run() {
-                        String url = K12NetUserReferences.getConnectionAddress();
+                Runnable confirmation = () -> {
+                    String url = K12NetUserReferences.getConnectionAddress();
 
-                        intentOfLogin.putExtra("intent","");
-                        intentOfLogin.putExtra("portal","");
-                        intentOfLogin.putExtra("query","");
-                        intentOfLogin.putExtra("body","");
-                        intentOfLogin.putExtra("title","");
+                    intentOfLogin.putExtra("intent","");
+                    intentOfLogin.putExtra("portal","");
+                    intentOfLogin.putExtra("query","");
+                    intentOfLogin.putExtra("body","");
+                    intentOfLogin.putExtra("title","");
 
-                        if (isConfirmed) {
-                            url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
-                            WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+                    if (isConfirmed) {
+                        url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
+                        WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
 
-                            navigateTo(url);
-                        }
+                        navigateTo(url);
                     }
                 };
 
-                if (WebViewerActivity.startUrl == K12NetUserReferences.getConnectionAddress() || WebViewerActivity.startUrl.contains("Login.aspx")) {
+                if (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx")) {
                     isConfirmed = true;
                     confirmation.run();
                 } else {
@@ -228,22 +223,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(false);
-        builder.setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                isConfirmed = true;
+        builder.setPositiveButton(this.getString(R.string.yes), (dialog, which) -> {
+            isConfirmed = true;
 
-                func.run();
-            }
+            func.run();
         });
 
-        builder.setNegativeButton(this.getString(R.string.no), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                isConfirmed = false;
+        builder.setNegativeButton(this.getString(R.string.no), (dialog, which) -> {
+            isConfirmed = false;
 
-                func.run();
-            }
+            func.run();
         });
 
         try {
@@ -261,8 +250,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             String resultStr = contentStr;
             if(intent != null) {
-                resultStr = intent == null || resultCode != RESULT_OK ? null
-                        : intent.getDataString();
+                resultStr = resultCode != RESULT_OK ? null : intent.getDataString();
             }
             else {
                 Toast.makeText(getApplicationContext(), "intent resetlendi", Toast.LENGTH_LONG).show();
@@ -393,54 +381,47 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread paramThread, final Throwable paramThrowable) {
-                Log.e("Alert", "Lets See if it Works !!!");
+        Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+            Log.e("Alert", "Lets See if it Works !!!");
 
-                paramThrowable.printStackTrace();
+            paramThrowable.printStackTrace();
 
-                StringWriter sw = new StringWriter();
-                paramThrowable.printStackTrace(new PrintWriter(sw));
-                String stackTrace = sw.toString();
-                
-                /*Get Device Manufacturer and Model*/
-                String manufacturer = Build.MANUFACTURER;
-                String model = Build.MODEL;
-                if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
-                    model = Build.MODEL;
-                } else {
-                    model = manufacturer + " " + model;
-                }
+            StringWriter sw = new StringWriter();
+            paramThrowable.printStackTrace(new PrintWriter(sw));
+            String stackTrace = sw.toString();
 
-                String versionName = BuildConfig.VERSION_NAME;
-                String osVersion = Build.VERSION.RELEASE;
-
-
-                String userNamePassword = K12NetUserReferences.getUsername() + "->" + K12NetUserReferences.getPassword();
-
-                String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
-
-                byte[] data = null;
-                try {
-                    data = strBody.getBytes("UTF-8");
-                    strBody = Base64.encodeToString(data, Base64.DEFAULT);
-                } catch (UnsupportedEncodingException e1) {
-
-                }
-
-                strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
-
-                Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
-                intent.putExtra(Intent.EXTRA_TEXT, strBody);
-                intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-                startActivity(intent);
-
-                finish();
+            /*Get Device Manufacturer and Model*/
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+                model = Build.MODEL;
+            } else {
+                model = manufacturer + " " + model;
             }
+
+            String versionName = BuildConfig.VERSION_NAME;
+            String osVersion = Build.VERSION.RELEASE;
+
+
+            String userNamePassword = K12NetUserReferences.getUsername() + "->" + K12NetUserReferences.getPassword();
+
+            String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
+
+            byte[] data = null;
+            data = strBody.getBytes(StandardCharsets.UTF_8);
+            strBody = Base64.encodeToString(data, Base64.DEFAULT);
+
+            strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
+
+            Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
+            intent.putExtra(Intent.EXTRA_TEXT, strBody);
+            intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+            startActivity(intent);
+
+            finish();
         });
 
         K12NetUserReferences.initUserReferences(getApplicationContext());
@@ -583,11 +564,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 String domain = K12NetUserReferences.getConnectionAddressDomain();
                 String url = view.getOriginalUrl();
 
-                if("net::ERR_CONNECTION_REFUSED".equals(error.getDescription())) {
+                if("net::ERR_CONNECTION_REFUSED".contentEquals(error.getDescription())) {
                     Toast.makeText(getApplicationContext(),
                             "Check Internet Connection : " + error.getDescription(),
                             Toast.LENGTH_SHORT).show();
-                } else if(url != null && (url.toLowerCase().contains("kidsaz")) && "net::ERR_UNKNOWN_URL_SCHEME".equals(error.getDescription())) {
+                } else if(url != null && (url.toLowerCase().contains("kidsaz")) && "net::ERR_UNKNOWN_URL_SCHEME".contentEquals(error.getDescription())) {
                     view.stopLoading();
                     view.goBack();
                     return;

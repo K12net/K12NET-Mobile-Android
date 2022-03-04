@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -14,7 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
+import android.provider.Settings;
 import android.view.Window;
 import android.webkit.CookieManager;
 import android.widget.Button;
@@ -61,15 +59,6 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             super.onNewIntent(intent);
             this.setIntent(intent);
 
-            if(intent != null && intent.getExtras() != null) {
-                final String confirm = intent.getExtras().getString("confirm","");
-                final String query = intent.getExtras().getString("query","");
-
-                if(confirm == "yes") {
-                } else if(confirm == "no") {
-                }
-            }
-
             if (chkRememberMe.isChecked()) {
                 StartLoginOperation();
             }
@@ -94,7 +83,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
             } else {
                 FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-                    if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult().toString());
+                    if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult());
                 });
             }
 
@@ -129,49 +118,33 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
         Button login_button = (Button) findViewById(R.id.btn_login_submit);
 
-        login_button.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                isLoginRetry = false;
-                checkCurrentVersion();
-            }
+        login_button.setOnClickListener(arg0 -> {
+            isLoginRetry = false;
+            checkCurrentVersion();
         });
 
         Button settings_button = (Button) findViewById(R.id.btn_settings);
-        settings_button.setOnClickListener(new View.OnClickListener() {
+        settings_button.setOnClickListener(arg0 -> {
+            K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext());
+            dialogView.createContextView(null);
 
-            @Override
-            public void onClick(View arg0) {
-                K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext());
-                dialogView.createContextView(null);
+            dialogView.setOnDismissListener(dialog -> {
 
-                dialogView.setOnDismissListener(new OnDismissListener() {
+                K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
 
-                    @Override
-                    public void onDismiss(final DialogInterface dialog) {
+                recreate();
 
-                        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+            });
 
-                        recreate();
-
-                    }
-                });
-
-                dialogView.show();
-            }
+            dialogView.show();
         });
 
         Button resetPassword = (Button) findViewById(R.id.btnResetPassword);
-        resetPassword.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                Intent webIntent = new Intent(arg0.getContext(), WebViewerActivity.class);
-                webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                WebViewerActivity.startUrl = K12NetUserReferences.getConnectionAddress() + "/ResetPassword.aspx";
-                arg0.getContext().startActivity(webIntent);
-            }
+        resetPassword.setOnClickListener(arg0 -> {
+            Intent webIntent = new Intent(arg0.getContext(), WebViewerActivity.class);
+            webIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            WebViewerActivity.startUrl = K12NetUserReferences.getConnectionAddress() + "/ResetPassword.aspx";
+            arg0.getContext().startActivity(webIntent);
         });
 
         if (chkRememberMe.isChecked()) {
@@ -192,7 +165,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        currentVersion = pInfo.versionName;
+        currentVersion = pInfo == null ? "" : pInfo.versionName;
         //check if version number only has 2 segment
         if(K12NetHelper.findPattermCount(currentVersion, ".") < 2){
             currentVersion += ".0";
@@ -246,6 +219,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             loginTask.setHeader("Content-type", "application/json;charset=UTF-8");
             loginTask.setHeader("Atlas-DeviceID", K12NetUserReferences.getDeviceToken());
             loginTask.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
+            loginTask.setHeader("Atlas-DeviceModel", GetDeviceModel());
 
             loginTask.setJson("userName", K12NetUserReferences.getUsername());
             loginTask.setJson("password", K12NetUserReferences.getPassword());
@@ -260,11 +234,40 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         }
     }
 
+    private String GetDeviceModel() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+            model =  Build.MODEL;
+        } else {
+            model = manufacturer + " [" + model + "] ";
+        }
+        String deviceName = "";
+
+        try{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                deviceName = Settings.Global.getString(getContentResolver(), Settings.Global.DEVICE_NAME);
+            }
+        } catch(Exception e) {
+
+        }
+
+        if(deviceName != null && !deviceName.equals("")) {
+            model += " [" + deviceName + "] ";
+        }
+
+        if(Build.SERIAL != null && !Build.SERIAL.equals("unknown")) {
+            model += " [" + Build.SERIAL + "] ";
+        }
+
+        return  model;
+    }
+
     @Override
     public void asyncTaskCompleted(HTTPAsyncTask completedTask){
         String taskName = completedTask.GetName();
 
-        if(taskName == "Login") {
+        if(taskName != null && taskName.equals("Login")) {
             try {
                 JSONObject responseJSON = new JSONObject(completedTask.GetResult());
 
@@ -348,7 +351,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
                 WebViewerActivity.intent = intentOfLogin.getExtras().getString("intent","");
 
-                if(WebViewerActivity.intent != "") {
+                if(!WebViewerActivity.intent.equals("")) {
                     WebViewerActivity.portal = intentOfLogin.getExtras().getString("portal","");
                     WebViewerActivity.query = intentOfLogin.getExtras().getString("query","");
                     WebViewerActivity.body = intentOfLogin.getExtras().getString("body","");
@@ -360,28 +363,25 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                     final String body = WebViewerActivity.body;
                     final String title = WebViewerActivity.title;
 
-                    Runnable confirmCompleted = new Runnable() {
-                        @Override
-                        public void run() {
-                            Intent intentOfLogin = currentActivity.getIntent();
-                            String url = K12NetUserReferences.getConnectionAddress();
+                    Runnable confirmCompleted = () -> {
+                        Intent intentOfLogin1 = currentActivity.getIntent();
+                        String url = K12NetUserReferences.getConnectionAddress();
 
-                            intentOfLogin.putExtra("intent","");
-                            intentOfLogin.putExtra("portal","");
-                            intentOfLogin.putExtra("query","");
-                            intentOfLogin.putExtra("body","");
-                            intentOfLogin.putExtra("title","");
+                        intentOfLogin1.putExtra("intent","");
+                        intentOfLogin1.putExtra("portal","");
+                        intentOfLogin1.putExtra("query","");
+                        intentOfLogin1.putExtra("body","");
+                        intentOfLogin1.putExtra("title","");
 
-                            if (isConfirmed) {
-                                url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
-                                WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+                        if (isConfirmed) {
+                            url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
+                            WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
 
-                                navigateTo(url);
-                            }
+                            navigateTo(url);
                         }
                     };
 
-                    if (WebViewerActivity.startUrl == startUrl) {
+                    if (WebViewerActivity.startUrl != null && WebViewerActivity.startUrl.equals(startUrl)) {
                         isConfirmed = true;
                         confirmCompleted.run();
                     } else {
@@ -410,22 +410,16 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(false);
-        builder.setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                isConfirmed = true;
+        builder.setPositiveButton(context.getString(R.string.yes), (dialog, which) -> {
+            isConfirmed = true;
 
-                func.run();
-            }
+            func.run();
         });
 
-        builder.setNegativeButton(context.getString(R.string.no), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                isConfirmed = false;
+        builder.setNegativeButton(context.getString(R.string.no), (dialog, which) -> {
+            isConfirmed = false;
 
-                func.run();
-            }
+            func.run();
         });
 
         builder.show();
@@ -527,20 +521,14 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.appName);
             builder.setMessage(R.string.newUpdateAvailable);
-            builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
-                            (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
-                    dialog.dismiss();
-                }
+            builder.setPositiveButton(R.string.update, (dialog, which) -> {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                        (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
+                dialog.dismiss();
             });
 
-            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //background.start();
-                }
+            builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+                //background.start();
             });
 
             builder.setCancelable(false);
@@ -558,21 +546,15 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.appName);
                 builder.setMessage(R.string.newUpdateAvailableWarning);
-                builder.setPositiveButton(R.string.update, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
-                                (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
-                        dialog.dismiss();
-                    }
+                builder.setPositiveButton(R.string.update, (dialog, which) -> {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                            (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
+                    dialog.dismiss();
                 });
 
-                builder.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        K12NetUserReferences.setWarnedVersionString(latestVersion);
-                        StartLoginOperation();
-                    }
+                builder.setNegativeButton(R.string.ok, (dialog, which) -> {
+                    K12NetUserReferences.setWarnedVersionString(latestVersion);
+                    StartLoginOperation();
                 });
 
                 builder.setCancelable(false);

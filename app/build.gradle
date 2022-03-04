@@ -1,16 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.2'
+    compileSdkVersion 31
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 22
-        targetSdkVersion 30
-        versionCode 70
-        versionName "1.32.26"
+        targetSdkVersion 31
+        versionCode 76
+        versionName "1.32.32"
     }
     buildTypes {
         release {
@@ -19,13 +18,6 @@ android {
         }
     }
     // add: Prevent errors in "Generate Signed APK"
-    lintOptions {
-        warning 'InvalidPackage' // for OKIO
-        warning 'MissingTranslation'
-        checkReleaseBuilds false
-        disable 'MissingTranslation'
-        abortOnError false
-    }
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
@@ -51,19 +43,25 @@ android {
             enableSplit = true
         }
     }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+        disable 'MissingTranslation'
+        warning 'InvalidPackage', 'MissingTranslation'
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
 
-    implementation 'com.google.firebase:firebase-messaging:22.0.0'
-    implementation 'com.google.firebase:firebase-core:19.0.2'
+    implementation 'com.google.firebase:firebase-messaging:23.0.0'
+    implementation 'com.google.firebase:firebase-core:20.1.0'
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
-    implementation 'org.jsoup:jsoup:1.12.1'
+    implementation 'org.jsoup:jsoup:1.13.1'
 }
 
 // ADD THIS AT THE BOTTOM

@@ -60,21 +60,15 @@ public class K12NetUserReferences {
 
             String language = Locale.getDefault().getLanguage();
 
-            if(language != null) {
-                language = language.split("_")[0].split("-")[0].toLowerCase();
+            language = language.split("_")[0].split("-")[0].toLowerCase();
 
-                if(language.equals("tr")) {
-                    languageCode = "tr";
-                    connectionString = "https://okul.k12net.com";
-                    fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
-                } else {
-                    connectionString = "https://azure.k12net.com";
-                    fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.azure.k12net.com/FS/");
-                }
-            } else {
-                languageCode = "en";
+            if(language.equals("tr")) {
+                languageCode = "tr";
                 connectionString = "https://okul.k12net.com";
                 fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
+            } else {
+                connectionString = "https://azure.k12net.com";
+                fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.azure.k12net.com/FS/");
             }
 
         }
@@ -131,7 +125,7 @@ public class K12NetUserReferences {
 	
 	public static String getConnectionAddress(){
 		String http_address = references.connectionString;
-		if(http_address.startsWith("http") == false) {
+		if(!http_address.startsWith("http")) {
 			http_address = "http://" + http_address;
 		}
 		return http_address;
@@ -199,7 +193,7 @@ public class K12NetUserReferences {
 
     public static String getFileServerAddress(){
         String http_address = references.fileServerAddress;
-        if(http_address.startsWith("http") == false) {
+        if(!http_address.startsWith("http")) {
             http_address = "https://" + http_address;
         }
         return http_address;
@@ -230,7 +224,7 @@ public class K12NetUserReferences {
     public static String getNormalizedLanguageCode(){
         String languageCode = getLanguageCode();
 
-        if(languageCode == K12NetSettingsDialogView.ARABIC) {
+        if(languageCode != null && languageCode.equals(K12NetSettingsDialogView.ARABIC)) {
             return "ar-AE";
         }
 
@@ -241,14 +235,9 @@ public class K12NetUserReferences {
 	    if (references.languageCode == null) {
             setLanguage("en");
 
-            if(Locale.getDefault() != null) {
-                String language = Locale.getDefault().getLanguage();
-
-                if(language != null) {
-                    language = language.split("_")[0].split("-")[0].toLowerCase();
-                    setLanguage(language);
-                }
-            }
+            String language = Locale.getDefault().getLanguage();
+            language = language.split("_")[0].split("-")[0].toLowerCase();
+            setLanguage(language);
         }
         return references.languageCode;
     }

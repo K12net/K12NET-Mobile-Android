@@ -73,17 +73,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Minor bugs fixed. 2 factor Auth added">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/SetUserStateTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/MyFirebaseMessagingService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/NotificationReceiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/NotificationReceiver.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable-xhdpi/k12net_appicon.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable-xhdpi/k12net_appicon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable-xhdpi/k12net_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable-xhdpi/k12net_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +93,7 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\hkn\.android\avd\Pixel_3a_API_30.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[D:\Development\.android\avd\Pixel_4a_API_31.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -145,6 +142,9 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedIndex" value="1" />
   </component>
   <component name="ProjectId" id="1Z1Yv1NEibUR5nTbwvXgI6CkVLy" />
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -220,12 +220,14 @@
     <property name="ExportApk.BuildType" value="release" />
     <property name="ExportApk.BuildVariants" value="release" />
     <property name="ExportApk.Flavors" value="" />
+    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SelectDeploymentTargetsDialog.selectedDevices" value="VirtualDevicePath@C:\Users\hkn\.android\avd\Pixel_3a_API_30.avd" />
     <property name="android.profiler.active" value="true" />
     <property name="android.project.structure.last.selected" value="app" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
+    <property name="cidr.known.project.marker" value="true" />
     <property name="device.picker.selection" value="Android_Accelerated_x86_Oreo" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/app" />
@@ -325,6 +327,7 @@
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
       <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
       <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
       <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
       <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
@@ -383,6 +386,7 @@
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
       <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
       <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
       <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
       <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
@@ -713,7 +717,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634826903624</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Minor bugs fixed. 2 factor Auth added">
+      <created>1639557583371</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1639557583371</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -793,7 +804,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>54</line>
+          <line>52</line>
           <option name="timeStamp" value="72" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -803,238 +814,223 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>258</line>
+          <line>232</line>
           <option name="timeStamp" value="232" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>250</line>
+          <line>239</line>
           <option name="timeStamp" value="234" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>329</line>
+          <line>317</line>
           <option name="timeStamp" value="363" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>291</line>
+          <line>279</line>
           <option name="timeStamp" value="367" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1139</line>
+          <line>1120</line>
           <option name="timeStamp" value="370" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1159</line>
+          <line>1140</line>
           <option name="timeStamp" value="371" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1179</line>
+          <line>1160</line>
           <option name="timeStamp" value="372" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1199</line>
+          <line>1180</line>
           <option name="timeStamp" value="373" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>526</line>
+          <line>520</line>
           <option name="timeStamp" value="378" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1757</line>
+          <line>1738</line>
           <option name="timeStamp" value="382" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1744</line>
+          <line>1725</line>
           <option name="timeStamp" value="397" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1625</line>
+          <line>1606</line>
           <option name="timeStamp" value="435" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>878</line>
+          <line>859</line>
           <option name="timeStamp" value="445" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>892</line>
+          <line>873</line>
           <option name="timeStamp" value="446" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>777</line>
+          <line>758</line>
           <option name="timeStamp" value="454" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>861</line>
+          <line>842</line>
           <option name="timeStamp" value="460" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>907</line>
+          <line>888</line>
           <option name="timeStamp" value="461" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>917</line>
+          <line>898</line>
           <option name="timeStamp" value="462" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>928</line>
+          <line>909</line>
           <option name="timeStamp" value="463" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>554</line>
+          <line>535</line>
           <option name="timeStamp" value="465" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>886</line>
+          <line>867</line>
           <option name="timeStamp" value="468" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>727</line>
+          <line>708</line>
           <option name="timeStamp" value="479" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>734</line>
+          <line>715</line>
           <option name="timeStamp" value="481" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>357</line>
+          <line>360</line>
           <option name="timeStamp" value="483" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>766</line>
+          <line>747</line>
           <option name="timeStamp" value="487" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>755</line>
+          <line>736</line>
           <option name="timeStamp" value="488" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>745</line>
+          <line>726</line>
           <option name="timeStamp" value="489" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>378</line>
-          <option name="timeStamp" value="517" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1272</line>
+          <line>1253</line>
           <option name="timeStamp" value="533" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1564</line>
+          <line>1545</line>
           <option name="timeStamp" value="542" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>60</line>
+          <line>58</line>
           <option name="timeStamp" value="544" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1560</line>
+          <line>1541</line>
           <option name="timeStamp" value="545" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1474</line>
+          <line>1455</line>
           <option name="timeStamp" value="547" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1506</line>
+          <line>1487</line>
           <option name="timeStamp" value="550" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1457</line>
+          <line>1438</line>
           <option name="timeStamp" value="551" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1472</line>
+          <line>1453</line>
           <option name="timeStamp" value="552" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>206</line>
+          <line>201</line>
           <option name="timeStamp" value="554" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>662</line>
+          <line>643</line>
           <option name="timeStamp" value="584" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>650</line>
+          <line>631</line>
           <option name="timeStamp" value="585" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>685</line>
+          <line>666</line>
           <option name="timeStamp" value="586" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>598</line>
+          <line>579</line>
           <option name="timeStamp" value="587" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>101</line>
+          <line>90</line>
           <option name="timeStamp" value="595" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>582</line>
+          <line>563</line>
           <option name="timeStamp" value="600" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>402</line>
-          <option name="timeStamp" value="611" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1342</line>
+          <line>1323</line>
           <option name="timeStamp" value="621" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>1411</line>
+          <line>1392</line>
           <option name="timeStamp" value="622" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LoginActivity.java</url>
-          <line>65</line>
-          <option name="timeStamp" value="625" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/fcm/SetUserStateTask.java</url>
@@ -1048,15 +1044,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="java-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java</url>
-          <line>575</line>
+          <line>556</line>
           <option name="timeStamp" value="646" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="app">
-        <watch expression="intent.getIntExtra(&quot;id&quot;, 0)" language="JAVA" />
+        <watch expression="Build.USER" language="JAVA" />
         <watch expression="intent.getExtras().getInt(&quot;requestID&quot;,0)" language="JAVA" />
+        <watch expression="languageCode == K12NetSettingsDialogView.ARABIC" language="JAVA" />
+        <watch expression="languageCode != null &amp;&amp; languageCode.equals(K12NetSettingsDialogView.ARABIC)" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>

@@ -20,12 +20,6 @@
         android:protectionLevel="signature" />
     <uses-permission android:name="${applicationId}.permission.WRITE_MEDIA_STORAGE"/>
 
-    <permission
-        android:name="${applicationId}.permission.READ_ATTACHMENT"
-        android:description="@string/read_attachment_desc"
-        android:label="@string/read_attachment_label"
-        android:permissionGroup="android.permission-group.MESSAGES"
-        android:protectionLevel="dangerous"/>
     <uses-permission android:name="${applicationId}.permission.READ_ATTACHMENT"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -82,7 +76,8 @@
          <activity
              android:launchMode="singleTop"
              android:hardwareAccelerated="true"
-             android:name="com.k12nt.k12netframe.LoginActivity" android:configChanges="locale">
+             android:name="com.k12nt.k12netframe.LoginActivity" android:configChanges="locale"
+             android:exported="true">
              <intent-filter>
                  <action android:name="android.intent.action.MAIN" />
                  <action android:name="android.intent.action.VIEW" />
@@ -97,7 +92,8 @@
          </receiver>
          <!-- [START firebase_service] -->
         <service
-            android:name="com.k12nt.k12netframe.fcm.MyFirebaseMessagingService">
+            android:name="com.k12nt.k12netframe.fcm.MyFirebaseMessagingService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
@@ -108,7 +104,8 @@
             android:name="com.k12nt.k12netframe.WebViewerActivity" android:configChanges="orientation|screenSize|locale"
             android:taskAffinity=""
             android:hardwareAccelerated="true"
-            android:excludeFromRecents="true">
+            android:excludeFromRecents="true"
+            android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
