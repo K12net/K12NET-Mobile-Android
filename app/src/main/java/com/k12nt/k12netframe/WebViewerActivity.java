@@ -11,7 +11,6 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -24,6 +23,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -72,7 +72,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -113,79 +112,87 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private String contentStr = null;
 
     protected void onNewIntent(Intent intent) {
-
         if(intent != null && intent.getExtras() != null) {
             super.onNewIntent(intent);
             this.setIntent(intent);
+            this.checkNotificationExist(intent);
+        }
+    }
 
-            if (intent.getExtras().getInt("requestID",0) != 0) {
-                WebViewerActivity.body = intent.getExtras().getString("body","");
-                WebViewerActivity.title = intent.getExtras().getString("title","");
+    private void checkNotificationExist(Intent intent) {
+        if(!LoginActivity.isLogin) {
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            loginIntent.replaceExtras(intent);
+            this.startActivity(loginIntent);
+            return;
+        }
 
-                final String body = WebViewerActivity.body;
-                final String title = WebViewerActivity.title;
-                final String query = intent.getStringExtra("query");
-                final Intent intentOfLogin = this.getIntent();
+        if (intent.getExtras().getInt("requestID",0) != 0) {
+            WebViewerActivity.body = intent.getExtras().getString("body","");
+            WebViewerActivity.title = intent.getExtras().getString("title","");
 
-                NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-                manager.cancel(intent.getExtras().getInt("requestID",0));
+            final String body = WebViewerActivity.body;
+            final String title = WebViewerActivity.title;
+            final String query = intent.getStringExtra("query");
+            final Intent intentOfLogin = this.getIntent();
 
-                Runnable confirmation = () -> {
-                    String url = K12NetUserReferences.getConnectionAddress();
+            NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.cancel(intent.getExtras().getInt("requestID",0));
 
-                    intentOfLogin.putExtra("intent","");
-                    intentOfLogin.putExtra("portal","");
-                    intentOfLogin.putExtra("query","");
-                    intentOfLogin.putExtra("body","");
-                    intentOfLogin.putExtra("title","");
+            Runnable confirmation = () -> {
+                intentOfLogin.putExtra("intent","");
+                intentOfLogin.putExtra("portal","");
+                intentOfLogin.putExtra("query","");
+                intentOfLogin.putExtra("body","");
+                intentOfLogin.putExtra("title","");
+                intentOfLogin.putExtra("requestID",0);
 
-                    new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
-                };
+                new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
+            };
 
-                setConfirmDialog(title,body,confirmation);
+            setConfirmDialog(title,body,confirmation);
 
-                return;
-            }
+            return;
+        }
 
-            WebViewerActivity.intent = intent.getExtras().getString("intent","");
+        WebViewerActivity.intent = intent.getExtras().getString("intent","");
 
-            if(!WebViewerActivity.intent.equals("")) {
-                WebViewerActivity.portal = intent.getExtras().getString("portal","");
-                WebViewerActivity.query = intent.getExtras().getString("query","");
-                WebViewerActivity.body = intent.getExtras().getString("body","");
-                WebViewerActivity.title = intent.getExtras().getString("title","");
+        if(!WebViewerActivity.intent.equals("")) {
+            WebViewerActivity.portal = intent.getExtras().getString("portal","");
+            WebViewerActivity.query = intent.getExtras().getString("query","");
+            WebViewerActivity.body = intent.getExtras().getString("body","");
+            WebViewerActivity.title = intent.getExtras().getString("title","");
 
-                final String webPart = WebViewerActivity.intent;
-                final String portal = WebViewerActivity.portal;
-                final String query = WebViewerActivity.query;
-                final String body = WebViewerActivity.body;
-                final String title = WebViewerActivity.title;
+            final String webPart = WebViewerActivity.intent;
+            final String portal = WebViewerActivity.portal;
+            final String query = WebViewerActivity.query;
+            final String body = WebViewerActivity.body;
+            final String title = WebViewerActivity.title;
 
-                final Intent intentOfLogin = this.getIntent();
+            final Intent intentOfLogin = this.getIntent();
 
-                Runnable confirmation = () -> {
-                    String url = K12NetUserReferences.getConnectionAddress();
+            Runnable confirmation = () -> {
+                String url = K12NetUserReferences.getConnectionAddress();
 
-                    intentOfLogin.putExtra("intent","");
-                    intentOfLogin.putExtra("portal","");
-                    intentOfLogin.putExtra("query","");
-                    intentOfLogin.putExtra("body","");
-                    intentOfLogin.putExtra("title","");
+                intentOfLogin.putExtra("intent","");
+                intentOfLogin.putExtra("portal","");
+                intentOfLogin.putExtra("query","");
+                intentOfLogin.putExtra("body","");
+                intentOfLogin.putExtra("title","");
 
-                    if (isConfirmed) {
-                        url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
-                        WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+                if (isConfirmed) {
+                    url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
+                    WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
 
-                        navigateTo(url);
-                    }
-                };
-
-                if (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx")) {
-                    isConfirmed = true;
-                    confirmation.run();
-                } else {
-                    setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + this.getString(R.string.navToNotify),confirmation);
+                    navigateTo(url);
                 }
+            };
+
+            if (WebViewerActivity.startUrl != null && (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx"))) {
+                isConfirmed = true;
+                confirmation.run();
+            } else {
+                setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + this.getString(R.string.navToNotify),confirmation);
             }
         }
     }
@@ -236,7 +243,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         });
 
         try {
-            builder.show();
+            Handler handler=new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    builder.show();
+                }
+            },300);
         } catch (Exception e) {
 
         }
@@ -365,10 +378,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            String processName = getProcessName(this);
-            String packageName = this.getPackageName();
-            if (processName != null && packageName != null && !packageName.equals(processName)) {
-                WebView.setDataDirectorySuffix(processName);
+            try {
+                String processName = getProcessName(this);
+                String packageName = this.getPackageName();
+                if (processName != null && packageName != null && !packageName.equals(processName)) {
+                    WebView.setDataDirectorySuffix(processName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -1629,7 +1646,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
         } else {
             Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-            return cursor.getString(cursor.getColumnIndex("_data"));
+            int columnIX = cursor.getColumnIndex("_data");
+            return cursor.getString(columnIX);
         }
 
         return null;
@@ -2015,7 +2033,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    int columnIX = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    result = cursor.getString(columnIX);
                 }
             } finally {
                 cursor.close();

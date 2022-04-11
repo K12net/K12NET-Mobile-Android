@@ -3,6 +3,7 @@ package com.k12nt.k12netframe;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
+import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -54,6 +57,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     }
 
     protected void onNewIntent(Intent intent) {
+        isLogin = false;
 
         if(intent != null && intent.getExtras() != null) {
             super.onNewIntent(intent);
@@ -61,12 +65,93 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
             if (chkRememberMe.isChecked()) {
                 StartLoginOperation();
+            } else {
+                checkNotificationExist(intent);
             }
         }
     }
 
+    private boolean checkNotificationExist(Intent intent) {
+        if(intent == null || intent.getExtras() == null) return false;
+
+        if (intent.getExtras().getInt("requestID",0) != 0) {
+            WebViewerActivity.body = intent.getExtras().getString("body","");
+            WebViewerActivity.title = intent.getExtras().getString("title","");
+
+            final String body = WebViewerActivity.body;
+            final String title = WebViewerActivity.title;
+            final String query = intent.getStringExtra("query");
+            final Intent intentOfLogin = this.getIntent();
+
+            NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.cancel(intent.getExtras().getInt("requestID",0));
+
+            Runnable confirmation = () -> {
+                String url = K12NetUserReferences.getConnectionAddress();
+
+                intentOfLogin.putExtra("intent","");
+                intentOfLogin.putExtra("portal","");
+                intentOfLogin.putExtra("query","");
+                intentOfLogin.putExtra("body","");
+                intentOfLogin.putExtra("title","");
+                intentOfLogin.putExtra("requestID",0);
+
+                new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
+            };
+
+            setConfirmDialog(title,body,confirmation);
+
+            return true;
+        }
+
+        WebViewerActivity.intent = intent.getExtras().getString("intent","");
+
+        if(!WebViewerActivity.intent.equals("")) {
+            WebViewerActivity.portal = intent.getExtras().getString("portal","");
+            WebViewerActivity.query = intent.getExtras().getString("query","");
+            WebViewerActivity.body = intent.getExtras().getString("body","");
+            WebViewerActivity.title = intent.getExtras().getString("title","");
+
+            final String webPart = WebViewerActivity.intent;
+            final String portal = WebViewerActivity.portal;
+            final String query = WebViewerActivity.query;
+            final String body = WebViewerActivity.body;
+            final String title = WebViewerActivity.title;
+
+            final Intent intentOfLogin = this.getIntent();
+
+            Runnable confirmation = () -> {
+                String url = K12NetUserReferences.getConnectionAddress();
+
+                intentOfLogin.putExtra("intent","");
+                intentOfLogin.putExtra("portal","");
+                intentOfLogin.putExtra("query","");
+                intentOfLogin.putExtra("body","");
+                intentOfLogin.putExtra("title","");
+
+                if (isConfirmed) {
+                    url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
+                    WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+
+                    navigateTo(url);
+                }
+            };
+
+            if (WebViewerActivity.startUrl != null && (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx"))) {
+                isConfirmed = true;
+                confirmation.run();
+            } else {
+                setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + this.getString(R.string.navToNotify),confirmation);
+            }
+
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void onResume(){
+        isLogin = false;
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
 
         super.onResume();
@@ -83,7 +168,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
             } else {
                 FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-                    if(task.isComplete()) K12NetUserReferences.setDeviceToken(task.getResult());
+                    if(task.isComplete() && task.isSuccessful()) K12NetUserReferences.setDeviceToken(task.getResult());
                 });
             }
 
@@ -345,54 +430,13 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         } else {
             final Activity currentActivity = LoginActivity.this;
             Intent intentOfLogin = currentActivity.getIntent();
-            String startUrl = K12NetUserReferences.getConnectionAddress();
+            boolean hasNotification = checkNotificationExist(intentOfLogin);
 
-            WebViewerActivity.previousUrl = null;
-            if(intentOfLogin != null && intentOfLogin.getExtras() != null) {
-                WebViewerActivity.intent = intentOfLogin.getExtras().getString("intent","");
+            if(!hasNotification) {
+                String startUrl = K12NetUserReferences.getConnectionAddress();
 
-                if(!WebViewerActivity.intent.equals("")) {
-                    WebViewerActivity.portal = intentOfLogin.getExtras().getString("portal","");
-                    WebViewerActivity.query = intentOfLogin.getExtras().getString("query","");
-                    WebViewerActivity.body = intentOfLogin.getExtras().getString("body","");
-                    WebViewerActivity.title = intentOfLogin.getExtras().getString("title","");
-
-                    final String intent = WebViewerActivity.intent;
-                    final String portal = WebViewerActivity.portal;
-                    final String query = WebViewerActivity.query;
-                    final String body = WebViewerActivity.body;
-                    final String title = WebViewerActivity.title;
-
-                    Runnable confirmCompleted = () -> {
-                        Intent intentOfLogin1 = currentActivity.getIntent();
-                        String url = K12NetUserReferences.getConnectionAddress();
-
-                        intentOfLogin1.putExtra("intent","");
-                        intentOfLogin1.putExtra("portal","");
-                        intentOfLogin1.putExtra("query","");
-                        intentOfLogin1.putExtra("body","");
-                        intentOfLogin1.putExtra("title","");
-
-                        if (isConfirmed) {
-                            url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",intent,portal,query);
-                            WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
-
-                            navigateTo(url);
-                        }
-                    };
-
-                    if (WebViewerActivity.startUrl != null && WebViewerActivity.startUrl.equals(startUrl)) {
-                        isConfirmed = true;
-                        confirmCompleted.run();
-                    } else {
-                        setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + context.getString(R.string.navToNotify),confirmCompleted);
-                    }
-
-                    return;
-                }
+                navigateTo(startUrl + "/Logon.aspx");
             }
-
-            navigateTo(startUrl + "/Logon.aspx");
         }
     }
 
@@ -422,7 +466,17 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             func.run();
         });
 
-        builder.show();
+        try {
+            Handler handler=new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    builder.show();
+                }
+            },300);
+        } catch (Exception e) {
+
+        }
     }
 
     private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {

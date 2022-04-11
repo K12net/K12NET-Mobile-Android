@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Icon;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -25,7 +24,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -113,77 +111,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
     // [END receive_message]
 
-    private void confirmNotification(String messageBody,String title,String intentStr,String portal,String query) {
-        Intent intent = new Intent(this, WebViewerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        title += " Confirm?";
-        intent.putExtra("intent",intentStr);
-        intent.putExtra("portal", portal);
-        intent.putExtra("query", query);
-        intent.putExtra("body", messageBody);
-        intent.putExtra("title", title);
-
-        int requestID = (int) System.currentTimeMillis();
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Notification.Builder builder = null;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Intent yesIntent = new Intent(this, LoginActivity.class);
-            yesIntent.putExtra("confirm","yes");
-            yesIntent.putExtra("query",query);
-            PendingIntent yesPendingAction = PendingIntent.getActivity(this, 0 , yesIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Intent noIntent = new Intent(this, LoginActivity.class);
-            noIntent.putExtra("confirm","no");
-            noIntent.putExtra("query",query);
-            PendingIntent noPendingAction = PendingIntent.getActivity(this, 0 , noIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Notification.Action yesAction = null;
-            Notification.Action noAction = null;
-
-            if("auth".equals(portal)) {
-                yesAction = new Notification.Action.Builder(Icon.createWithResource("", R.drawable.yes), this.getString(R.string.yes), yesPendingAction).build();
-                noAction = new Notification.Action.Builder(Icon.createWithResource("", R.drawable.no), this.getString(R.string.no), noPendingAction).build();
-            } else {
-                yesAction = new Notification.Action.Builder(Icon.createWithResource("", R.drawable.confirm), this.getString(R.string.yes), yesPendingAction).build();
-                noAction = new Notification.Action.Builder(Icon.createWithResource("", R.drawable.cancel), this.getString(R.string.no), noPendingAction).build();
-            }
-
-            builder = new Notification.Builder(this, ChannelID_Confirm)
-                    .setSmallIcon(R.drawable.k12net_logo)
-                    .setStyle(new Notification.BigTextStyle().bigText(messageBody))
-                    .setContentTitle(title)
-                    .setChannelId(ChannelID_Confirm)
-                    .setContentText(messageBody)
-                    .setContentIntent(pendingIntent)
-                    .setNumber(K12NetUserReferences.getBadgeCount())
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .setOngoing(true).setAutoCancel(false)
-                    .addAction(yesAction).addAction(noAction);
-        }
-
-        if(builder == null) return;
-
-        Notification notification = builder.build();
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notificationManager.getNotificationChannel(ChannelID_Confirm) == null) {
-                createChannel(title,notificationManager,ChannelID_Confirm);
-            }
-        }
-
-        notificationManager.notify(K12NetUserReferences.getBadgeCount(), notification);
-
-        ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
-    }
     /**
      * Create and show a simple notification containing the received FCM message.
      *
@@ -192,7 +119,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String messageBody,String title,String intentStr,String portal,String query) {
         int requestID = (int) System.currentTimeMillis();
         Intent intent = new Intent(this, WebViewerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK  );
 
         intent.putExtra("intent",intentStr);
         intent.putExtra("portal", portal);
@@ -204,7 +131,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ChannelID)
@@ -246,14 +173,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             yesAction.putExtra("portal",portal);
             yesAction.putExtra("query",query);
             yesAction.putExtra("id", requestID);
-            PendingIntent yesPendingAction = PendingIntent.getBroadcast(this, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent yesPendingAction = PendingIntent.getBroadcast(this, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
             Intent noAction = new Intent(this, NotificationReceiver.class);
             noAction.putExtra("confirm","0");
             noAction.putExtra("query",query);
             noAction.putExtra("portal",portal);
             noAction.putExtra("id", requestID);
-            PendingIntent noPendingAction = PendingIntent.getBroadcast(this, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent noPendingAction = PendingIntent.getBroadcast(this, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
             if("auth".equals(portal)) {
                 builder = builder.addAction(0,"✅ " + this.getString(R.string.yes),yesPendingAction);
