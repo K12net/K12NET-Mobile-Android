@@ -865,10 +865,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     String origin,
                     GeolocationPermissions.Callback callback) {
 
-                if (checkGPSPermission() == false) {
-                    requestGPSPermission();
-                }
-
+                checkLocationPermission();
 
                 callback.invoke(origin, true, false);
             }
@@ -1163,24 +1160,51 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
-    protected boolean checkGPSPermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    protected void requestGPSPermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS)) {
-            Toast.makeText(this, R.string.locationAccessAppSettings, Toast.LENGTH_LONG).show();
-        } else {
-            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS}, 102);
+    protected void checkLocationPermission() {
+        List<String> permissions = new ArrayList<String>();
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        boolean showMessage = false;
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                showMessage = true;
+            } else {
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                    permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+                }
             }
         }
+
+        result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                showMessage = true;
+            } else {
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                    permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+            }
+        }
+
+        result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS)) {
+                showMessage = true;
+            } else {
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                    permissions.add(Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
+                }
+            }
+        }
+
+        if(showMessage) {
+            Toast.makeText(this, R.string.locationAccessAppSettings, Toast.LENGTH_LONG).show();
+        }
+
+       if(!permissions.isEmpty()) {
+           if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+               requestPermissions(permissions.toArray(new String[permissions.size()]), 105);
+           }
+       }
     }
 
     protected boolean checkCameraPermission() {
@@ -1269,6 +1293,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     //Toast.makeText(this, "Permission Denied, You cannot use Access to All Downloads.", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case 105:
+                if (garanted) {
+
+                } else {
+                    Log.e("value", "Permission Denied, You cannot use location.");
+                }
+                break;
+            case 106:
+                if (garanted) {
+
+                } else {
+                    Log.e("value", "Permission Denied, You cannot use fine location.");
                 }
                 break;
         }

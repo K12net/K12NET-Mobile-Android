@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 22
-        targetSdkVersion 31
-        versionCode 79
-        versionName "1.32.35"
+        targetSdkVersion 32
+        versionCode 81
+        versionName "1.32.37"
     }
     buildTypes {
         release {
@@ -62,7 +62,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
 
     implementation 'com.google.firebase:firebase-messaging:23.0.2'
-    implementation 'com.google.firebase:firebase-core:20.1.1'
+    implementation 'com.google.firebase:firebase-core:20.1.2'
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
