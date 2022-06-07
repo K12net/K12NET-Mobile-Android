@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Error strings -->
+    <string name="geofence_not_available">Coğrafi Sınır servisi şuanda aktif değil</string>
+    <string name="geofence_too_many_geofences">Uygulama çok fazla çoğrafi sınır için kaydedilmiş.</string>
+    <string name="geofence_too_many_pending_intents">
+        You have provided too many PendingIntents to the addGeofences() call
+    </string>
+    <string name="unknown_geofence_error">
+        Bilinmeyen hata: Coğrafi Sınır servisi şuanda aktif değil
+    </string>
+    <string name="geofence_transition_invalid_type">
+        Coğrafi Sınır geçiş hatası: invalid transition type %1$d
+    </string>
+
+    <!-- Transition type strings -->
+    <string name="geofence_transition_entered">Giriş Yapıldı</string>
+    <string name="geofence_transition_exited">Çıkış Yapıldı</string>
+    <string name="unknown_geofence_transition">Bilinmeyen Geçiş</string>
+
+    <string name="geofence_transition_notification_text">
+        Uygulamaya dönmek için bildirime tıklayınız
+    </string>
+
+    <string name="geofences_added">Coğrafi Sınırlar eklendi</string>
+    <string name="geofences_removed">Coğrafi Sınırlar çıkarıldı</string>
+    <string name="permission_denied_explanation">Arka planda konum servislerine ulaşabilmek için kullanıcı izni bekleniyor! Ayarlardan Konum Servislerine izin vermek ister misiniz?</string>
+    <string name="settings">Ayarlar</string>
+    <string name="attendance_type_attend_not_found">%1$s kurumunda Geldi türünde devamsızlık kodu tanımı eksik! Lütfen sistem yöneticinize başvurun.</string>
+    <string name="attendance_take">%1$s [Mesafe: %2$d m.] [Doğruluk: %3$s m.]</string>
+    <string name="attendance_service_title">Devam Durumu Servisi</string>
+    <string name="attendance_service_started">Konum Bölge Takip arka planda çalışıyor</string>
+
+    <string name="login_required">Devamsızlık takibi kullanıcı girişinden sonra başlatılacak.</string>
+    <string name="insufficient_location_permission">Arka planda konum servislerine ulaşabilmek için kullanıcı izni bekleniyor!</string>
+    <string name="no_geofence">Kullanıcı için tanımlı devamsızlık coğrafi sınır bulunamadı! Arka plan konum servisleri kapatıldı.</string>
+    <string name="location_services">Konum Servisi</string>
     <string name="error">Hata</string>
     <string name="error_open_page">Sayfa açılırken hata oluştu! Uygulama dışından bu sayfayı açmak ister misiniz? </string>
     <string name="permlab_accessAllDownloads">Tüm sistem indirmelerine izin verir</string>
@@ -245,7 +280,8 @@
     <string name="writeAccessAppSettings">Eklentileri indirebilmek için "Yazma" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Yazma" yetkisini açın.</string>
     <string name="readAccessAppSettings">Eklentileri yükleyebilmek için "Okuma" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Okuma" yetkisini açın.</string>
     <string name="readAccessCameraPermission">Fotograf çekip kullanabilmek için "Kamera" yetkisi verilmelidir. Lütfen Android ayarlar kısmından "Kamera" yetkisini açın.</string>
-    <string name="locationAccessAppSettings">Güncel pozisyonu kaydedebilmek için "Konum Erişim" yetkisi verilmelidir. Lütfen Android ayarlar kısmından bu "Konum Erişim" yetkisini açın.</string>
+    <string name="locationAccessAppSettings">K12NET Mobil, uygulama kapalıyken veya kullanımda değilken bile Konum Bazlı Devam Durum Takibini etkinleştirmek için konum bilginize ihtiyaç duyar. Lütfen Ayarlar/Uygulamalar/K12NET Mobil/Konum İzni için (Her zaman izin ver) seçeneğine onay verin. Bu hizmeti K12NET Mobil - Ayarlar kısmından istediğiniz zaman devre dışı bırakabilirsiniz.</string>
+    <string name="location_permission">📍 Konum İzni</string>
     <string name="resetPassword">Şifremi Unuttum</string>
     <string name="newUpdateAvailable">Yeni güncelleme bulunmaktadır. Devam etmeden önce lütfen güncelleyiniz.</string>
     <string name="update">Update</string>

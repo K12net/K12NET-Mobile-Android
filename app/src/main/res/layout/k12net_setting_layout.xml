@@ -45,12 +45,12 @@
             android:visibility="gone" />
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:weightSum="1"
             android:gravity="center"
-            android:visibility="visible">
+            android:orientation="horizontal"
+            android:visibility="visible"
+            android:weightSum="1">
 
             <ToggleButton
                 android:id="@+id/btn_tr"
@@ -104,12 +104,22 @@
 
         </LinearLayout>
 
+        <Switch
+            android:id="@+id/swtGeoFenceMonitor"
+            android:layout_width="251dp"
+            android:layout_height="37dp"
+            android:layout_marginTop="15dp"
+            android:autoText="false"
+            android:showText="false"
+            android:text="@string/location_services"
+            android:textAlignment="center" />
+
         <Button
             android:id="@+id/btn_save"
             style="@style/Asisto_Button"
+            android:layout_marginTop="15dp"
             android:gravity="center"
-            android:text="@string/save"
-            android:layout_marginTop="15dp" />
+            android:text="@string/save" />
 
         <Button
             android:id="@+id/btn_policy"

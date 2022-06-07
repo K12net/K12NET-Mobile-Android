@@ -72,12 +72,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Android 31 supported notification errors are fixed.">
-      <change afterPath="$PROJECT_DIR$/.idea/deploymentTargetDropDown.xml" afterDir="false" />
+    <list default="true" id="445e1b81-4d66-485c-be59-2a8462b61066" name="Default" comment="Location permission enhanced">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/LocationUpdatesService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -230,7 +228,7 @@
     <property name="cidr.known.project.marker" value="true" />
     <property name="device.picker.selection" value="Android_Accelerated_x86_Oreo" />
     <property name="ignore.virus.scanning.warn.message" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/app" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Downloads/AndroidBackgroundLocation-master/AndroidBackgroundLocation-master/app" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -745,7 +743,14 @@
       <option name="project" value="LOCAL" />
       <updated>1649665662556</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Location permission enhanced">
+      <created>1650003938421</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1650003938422</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -793,7 +798,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Merge branch 'AndroidStudio3.1.1' to main" />
     <MESSAGE value="Apk generate build error fixed" />
     <MESSAGE value="Notification enhanced and some minor bugs are fixed" />
     <MESSAGE value="Not selected attachments bug fixed." />
@@ -818,7 +822,8 @@
     <MESSAGE value="Minor bugs fixed. 2 factor Auth added" />
     <MESSAGE value="Android 31 supported and device info saved to personel detail." />
     <MESSAGE value="Android 31 supported notification errors are fixed." />
-    <option name="LAST_COMMIT_MESSAGE" value="Android 31 supported notification errors are fixed." />
+    <MESSAGE value="Location permission enhanced" />
+    <option name="LAST_COMMIT_MESSAGE" value="Location permission enhanced" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

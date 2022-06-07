@@ -1,12 +1,29 @@
 package com.k12nt.k12netframe.utils.webConnection;
 
+import android.os.Looper;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.util.List;
+import com.loopj.android.http.*;
 
 public class K12NetHttpClient {
+    // A SyncHttpClient is an AsyncHttpClient
+    public static AsyncHttpClient syncHttpClient= new SyncHttpClient();
+    public static AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+
+    /**
+     * @return an async client when calling from the main thread, otherwise a sync client.
+     */
+    public static AsyncHttpClient getClient()
+    {
+        // Return the synchronous HTTP client when the thread is not prepared
+        if (Looper.myLooper() == null)
+            return syncHttpClient;
+        return asyncHttpClient;
+    }
 
     public static void resetBrowser() {
         CookieManager cookieManager = new CookieManager();

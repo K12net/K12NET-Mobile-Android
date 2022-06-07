@@ -6,6 +6,7 @@
     
         
     <style name="AppTheme"  parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
        <item name="android:colorPrimary">#005555</item>
       <item name="android:colorPrimaryDark">#04b7bb</item>

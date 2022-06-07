@@ -8,9 +8,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
 import java.util.Locale;
@@ -22,9 +26,11 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
     public static String ARABIC = "ar";
     public static String FRENCH = "fr";
     public static String RUSSIAN = "ru";
+    private LoginActivity Activity;
 
-	public K12NetSettingsDialogView(Context context) {
+	public K12NetSettingsDialogView(Context context,LoginActivity activity) {
 		super(context);
+		this.Activity = activity;
 	}
 
     ToggleButton[] language_btn_list = new ToggleButton[5];
@@ -49,6 +55,29 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
         appAddress.setText(K12NetUserReferences.getConnectionAddress());
         fsAddress.setText(K12NetUserReferences.getFileServerAddress());
 
+        Switch swtGeoFenceMonitor = (Switch) view.findViewById(R.id.swtGeoFenceMonitor);
+
+        if(K12NetUserReferences.isPermitBackgroundLocation() == null || K12NetUserReferences.isPermitBackgroundLocation() == true) {
+            swtGeoFenceMonitor.setChecked(true);
+        } else {
+            swtGeoFenceMonitor.setChecked(false);
+        }
+
+        final LoginActivity activity = this.Activity;
+
+        swtGeoFenceMonitor.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton var1, boolean isChecked) {
+                if(isChecked) {
+                    Toast.makeText(activity, activity.getString(R.string.login_required), Toast.LENGTH_LONG).show();
+                } else {
+                    AttendanceManager.Instance().stopAttendanceService(activity);
+                }
+
+                K12NetUserReferences.setPermitBackgroundLocation(isChecked);
+            }
+        });
+
         Button save_button = (Button) view.findViewById(R.id.btn_save);
 
         save_button.setOnClickListener(new View.OnClickListener() {
@@ -72,7 +101,9 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
                 intent.addCategory(Intent.CATEGORY_BROWSABLE);
 
                 //todo: App provider must include their own PrivacyPolicy by changing below url
-                intent.setData(Uri.parse(String.format("http://fs.k12net.com/mobile/files/PrivacyPolicy_%s.pdf",K12NetUserReferences.getLanguageCode())));
+                String lang = K12NetUserReferences.getLanguageCode();
+                if (!lang.equals("tr") && !lang.equals("ar")) lang = "en";
+                intent.setData(Uri.parse(String.format("http://fs.k12net.com/mobile/files/PrivacyPolicy_%s.html",lang)));
                 getContext().startActivity(intent);
             }
         });
@@ -180,5 +211,4 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
         res.updateConfiguration(configuration,res.getDisplayMetrics());
 
     }
-
 }

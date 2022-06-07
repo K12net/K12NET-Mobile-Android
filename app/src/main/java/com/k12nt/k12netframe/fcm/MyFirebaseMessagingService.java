@@ -18,12 +18,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.k12nt.k12netframe.LoginActivity;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -37,6 +39,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
     private static final String ChannelID = "M_CH_ID_K12net";
     private static final String ChannelID_Confirm = "M_CH_ID_K12net_Confirm";
+    public static final int REQUEST_ID_ATTENDANCE = 1978;
 
     @Override
     public void onNewToken(String s) {
@@ -104,7 +107,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         K12NetUserReferences.initUserReferences(this);
         K12NetUserReferences.increaseBadgeNumber();
 
-        sendNotification(msg,title,intent,portal,query);
+        sendNotification(this, msg,title,intent,portal,query,null);
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
@@ -116,9 +119,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody,String title,String intentStr,String portal,String query) {
-        int requestID = (int) System.currentTimeMillis();
-        Intent intent = new Intent(this, WebViewerActivity.class);
+    public static Notification sendNotification(Context packageContext, String messageBody, String title, String intentStr, String portal, String query, @Nullable Integer requestID) {
+        if(requestID == null) requestID = (int) System.currentTimeMillis();
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+        Intent intent = new Intent(packageContext, WebViewerActivity.class);
+
+        if(requestID == REQUEST_ID_ATTENDANCE) {
+            flags = PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+            intent = new Intent(packageContext, LoginActivity.class);
+        }
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK  );
 
         intent.putExtra("intent",intentStr);
@@ -130,30 +141,43 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("requestID", requestID);
         }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestID, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(packageContext, requestID, intent,flags);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ChannelID)
+        String channel = ChannelID;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(packageContext, channel)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setSmallIcon(R.drawable.k12net_logo)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
                 .setContentTitle(title)
-                .setChannelId(ChannelID)
+                .setChannelId(channel)
                 .setColor(0xfd7e14)
                 .setContentText(messageBody)
-                .setAutoCancel(true).setContentIntent(pendingIntent)
+                .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setNumber(K12NetUserReferences.getBadgeCount())
                 .setContentIntent(pendingIntent)
                 .setWhen(System.currentTimeMillis());
 
+        if(requestID == REQUEST_ID_ATTENDANCE) {
+            channel = requestID + " Channel";
+            builder = new NotificationCompat.Builder(packageContext, channel)
+                    .setSmallIcon(R.drawable.k12net_logo)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
+                    .setContentTitle(title)
+                    .setColor(0xfd7e14)
+                    .setContentText(messageBody)
+                    .setContentIntent(pendingIntent)
+                    .setSound(defaultSoundUri)
+                    .setWhen(System.currentTimeMillis());
+        }
+
         if("confirm".equals(intentStr)) {
-            builder.setColor(ContextCompat.getColor(this, R.color.cardview_dark_background));
+            builder.setColor(ContextCompat.getColor(packageContext, R.color.cardview_dark_background));
 
             String culture =query.split(";")[0];
             Locale myLocale = new Locale(culture);
-            Resources res = this.getResources();
+            Resources res = packageContext.getResources();
             Configuration configuration = res.getConfiguration();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
@@ -163,31 +187,31 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             configuration.locale = myLocale;
             Locale.setDefault(myLocale);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-                this.createConfigurationContext(configuration);
+                packageContext.createConfigurationContext(configuration);
             }
 
             res.updateConfiguration(configuration,res.getDisplayMetrics());
 
-            Intent yesAction = new Intent(this, NotificationReceiver.class);
+            Intent yesAction = new Intent(packageContext, NotificationReceiver.class);
             yesAction.putExtra("confirm","1");
             yesAction.putExtra("portal",portal);
             yesAction.putExtra("query",query);
             yesAction.putExtra("id", requestID);
-            PendingIntent yesPendingAction = PendingIntent.getBroadcast(this, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+            PendingIntent yesPendingAction = PendingIntent.getBroadcast(packageContext, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-            Intent noAction = new Intent(this, NotificationReceiver.class);
+            Intent noAction = new Intent(packageContext, NotificationReceiver.class);
             noAction.putExtra("confirm","0");
             noAction.putExtra("query",query);
             noAction.putExtra("portal",portal);
             noAction.putExtra("id", requestID);
-            PendingIntent noPendingAction = PendingIntent.getBroadcast(this, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+            PendingIntent noPendingAction = PendingIntent.getBroadcast(packageContext, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
 
             if("auth".equals(portal)) {
-                builder = builder.addAction(0,"✅ " + this.getString(R.string.yes),yesPendingAction);
-                builder = builder.addAction(0,"⛔ " + this.getString(R.string.no),noPendingAction);
+                builder = builder.addAction(0,"✅ " + packageContext.getString(R.string.yes),yesPendingAction);
+                builder = builder.addAction(0,"⛔ " + packageContext.getString(R.string.no),noPendingAction);
             } else {
-                builder = builder.addAction(R.drawable.confirm,this.getString(R.string.yes),yesPendingAction);
-                builder = builder.addAction(R.drawable.cancel,this.getString(R.string.no),noPendingAction);
+                builder = builder.addAction(R.drawable.confirm,packageContext.getString(R.string.yes),yesPendingAction);
+                builder = builder.addAction(R.drawable.cancel,packageContext.getString(R.string.no),noPendingAction);
             }
             builder = builder.setWhen(0).setOngoing(true).setAutoCancel(false);
                     //.setStyle(new NotificationCompat.BigTextStyle().bigText(this.getString(R.string.yes)))
@@ -197,28 +221,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Notification notification = null;
 
         if (Build.VERSION.SDK_INT > 15) {// for some reason Notification.PRIORITY_DEFAULT doesn't show the counter
-            builder.setPriority(Notification.PRIORITY_MAX);
+            if(requestID == REQUEST_ID_ATTENDANCE) {
+                builder.setPriority(Notification.PRIORITY_LOW);
+            } else {
+                builder.setPriority(Notification.PRIORITY_MAX);
+            }
             notification= builder.build();
         } else {
             notification = builder.getNotification();
         }
 
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) packageContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notificationManager.getNotificationChannel(ChannelID) == null) {
-                createChannel(title,notificationManager,ChannelID);
+            if (notificationManager.getNotificationChannel(channel) == null) {
+                createChannel(title,notificationManager,channel);
             }
         }
 
-        notificationManager.notify(requestID, notification);
+        if(requestID != REQUEST_ID_ATTENDANCE) notificationManager.notify(requestID, notification);
 
-        ShortcutBadger.applyCount(getApplicationContext(), K12NetUserReferences.getBadgeCount());
+        ShortcutBadger.applyCount(packageContext.getApplicationContext(), K12NetUserReferences.getBadgeCount());
+
+        return notification;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private void createChannel(String channelTitle, NotificationManager notificationManager,String channelID ) {
+    private static void createChannel(String channelTitle, NotificationManager notificationManager,String channelID ) {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel notificationChannel = new NotificationChannel(channelID, channelTitle, importance);
         notificationChannel.setShowBadge(true);
@@ -226,8 +256,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.RED);
+        notificationChannel.setVibrationPattern(new long[] { 100, 200});
         notificationChannel.enableVibration(true);
-        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        //notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
 
         notificationManager.createNotificationChannel(notificationChannel);
     }

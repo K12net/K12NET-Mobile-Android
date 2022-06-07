@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
-        minSdkVersion 22
+        minSdkVersion 23
         targetSdkVersion 32
-        versionCode 81
-        versionName "1.32.37"
+        versionCode 97
+        versionName "1.32.53"
     }
     buildTypes {
         release {
@@ -59,10 +59,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'com.google.android.material:material:1.6.0'
 
-    implementation 'com.google.firebase:firebase-messaging:23.0.2'
-    implementation 'com.google.firebase:firebase-core:20.1.2'
+    implementation 'com.google.firebase:firebase-messaging:23.0.5'
+    implementation 'com.google.firebase:firebase-core:21.0.0'
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
@@ -70,6 +70,17 @@ dependencies {
 
     // required to avoid crash on Android 12 API 31
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
+
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.code.gson:gson:2.8.8'
+
+    implementation 'com.loopj.android:android-async-http:1.4.9'
+}
+task wrapper(type: Wrapper){
+    gradleVersion = '7.2'
+}
+task prepareKotlinBuildScriptModel {
+
 }
 
 // ADD THIS AT THE BOTTOM

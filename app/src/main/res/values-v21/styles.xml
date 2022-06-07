@@ -1,6 +1,7 @@
 <resources>
 
     <style name="AppTheme"  parent="android:Theme.Material.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:colorPrimary">#2d76a1</item>
         <item name="android:colorPrimaryDark">#2d76a1</item>
@@ -13,5 +14,4 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:background">#FFFFFF</item>
     </style>
-
 </resources>

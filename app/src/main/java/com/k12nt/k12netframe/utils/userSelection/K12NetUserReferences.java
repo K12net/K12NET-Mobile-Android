@@ -5,8 +5,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
+import com.google.android.gms.location.Geofence;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.k12nt.k12netframe.K12NetSettingsDialogView;
+import com.k12nt.k12netframe.attendance.GeoFenceData;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Locale;
 
 public class K12NetUserReferences {
@@ -26,7 +33,8 @@ public class K12NetUserReferences {
     private static final String LANGAUGE = "languageCode";
 	private static final String CONNECTION_ADDRESS = "connectionAddress";
     private static final String FILE_SERVER_ADDRESS = "fileServerAddress";
-	private static final String REMEMBER_PASSWORD = "rememberPassword";
+    private static final String REMEMBER_PASSWORD = "rememberPassword";
+    private static final String PERMIT_LOCATION_SERVICES = "permitLocationService";
 	private static final String LIGHT_OPTION = "lightOption";
     private static final String CALENDAR_PROVIDER_ID = "calendarProviderId";
     private static final String BADGENUMBER = "badgeNumber";
@@ -42,7 +50,8 @@ public class K12NetUserReferences {
     private String fileServerAddress;
     private String appRegisterId;
     private int appVersionNo;
-	private boolean rememberPassword;
+    private boolean rememberPassword;
+    private Boolean permitBackgroundLocation = null;
     private int calendarProviderId;
     private int badgeNumber;
     private String languageCode;
@@ -83,6 +92,8 @@ public class K12NetUserReferences {
 
         fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
 		rememberPassword = settings.getBoolean(REMEMBER_PASSWORD, false);
+        permitBackgroundLocation = settings.contains(PERMIT_LOCATION_SERVICES) ?
+                settings.getBoolean(PERMIT_LOCATION_SERVICES, false) : null;
         appRegisterId = settings.getString(PROPERTY_REG_ID, "");
         appVersionNo = settings.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         calendarProviderId = settings.getInt(CALENDAR_PROVIDER_ID, 1);
@@ -95,14 +106,6 @@ public class K12NetUserReferences {
         if(references == null){
 	    	references = new K12NetUserReferences(context);
 	    }
-    }
-
-    public static String getAsistoRegisterId() {
-        return references.appRegisterId;
-    }
-
-    public static int getAsistoVersionNo() {
-        return references.appVersionNo;
     }
 
     private void storeString(String key, String value) {
@@ -143,6 +146,7 @@ public class K12NetUserReferences {
     }
 	
 	public static String getUsername(){
+        if(references.username == null) return "";
 		return references.username;
 	}
 	
@@ -178,6 +182,10 @@ public class K12NetUserReferences {
 		return references.rememberPassword;
 	}
 
+    public static Boolean isPermitBackgroundLocation() {
+        return references.permitBackgroundLocation;
+    }
+
     public static int getCalendarId() {
         return references.calendarProviderId;
     }
@@ -185,11 +193,38 @@ public class K12NetUserReferences {
     public static int getBadgeCount() {
         return references.badgeNumber;
     }
-	
-	public static void setRememberMe(boolean rememberMe) {
-		references.rememberPassword = rememberMe;
-		references.storeBoolean(REMEMBER_PASSWORD, references.rememberPassword);
-	}
+
+    public static void setRememberMe(boolean rememberMe) {
+        references.rememberPassword = rememberMe;
+        references.storeBoolean(REMEMBER_PASSWORD, references.rememberPassword);
+    }
+
+    public static void setPermitBackgroundLocation(boolean permitBackgroundLocation) {
+        references.permitBackgroundLocation = permitBackgroundLocation;
+        references.storeBoolean(PERMIT_LOCATION_SERVICES, references.permitBackgroundLocation);
+    }
+
+    public static void setGeoFenceData(List<GeoFenceData> locations, String userName) {
+        SharedPreferences.Editor editor = references.settings.edit();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
+        String json = gson.toJson(locations,listType);
+        String key = userName.replaceAll(" ","")+":GeoFenceData.toJson";
+        editor.putString(key, json);
+
+        editor.commit();
+    }
+
+    public static List<GeoFenceData> getGeoFenceData(String userName) {
+        Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
+        String key = userName.replaceAll(" ","")+":GeoFenceData.toJson";
+        Gson gson = new Gson();
+        String json = references.settings.getString(key, "");
+        List<GeoFenceData> locations = gson.fromJson(json, listType);
+
+        return locations;
+    }
 
     public static String getFileServerAddress(){
         String http_address = references.fileServerAddress;

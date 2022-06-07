@@ -14,6 +14,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.Settings;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -22,9 +24,15 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.location.LocationSettingsStates;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
+import com.k12nt.k12netframe.async_tasks.TaskHandler;
+import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
@@ -39,6 +47,7 @@ import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LoginActivity extends Activity implements AsyncCompleteListener {
 
@@ -150,6 +159,30 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        if(data != null) {
+            final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
+            switch (requestCode) {
+                case AttendanceManager.REQUEST_CHECK_SETTINGS:
+                    switch (resultCode) {
+                        case Activity.RESULT_OK:
+                            // All required changes were successfully made
+                            break;
+                        case Activity.RESULT_CANCELED:
+                            // The user was asked to change settings, but chose not to
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void onResume(){
         isLogin = false;
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
@@ -210,7 +243,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
         Button settings_button = (Button) findViewById(R.id.btn_settings);
         settings_button.setOnClickListener(arg0 -> {
-            K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext());
+            K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext(), this);
             dialogView.createContextView(null);
 
             dialogView.setOnDismissListener(dialog -> {
@@ -306,7 +339,7 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
             loginTask.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
             loginTask.setHeader("Atlas-DeviceModel", GetDeviceModel());
 
-            loginTask.setJson("userName", K12NetUserReferences.getUsername());
+            loginTask.setJson("userName", K12NetUserReferences.getUsername().trim());
             loginTask.setJson("password", K12NetUserReferences.getPassword());
             loginTask.setJson("createPersistentCookie", "false");
 
@@ -374,47 +407,66 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
                     return;
                 }
 
-                this.LoginCompleted();
+                if (isLogin == false) {
+                    Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
+                } else {
+                    AttendanceManager.Instance().initialize(this, new TaskHandler() {
+                        @Override
+                        public void onTaskCompleted(String result) {
+                            if (isLoginRetry) {
 
-                if(isLogin) {
+                                String connString = K12NetUserReferences.getConnectionAddress();
 
-                    if (isLoginRetry) {
-
-                        String connString = K12NetUserReferences.getConnectionAddress();
-
-                        if (connString.equals("https://azure.k12net.com")) {
-                            if(K12NetUserReferences.getLanguageCode().equals("tr")) K12NetUserReferences.setLanguage("en");
-                        } else {
-                            K12NetUserReferences.setLanguage("tr");
-                        }
-
-                    }
-
-                    if (K12NetUserReferences.LANG_UPDATED) {
-
-                        String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/SetLanguage";
-
-                        HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
-
-                        langTask.setHeader("LanguageCode", K12NetUserReferences.getNormalizedLanguageCode());
-
-                        List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
-
-                        if(cookies != null) {
-                            for (String cookie : cookies) {
-                                if(cookie.startsWith(".")) {//Set Authentication cookie
-                                    langTask.GetConnection().setRequestProperty("Cookie", cookie.replaceAll("; HttpOnly","").replaceAll("HttpOnly",""));
+                                if (connString.equals("https://azure.k12net.com")) {
+                                    if(K12NetUserReferences.getLanguageCode().equals("tr")) K12NetUserReferences.setLanguage("en");
+                                } else {
+                                    K12NetUserReferences.setLanguage("tr");
                                 }
+
+                            }
+
+                            final LoginActivity currentActivity = LoginActivity.this;
+
+                            String connString = K12NetUserReferences.getConnectionAddress() + "/Authentication_JSON_AppService.axd/SetLanguage";
+
+                            try {
+                                HTTPAsyncTask langTask = new HTTPAsyncTask(context, connString,"SetLanguage");
+
+                                langTask.setHeader("LanguageCode", K12NetUserReferences.getNormalizedLanguageCode());
+
+                                List<String> cookies = completedTask.GetConnection().getHeaderFields().get("Set-Cookie");
+
+                                if(cookies != null) {
+                                    for (String cookie : cookies) {
+                                        if(cookie.startsWith(".")) {//Set Authentication cookie
+                                            langTask.GetConnection().setRequestProperty("Cookie", cookie.replaceAll("; HttpOnly","").replaceAll("HttpOnly",""));
+                                        }
+                                    }
+                                }
+
+                                langTask.setOnCompleteListener(currentActivity);
+
+                                langTask.execute();
+
+                                K12NetUserReferences.LANG_UPDATED = false;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            if (result.equals("PermissionRequested")) return;
+
+                            Intent intentOfLogin = currentActivity.getIntent();
+                            boolean hasNotification = checkNotificationExist(intentOfLogin);
+
+                            if(!hasNotification) {
+                                String startUrl = K12NetUserReferences.getConnectionAddress();
+
+                                navigateTo(startUrl + "/Logon.aspx");
                             }
                         }
-
-                        langTask.setOnCompleteListener(this);
-
-                        langTask.execute();
-
-                        K12NetUserReferences.LANG_UPDATED = false;
-                    }
+                    });
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -423,21 +475,8 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         }
     }
 
-    private Boolean isConfirmed = false;
+    public Boolean isConfirmed = false;
     private void LoginCompleted() {
-        if (isLogin == false) {
-            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
-        } else {
-            final Activity currentActivity = LoginActivity.this;
-            Intent intentOfLogin = currentActivity.getIntent();
-            boolean hasNotification = checkNotificationExist(intentOfLogin);
-
-            if(!hasNotification) {
-                String startUrl = K12NetUserReferences.getConnectionAddress();
-
-                navigateTo(startUrl + "/Logon.aspx");
-            }
-        }
     }
 
     private void navigateTo(String url) {
@@ -446,36 +485,80 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         context.startActivity(intent);
     }
 
-    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+    public synchronized void setConfirmDialog(String title, String message, final Runnable func) {
         isConfirmed = false;
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setCancelable(false);
-        builder.setPositiveButton(context.getString(R.string.yes), (dialog, which) -> {
-            isConfirmed = true;
-
-            func.run();
-        });
-
-        builder.setNegativeButton(context.getString(R.string.no), (dialog, which) -> {
-            isConfirmed = false;
-
-            func.run();
-        });
-
         try {
-            Handler handler=new Handler();
-            handler.postDelayed(new Runnable() {
+
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    builder.show();
-                }
-            },300);
-        } catch (Exception e) {
 
+                    if (!isFinishing()){
+                        final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(LoginActivity.this);
+
+                        confirmDialog.setTitle(title);
+                        confirmDialog.setMessage(message);
+                        confirmDialog.setCancelable(false);
+
+                        confirmDialog.setPositiveButton(context.getString(R.string.yes), (dialog, which) -> {
+                            isConfirmed = true;
+
+                            func.run();
+                        });
+
+                        confirmDialog.setNegativeButton(context.getString(R.string.no), (dialog, which) -> {
+                            isConfirmed = false;
+
+                            func.run();
+                        });
+
+                        confirmDialog.show();
+                    }
+                }
+            });
+
+
+            /*if (!isFinishing()) {
+                final Handler diloagResultWaitHandler = new Handler(Looper.getMainLooper())
+                {
+                    @Override
+                    public void handleMessage(Message mesg)
+                    {
+
+                    }
+                };
+
+                final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
+
+                confirmDialog.setTitle(title);
+                confirmDialog.setMessage(message);
+                confirmDialog.setCancelable(false);
+
+                confirmDialog.setPositiveButton(context.getString(R.string.yes), (dialog, which) -> {
+                    isConfirmed = true;
+
+                    func.run();
+                    diloagResultWaitHandler.sendMessage(diloagResultWaitHandler.obtainMessage());
+                });
+
+                confirmDialog.setNegativeButton(context.getString(R.string.no), (dialog, which) -> {
+                    isConfirmed = false;
+
+                    func.run();
+                    diloagResultWaitHandler.sendMessage(diloagResultWaitHandler.obtainMessage());
+                });
+
+                confirmDialog.show();
+
+                try{
+                    Looper.loop();
+                }
+                catch(RuntimeException e){}
+            }*/
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -620,4 +703,53 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
         }
     }
 
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == AttendanceManager.REQUEST_PERMISSIONS_REQUEST_CODE) {
+            Runnable confirmation = () -> {
+                if(!isConfirmed) {
+                    final LoginActivity currentActivity = LoginActivity.this;
+                    Intent intentOfLogin = currentActivity.getIntent();
+                    boolean hasNotification = checkNotificationExist(intentOfLogin);
+
+                    if(!hasNotification) {
+                        String startUrl = K12NetUserReferences.getConnectionAddress();
+
+                        navigateTo(startUrl + "/Logon.aspx");
+                    }
+                    return;
+                }
+                // Build intent that displays the App settings screen.
+
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                intent.setData(uri);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                startActivity(intent);
+            };
+
+            if (grantResults.length <= 0) {
+                setConfirmDialog(getString(R.string.location_permission),getString(R.string.locationAccessAppSettings),confirmation);
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                AttendanceManager.Instance().initialize(this, new TaskHandler() {
+
+                    @Override
+                    public void onTaskCompleted(String result) {
+
+                    }
+                });
+            } else {
+                // Permission denied.
+                // Notify the user via a SnackBar that they have rejected a core permission for the
+                setConfirmDialog(getString(R.string.location_permission),getString(R.string.locationAccessAppSettings),confirmation);
+            }
+        }
+    }
 }

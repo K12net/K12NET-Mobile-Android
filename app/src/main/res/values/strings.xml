@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Error strings -->
+    <string name="geofence_not_available">Geofence service is not available now</string>
+    <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
+    <string name="geofence_too_many_pending_intents">
+        You have provided too many PendingIntents to the addGeofences() call
+    </string>
+    <string name="unknown_geofence_error">
+        Unknown error: the Geofence service is not available now
+    </string>
+    <string name="geofence_transition_invalid_type">
+        Geofence transition error: invalid transition type %1$d
+    </string>
+
+    <!-- Transition type strings -->
+    <string name="geofence_transition_entered">Entered</string>
+    <string name="geofence_transition_exited">Exited</string>
+    <string name="unknown_geofence_transition">Unknown Transition</string>
+
+    <string name="geofence_transition_notification_text">
+        Click notification to return to app
+    </string>
+
+    <string name="geofences_added">Geofences added</string>
+    <string name="geofences_removed">Geofences removed</string>
+    <string name="permission_denied_explanation">Waiting permission for background location services access! Confirm to give permission for Location Services from Setting?</string>
+    <string name="settings">Settings</string>
+    <string name="attendance_type_attend_not_found">%1$s has no any Attend Type! Please apply to system manager.</string>
+    <string name="attendance_take">%1$s [Distance: %2$d m.] [Accuracy: %3$s m.]</string>
+    <string name="attendance_service_title">Attendance Service</string>
+    <string name="attendance_service_started">Location Region Tracking is running</string>
+
+
+    <string name="login_required">Waiting to login to start attendance services.</string>
+    <string name="insufficient_location_permission">Waiting permission for background location services access!</string>
+    <string name="no_geofence">User has no defined location fences! Background services are closed!</string>
+    <string name="location_services">Location Service</string>
     <string name="error">Error</string>
     <string name="error_open_page">This page not opened! Would you like to open outside from app?</string>
     <string name="permlab_accessAllDownloads">Access all system downloads</string>
@@ -245,7 +281,8 @@
     <string name="writeAccessAppSettings">Write External Storage permission allows us to do store images. Please allow this permission in App Settings.</string>
     <string name="readAccessAppSettings">Read External Storage permission allows us to read stored images. Please allow this permission in App Settings.</string>
     <string name="readAccessCameraPermission">Camera permission allows us to take photos. Please allow this permission in App Settings.</string>
-    <string name="locationAccessAppSettings">Getting Location permission allows us to read current position and record if you want. Please allow this permission in App Settings.</string>
+    <string name="locationAccessAppSettings">K12NET Mobile collects your location data to enable Location Based Attendance Tracking even when the app is closed or not in use. Please allow Location permission - Allow all the time in App Settings. You can disable this service from K12NET Mobile - Settings whenever you want</string>
+    <string name="location_permission">📍 Use Your Location</string>
     <string name="resetPassword">Forgot Password</string>
     <string name="newUpdateAvailable">A new update is available. Please update before continue.</string>
     <string name="update">Update</string>

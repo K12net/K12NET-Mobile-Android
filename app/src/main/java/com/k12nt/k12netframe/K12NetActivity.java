@@ -2,11 +2,9 @@ package com.k12nt.k12netframe;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.AlertDialog;
-import android.content.res.Configuration;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,14 +19,13 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
+import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 
 public abstract class K12NetActivity extends Activity implements K12NetAsyncCompleteListener {
 	

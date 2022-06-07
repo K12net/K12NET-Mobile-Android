@@ -24,9 +24,12 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -59,6 +62,7 @@ import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
+import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -100,7 +104,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private ValueCallback<Uri> mUploadMessage;
     private ValueCallback<Uri[]> mFilePathCallback;
     private final static int FILECHOOSER_RESULTCODE = 1;
-    private Boolean isConfirmed = false;
+
+    public Boolean isConfirmed = false;
     private Dialog progress_dialog;
 
     private static final String TAG = "WebViewerActivity";
@@ -222,37 +227,73 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
     }
 
-    private synchronized void setConfirmDialog(String title, String message, final Runnable func) {
+    public synchronized void setConfirmDialog(String title, String message, final Runnable func) {
         isConfirmed = false;
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setCancelable(false);
-        builder.setPositiveButton(this.getString(R.string.yes), (dialog, which) -> {
-            isConfirmed = true;
+                if (!isFinishing()){
 
-            func.run();
-        });
+                    final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(WebViewerActivity.this);
 
-        builder.setNegativeButton(this.getString(R.string.no), (dialog, which) -> {
-            isConfirmed = false;
+                    confirmDialog.setTitle(title);
+                    confirmDialog.setMessage(message);
+                    confirmDialog.setCancelable(false);
+                    confirmDialog.setPositiveButton(WebViewerActivity.this.getString(R.string.yes), (dialog, which) -> {
+                        isConfirmed = true;
 
-            func.run();
-        });
+                        func.run();
+                    });
 
-        try {
-            Handler handler=new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    builder.show();
+                    confirmDialog.setNegativeButton(WebViewerActivity.this.getString(R.string.no), (dialog, which) -> {
+                        isConfirmed = false;
+
+                        func.run();
+                    });
+
+                    confirmDialog.show();
                 }
-            },300);
-        } catch (Exception e) {
+            }
+        });
 
-        }
+        /*if (!isFinishing()) {
+            final Handler diloagResultWaitHandler = new Handler(Looper.getMainLooper())
+            {
+                @Override
+                public void handleMessage(Message mesg)
+                {
+                    throw new RuntimeException();
+                }
+            };
+            final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
+
+            confirmDialog.setTitle(title);
+            confirmDialog.setMessage(message);
+            confirmDialog.setCancelable(false);
+            confirmDialog.setPositiveButton(this.getString(R.string.yes), (dialog, which) -> {
+                isConfirmed = true;
+
+                func.run();
+                diloagResultWaitHandler.sendMessage(diloagResultWaitHandler.obtainMessage());
+            });
+
+            confirmDialog.setNegativeButton(this.getString(R.string.no), (dialog, which) -> {
+                isConfirmed = false;
+
+                func.run();
+                diloagResultWaitHandler.sendMessage(diloagResultWaitHandler.obtainMessage());
+            });
+
+            confirmDialog.show();
+
+            try{
+                Looper.loop();
+            }
+            catch(RuntimeException e){}
+        }*/
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -357,6 +398,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onDestroy() {
+        if(progress_dialog != null) progress_dialog.dismiss();
         super.onDestroy();
         unregisterReceiver(onDownloadComplete);
     }
@@ -420,7 +462,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             String osVersion = Build.VERSION.RELEASE;
 
 
-            String userNamePassword = K12NetUserReferences.getUsername() + "->" + K12NetUserReferences.getPassword();
+            String userNamePassword = K12NetUserReferences.getUsername().trim() + "->" + K12NetUserReferences.getPassword();
 
             String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
 
@@ -534,10 +576,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.setWebViewClient(new WebViewClient() {
 
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-
                 if(!ctx.isFinishing())
                 {
                     progress_dialog.show();
+                } else {
+                    int i = 0;
                 }
 
             }
@@ -1109,7 +1152,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             mainLayout.removeAllViews();
             mainLayout.addView(webview);
         } else if (previousUrl != null) {
-            webview.loadUrl(previousUrl);
+            if (previousUrl.equals("")) {
+                String startUrl = K12NetUserReferences.getConnectionAddress();
+                webview.loadUrl(startUrl);
+
+                return;
+            } else {
+                webview.loadUrl(previousUrl);
+            }
         } else if (webview.canGoBack()) {
             webview.goBack();
         } else {
