@@ -192,6 +192,8 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        K12NetUserReferences.initUserReferences(getApplicationContext());
+
         super.onCreate(savedInstanceState);
 
         try {
@@ -211,8 +213,6 @@ public class LoginActivity extends Activity implements AsyncCompleteListener {
 
         //Remove title bar
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        K12NetUserReferences.initUserReferences(getApplicationContext());
 
         if(K12NetUserReferences.getLanguageCode() == null){
             K12NetUserReferences.setLanguage(this.getString(R.string.localString));

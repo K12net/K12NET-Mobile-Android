@@ -544,7 +544,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             @Override
             public void onClick(View v) {
 
-                webview.reload();
+                webview.loadUrl( "javascript:window.location.reload( true )" );
             }
         });
 

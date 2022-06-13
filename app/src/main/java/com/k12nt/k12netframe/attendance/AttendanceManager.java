@@ -53,14 +53,23 @@ import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.ResponseHandlerInterface;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.BasicHttpEntity;
+import cz.msebera.android.httpclient.entity.ByteArrayEntity;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.message.BasicHeader;
+import cz.msebera.android.httpclient.protocol.HTTP;
 
 public class AttendanceManager extends Service {
 
@@ -97,6 +106,11 @@ public class AttendanceManager extends Service {
                 "","*","", MyFirebaseMessagingService.REQUEST_ID_ATTENDANCE);
 
         startForeground(1001, notification);
+
+        if (mGeofencingClient == null) {
+            mGeofencePendingIntent = null;
+            mGeofencingClient = LocationServices.getGeofencingClient(this);
+        }
 
         return START_STICKY;
     }
@@ -347,10 +361,26 @@ public class AttendanceManager extends Service {
             }*/
             K12NetUserReferences.initUserReferences(ctx);
             String deviceID = K12NetUserReferences.getDeviceToken();
-            String connString = K12NetUserReferences.getConnectionAddress() + "/SISCore.Web/api/MyAttendances/GeoFences/"+deviceID+"/"+K12NetUserReferences.getUsername().trim();
+            String connString = K12NetUserReferences.getConnectionAddress() + "/SISCore.Web/api/MyAttendances/GeoFences";
+
+            //RequestParams params = new RequestParams();
+            JSONObject jsonParams = new JSONObject();
+            jsonParams.put("UserName", K12NetUserReferences.getUsername().trim());
+            jsonParams.put("DeviceID", deviceID);
+            StringEntity entity = new StringEntity(jsonParams.toString());
+            //StringEntity entity = new StringEntity(K12NetUserReferences.getUsername().trim(), "UTF-8");
+            entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 
             client.cancelRequests(ctx, true);
-            client.post(connString, responseHandler);
+
+            //BasicHttpEntity entity=new BasicHttpEntity();
+           // entity.setContent(new ByteArrayInputStream(K12NetUserReferences.getUsername().trim().getBytes()));
+           // entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+            //ByteArrayEntity be = new ByteArrayEntity(K12NetUserReferences.getUsername().trim().toString().getBytes());
+            //client.addHeader("Content-Type:", "application/json");
+            //client.addHeader("Accept", "application/json");
+            client.post(ctx, connString, entity, "application/json", responseHandler);
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -423,6 +453,10 @@ public class AttendanceManager extends Service {
             Toast.makeText(ctx, "Error Geofence Broadcast PendingIntent is null.  isGooglePlayServicesAvailable : " + (isGooglePlayServicesAvailable ? "true" : "false"), Toast.LENGTH_SHORT).show();
             return;
         }
+        if (mGeofencingClient == null) {
+            return;
+        }
+        K12NetUserReferences.initUserReferences(ctx);
         mGeofencingClient.removeGeofences(mGeofencePendingIntent)
                 .addOnSuccessListener( new OnSuccessListener<Void>() {
                     @Override

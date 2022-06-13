@@ -44,6 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String s) {
         super.onNewToken(s);
+        K12NetUserReferences.initUserReferences(getApplicationContext());
         K12NetUserReferences.setDeviceToken(s);
     }
 

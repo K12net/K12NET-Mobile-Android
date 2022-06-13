@@ -20,6 +20,8 @@ import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -27,6 +29,9 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.message.BasicHeader;
+import cz.msebera.android.httpclient.protocol.HTTP;
 
 /**
  * Receiver for geofence transition changes.
@@ -125,19 +130,27 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             try {
                 K12NetUserReferences.initUserReferences(context);
                 String connString = K12NetUserReferences.getConnectionAddress() +
-                        "/SISCore.Web/api/MyAttendances/Edit/TakeAttendance/"+
-                        String.valueOf(nearestFence.LocationIX) + "/" +
-                        String.valueOf(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ? "enter" : "exit") + "/" +
-                        K12NetUserReferences.getDeviceToken() + "/" + K12NetUserReferences.getUsername().trim();
+                        "/SISCore.Web/api/MyAttendances/Edit/TakeAttendance";
 
                 final String locationSummary = nearestFence.LocationSummary;
                 final String portal = nearestFence.Portal;
                 final int distanceInM = distanceOfNearest;
 
                 AsyncHttpClient client = K12NetHttpClient.getClient();
-                client.cancelRequests(context, true);
 
-                client.get(connString, new AsyncHttpResponseHandler() {
+                JSONObject jsonParams = new JSONObject();
+
+                jsonParams.put("UserName", K12NetUserReferences.getUsername().trim());
+                jsonParams.put("DeviceID", K12NetUserReferences.getDeviceToken());
+                jsonParams.put("LocationIX", nearestFence.LocationIX);
+                jsonParams.put("Way", geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ? "enter" : "exit");
+                jsonParams.put("DistanceFromRange", (distanceOfNearest - nearestFence.RadiusInMeter));
+
+                StringEntity entity = new StringEntity(jsonParams.toString());
+                entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+
+                client.cancelRequests(context, true);
+                client.post(context, connString, entity, "application/json", new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] response) {
                         try {
