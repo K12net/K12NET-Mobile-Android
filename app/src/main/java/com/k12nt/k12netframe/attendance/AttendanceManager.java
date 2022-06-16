@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +69,7 @@ import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.BasicHttpEntity;
 import cz.msebera.android.httpclient.entity.ByteArrayEntity;
 import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.impl.cookie.BasicClientCookie;
 import cz.msebera.android.httpclient.message.BasicHeader;
 import cz.msebera.android.httpclient.protocol.HTTP;
 
@@ -320,7 +322,7 @@ public class AttendanceManager extends Service {
                 if(location.RadiusInMeter <= 0) continue;
 
                 Geofence geofence = geoBuild
-                        .setRequestId(String.format("%1$f$$$%2$f$$$%3$f$$$%4$d$$$%5$s$$$%6$s",location.Latitude, location.Longitude, location.RadiusInMeter,location.LocationIX,location.LocationSummary,location.Portal))
+                        .setRequestId(location.GetRequestID())
                         //.setLoiteringDelay(2 * 1000)                   // Dwell after 2 seconds
                         //.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                         .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
@@ -344,21 +346,16 @@ public class AttendanceManager extends Service {
             mGeofenceList = new ArrayList<Geofence>();
             AsyncHttpClient client = K12NetHttpClient.getClient();
 
-            /*List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
+            K12CookieStore myCookieStore = new K12CookieStore();
 
-            if (cookies != null && !cookies.isEmpty()) {
-                K12CookieStore myCookieStore = new K12CookieStore();
+            BasicClientCookie newCookie = new BasicClientCookie("UICulture" , K12NetUserReferences.getNormalizedLanguageCode());
+            //newCookie.setVersion(cookie.getVersion());
+            newCookie.setDomain(".k12net.com");
+            newCookie.setPath("/");
+            myCookieStore.addCookie(newCookie);
 
-                for (HttpCookie cookie : cookies) {
-                    BasicClientCookie newCookie = new BasicClientCookie(cookie.getName() , cookie.getValue());
-                    newCookie.setVersion(cookie.getVersion());
-                    newCookie.setDomain(cookie.getDomain());
-                    newCookie.setPath(cookie.getPath());
-                    myCookieStore.addCookie(newCookie);
-                }
+            client.setCookieStore(myCookieStore);
 
-                client.setCookieStore(myCookieStore);
-            }*/
             K12NetUserReferences.initUserReferences(ctx);
             String deviceID = K12NetUserReferences.getDeviceToken();
             String connString = K12NetUserReferences.getConnectionAddress() + "/SISCore.Web/api/MyAttendances/GeoFences";

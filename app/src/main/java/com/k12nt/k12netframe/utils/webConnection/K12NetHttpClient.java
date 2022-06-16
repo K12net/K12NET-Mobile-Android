@@ -11,7 +11,7 @@ import com.loopj.android.http.*;
 
 public class K12NetHttpClient {
     // A SyncHttpClient is an AsyncHttpClient
-    public static AsyncHttpClient syncHttpClient= new SyncHttpClient();
+    public static AsyncHttpClient syncHttpClient = new SyncHttpClient();
     public static AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
     /**

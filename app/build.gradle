@@ -8,8 +8,8 @@ android {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 98
-        versionName "1.32.54"
+        versionCode 100
+        versionName "1.32.56"
     }
     buildTypes {
         release {

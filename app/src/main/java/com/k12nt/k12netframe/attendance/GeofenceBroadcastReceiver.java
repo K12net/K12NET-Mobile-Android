@@ -97,8 +97,8 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     data.Longitude = nf.parse(parts[1]).doubleValue();
                     data.RadiusInMeter = nf.parse(parts[2]).floatValue();
                     data.LocationIX = nf.parse(parts[3]).intValue();
-                    data.LocationSummary = parts[4];
-                    data.Portal = parts[5];
+                    data.Portal = parts[4];
+                    data.LocationSummary = parts[5];
 
                     fenceList.add(data);
                 } catch (ParseException e) {
