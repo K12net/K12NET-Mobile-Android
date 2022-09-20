@@ -11,17 +11,16 @@
         android:layout_height="match_parent"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="@string/back"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:src="@drawable/arrow_previous_white" />
+            android:src="@drawable/previous" />
 
     </LinearLayout>
 
@@ -32,17 +31,16 @@
         android:layout_toEndOf="@+id/lyt_back"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/btn_home"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="Home"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:src="@drawable/home_white" />
+            android:src="@drawable/home" />
     </LinearLayout>
 
     <LinearLayout
@@ -53,17 +51,40 @@
         android:layout_toEndOf="@+id/lyt_back"
         android:background="@drawable/torquese_button_flat"
         android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/btn_next"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="Next"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:src="@drawable/arrow_next_white" />
+            android:src="@drawable/next" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lyt_settings"
+        android:layout_width="44dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="60dp"
+        android:background="@drawable/torquese_button_flat"
+        android:gravity="center|start"
+        android:orientation="vertical"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp">
+
+        <ImageView
+            android:id="@+id/btn_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/action_settings"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:src="@drawable/settings" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -83,6 +104,7 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:contentDescription="Refresh"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:src="@drawable/reload" />

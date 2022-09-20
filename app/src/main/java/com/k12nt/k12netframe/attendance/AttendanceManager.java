@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -46,7 +47,8 @@ import com.google.gson.reflect.TypeToken;
 import com.k12nt.k12netframe.BuildConfig;
 import com.k12nt.k12netframe.K12NetSettingsDialogView;
 import com.k12nt.k12netframe.R;
-import com.k12nt.k12netframe.LoginActivity;
+import com.k12nt.k12netframe.WebViewerActivity;
+import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.fcm.MyFirebaseMessagingService;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -178,7 +180,7 @@ public class AttendanceManager extends Service {
         return null;
     }
 
-    private void startAttendanceService(LoginActivity activity) {
+    private void startAttendanceService(WebViewerActivity activity) {
         final Intent intent = new Intent(activity, AttendanceManager.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             activity.startForegroundService(intent);
@@ -187,12 +189,12 @@ public class AttendanceManager extends Service {
         }
     }
 
-    public void stopAttendanceService(LoginActivity activity) {
+    public void stopAttendanceService(WebViewerActivity activity) {
         final Intent intent = new Intent(activity, AttendanceManager.class);
         activity.stopService(intent);
     }
 
-    public void initialize(LoginActivity activity, TaskHandler handler) {
+    public void initialize(WebViewerActivity activity, TaskHandler handler) {
         try {
             if(K12NetUserReferences.isPermitBackgroundLocation() != null && K12NetUserReferences.isPermitBackgroundLocation() == false) {
                 handler.onTaskCompleted("Cancel");
@@ -235,6 +237,15 @@ public class AttendanceManager extends Service {
                 public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
                     // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                     e.printStackTrace();
+
+                    String json = null;
+                    try {
+                        json = new String(errorResponse, "UTF-8");
+                        Log.i("WEB", "bindFenceData.onFailure: " + json);
+                    } catch (UnsupportedEncodingException ex) {
+                        ex.printStackTrace();
+                    }
+
                     Toast.makeText(activity, "Error Code 1071 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     handler.onTaskCompleted("Error");
                 }
@@ -245,11 +256,11 @@ public class AttendanceManager extends Service {
         }
     }
 
-    private void bindLocationRequest(LoginActivity activity) {
+    private void bindLocationRequest(WebViewerActivity activity) {
         try
         {
             LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setPriority(Priority.PRIORITY_HIGH_ACCURACY);
             locationRequest.setInterval(LOCATION_INTERVAL); // Set the desired interval for active location updates, in milliseconds.
             locationRequest.setFastestInterval(LOCATION_INTERVAL / 4); //This controls the fastest rate at which your application will receive location updates, which might be faster than setInterval(long) in some situations (for example, if other applications are triggering location updates).
             locationRequest.setSmallestDisplacement(10); // Set the minimum displacement between location updates in meters
@@ -348,7 +359,7 @@ public class AttendanceManager extends Service {
 
             K12CookieStore myCookieStore = new K12CookieStore();
 
-            BasicClientCookie newCookie = new BasicClientCookie("UICulture" , K12NetUserReferences.getNormalizedLanguageCode());
+            BasicClientCookie newCookie = new BasicClientCookie("UICulture" , K12NetUserReferences.getLanguageCode());
             //newCookie.setVersion(cookie.getVersion());
             newCookie.setDomain(".k12net.com");
             newCookie.setPath("/");
@@ -359,6 +370,8 @@ public class AttendanceManager extends Service {
             K12NetUserReferences.initUserReferences(ctx);
             String deviceID = K12NetUserReferences.getDeviceToken();
             String connString = K12NetUserReferences.getConnectionAddress() + "/SISCore.Web/api/MyAttendances/GeoFences";
+
+            if(deviceID == null || deviceID.equals("")) return;
 
             //RequestParams params = new RequestParams();
             JSONObject jsonParams = new JSONObject();
@@ -501,7 +514,7 @@ public class AttendanceManager extends Service {
         return mGeofencePendingIntent;
     }
 
-    public boolean checkAndRequestPermissions(LoginActivity activity) {
+    public boolean checkAndRequestPermissions(WebViewerActivity activity) {
 
         List<String> permissions = new ArrayList<String>();
         boolean showMessage = false;
@@ -557,7 +570,7 @@ public class AttendanceManager extends Service {
         return true;
     }
 
-    private void showAlertDialogForRequestingPermission(LoginActivity activity) {
+    private void showAlertDialogForRequestingPermission(WebViewerActivity activity) {
         Runnable confirmation = () -> {
             if(!activity.isConfirmed) return;
             // Build intent that displays the App settings screen.

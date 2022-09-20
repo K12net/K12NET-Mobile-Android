@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/login_background_repeat">
@@ -16,7 +17,9 @@
             android:layout_height="160dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="12dp"
-            android:src="@drawable/k12net_logo" />
+            android:src="@drawable/k12net_logo"
+            tools:ignore="ImageContrastCheck"
+            android:contentDescription="TODO" />
 
         <com.k12nt.k12netframe.component.AsistoTextView
             android:id="@+id/lbl_login_subtitle"
@@ -26,88 +29,14 @@
             android:layout_marginBottom="10dp"
             android:text="@string/action_settings"
             android:textAppearance="@style/Asisto_BigLabelWhite"
+            android:textColor="#039BE5"
             android:textSize="36sp"
             android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/txt_connection_address"
-            style="@style/Asisto_TextBox"
-            android:hint="@string/appServerUrl"
-            android:inputType="textNoSuggestions"
-            android:text="okul.k12net.com" />
-
-        <EditText
-            android:id="@+id/txt_fs_address"
-            style="@style/Asisto_TextBox"
-            android:hint="@string/fileServerUrl"
-            android:inputType="textNoSuggestions"
-            android:text="fs.k12net.com/FS/"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="visible"
-            android:weightSum="1">
-
-            <ToggleButton
-                android:id="@+id/btn_tr"
-                style="@style/Asisto_SmallButton"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="TR"
-                android:textOff="TR"
-                android:textOn="TR" />
-
-            <ToggleButton
-                android:id="@+id/btn_en"
-                style="@style/Asisto_SmallButton"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="EN"
-                android:textOff="EN"
-                android:textOn="EN" />
-
-            <ToggleButton
-                android:id="@+id/btn_ar"
-                style="@style/Asisto_SmallButton"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text=" ع "
-                android:textOff=" ع "
-                android:textOn=" ع " />
-
-            <ToggleButton
-                android:id="@+id/btn_fr"
-                style="@style/Asisto_SmallButton"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="FR"
-                android:textOff="FR"
-                android:textOn="FR" />
-
-            <ToggleButton
-                android:id="@+id/btn_ru"
-                style="@style/Asisto_SmallButton"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="RU"
-                android:textOff="RU"
-                android:textOn="RU" />
-
-        </LinearLayout>
 
         <Switch
             android:id="@+id/swtGeoFenceMonitor"
             android:layout_width="251dp"
-            android:layout_height="37dp"
+            android:layout_height="48dp"
             android:layout_marginTop="15dp"
             android:autoText="false"
             android:showText="false"
@@ -117,9 +46,11 @@
         <Button
             android:id="@+id/btn_save"
             style="@style/Asisto_Button"
+            android:layout_height="48dp"
             android:layout_marginTop="15dp"
             android:gravity="center"
-            android:text="@string/save" />
+            android:text="@string/save"
+            android:visibility="invisible" />
 
         <Button
             android:id="@+id/btn_policy"
@@ -127,8 +58,11 @@
             android:layout_width="254dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
+            android:background="#03A9F4"
             android:gravity="center"
-            android:text="@string/privacy_policy" />
+            android:text="@string/privacy_policy"
+            android:textColor="#F8F6F6"
+            android:textColorHighlight="#FAF8F8" />
 
     </LinearLayout>
 

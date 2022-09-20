@@ -80,28 +80,42 @@
          android:requestLegacyExternalStorage="true"
          android:hardwareAccelerated="true">
 
-         <activity
-             android:launchMode="singleTop"
-             android:hardwareAccelerated="true"
-             android:name="com.k12nt.k12netframe.LoginActivity" android:configChanges="locale"
-             android:exported="true">
-             <intent-filter>
-                 <action android:name="android.intent.action.MAIN" />
-                 <action android:name="android.intent.action.VIEW" />
-                 <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>
-         </activity>
-         <receiver
-             android:name="com.k12nt.k12netframe.fcm.NotificationReceiver"
-             android:enabled="true"
-             android:exported="true">
-         </receiver>
+         <!-- <activity
+              android:launchMode="singleTop"
+              android:hardwareAccelerated="true"
+              android:name="com.k12nt.k12netframe.LoginActivity" android:configChanges="locale"
+              android:exported="true">
+              <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+                  <action android:name="android.intent.action.VIEW" />
+                  <category android:name="android.intent.category.LAUNCHER" />
+              </intent-filter>
+          </activity>-->
 
-         <!--  <service
-                 android:name=".attendance.LocationUpdatesService"
-                 android:foregroundServiceType="location" />
+          <activity
+              android:launchMode="singleTop"
+              android:name="com.k12nt.k12netframe.WebViewerActivity" android:configChanges="orientation|screenSize|locale"
+              android:taskAffinity=""
+              android:hardwareAccelerated="true"
+              android:exported="true">
+              <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+                  <action android:name="android.intent.action.VIEW" />
+                  <category android:name="android.intent.category.LAUNCHER" />
+              </intent-filter>
+          </activity>
 
-                 -->
+          <receiver
+              android:name="com.k12nt.k12netframe.fcm.NotificationReceiver"
+              android:enabled="true"
+              android:exported="true">
+          </receiver>
+
+          <!--  <service
+                  android:name=".attendance.LocationUpdatesService"
+                  android:foregroundServiceType="location" />
+
+                  -->
 
          <!--  <service android:name=".attendance.GeofenceTransitionsIntentService"/>-->
          <service
@@ -131,16 +145,6 @@
              android:foregroundServiceType="location" />
              -->
 
-        <activity
-            android:name="com.k12nt.k12netframe.WebViewerActivity" android:configChanges="orientation|screenSize|locale"
-            android:taskAffinity=""
-            android:hardwareAccelerated="true"
-            android:excludeFromRecents="true"
-            android:exported="false">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
          <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data

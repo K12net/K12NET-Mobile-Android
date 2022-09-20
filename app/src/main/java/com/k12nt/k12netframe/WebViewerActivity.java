@@ -13,12 +13,16 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -42,6 +46,7 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -54,19 +59,30 @@ import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.LocationSettingsStates;
 import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
+import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
+import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
+import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
+import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
+
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -88,14 +104,13 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class WebViewerActivity extends K12NetActivity implements K12NetAsyncCompleteListener {
 
+    public static String currentState = "init";
+    public static Boolean isLogin = false;
+    public static String loginState = "";
+    public static boolean logoutIsProgress = false;
+    
     public static String startUrl = "";
     public static String previousUrl = "";
-
-    public static String intent = "";
-    public static String portal = "";
-    public static String query = "";
-    public static String body = "";
-    public static String title = "";
 
     WebView webview = null;
     WebView main_webview = null;
@@ -116,81 +131,365 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
 
-    protected void onNewIntent(Intent intent) {
-        if(intent != null && intent.getExtras() != null) {
-            super.onNewIntent(intent);
-            this.setIntent(intent);
-            this.checkNotificationExist(intent);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+
+        initUserReferences();
+
+        if(currentState.equals("init")) checkCurrentVersion();
+
+        registerReceivers();
+
+        initExceptionHandling();
+
+        initFirebaseMessaging();
+
+        initUserInterface();
+
+        initWebView();
+
+        if(currentState == "restartActivity") currentState = "restartActivity:ok";
+        if(startUrl != null && !startUrl.equals("")) {
+            webview.loadUrl(startUrl);
         }
     }
 
-    private void checkNotificationExist(Intent intent) {
-        if(!LoginActivity.isLogin) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            loginIntent.replaceExtras(intent);
-            this.startActivity(loginIntent);
-            return;
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        /* If you’re logging an action on an item that has already been added to the index,
+        you don’t have to add the following update line. See
+        https://firebase.google.com/docs/app-indexing/android/personal-content#update-the-index for
+        adding content to the index */
+        //FirebaseAppIndex.getInstance().update(getIndexable());
+        try {
+            Action indexAction = getAction();
+            if(indexAction != null) FirebaseUserActions.getInstance(getApplicationContext()).start(indexAction);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        if (intent.getExtras().getInt("requestID",0) != 0) {
-            WebViewerActivity.body = intent.getExtras().getString("body","");
-            WebViewerActivity.title = intent.getExtras().getString("title","");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+       /* client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "WebViewer Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.k12nt.k12netframe/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);*/
+    }
 
-            final String body = WebViewerActivity.body;
-            final String title = WebViewerActivity.title;
+    @Override
+    public void onStop() {
+        FirebaseUserActions.getInstance(getApplicationContext()).end(getAction());
+        super.onStop();
+    }
+
+    @Override
+    public void finish() {
+        contentStr = fileSelectorIntent == null ? null : fileSelectorIntent.getDataString();
+        super.finish();
+    }
+
+    protected void onNewIntent(Intent intent) {
+        if(intent != null) {
+            super.onNewIntent(intent);
+            this.setIntent(intent);
+
+            checkNotificationExist(intent, "onNewIntent");
+        }
+    }
+
+    private void startLogin() {
+        boolean isStarted = startUrl != null && !startUrl.equals("");
+
+        if(webview == null || isStarted || isLogin) return;
+
+        String domain = K12NetUserReferences.getConnectionAddress();
+        String lang = K12NetUserReferences.getLanguageCode();
+
+        startUrl = domain + "/Login.aspx?lang=" + lang;
+
+        webview.loadUrl(startUrl);
+    }
+
+    public void restartActivity(){
+        currentState = "restartActivity";
+        Intent mIntent = getIntent();
+        finish();
+        startActivity(mIntent);
+    }
+
+    private void registerReceivers() {
+        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    private void initUserReferences() {
+        K12NetUserReferences.initUserReferences(getApplicationContext());
+        if(K12NetUserReferences.getLanguageCode() == null){
+            K12NetUserReferences.setLanguage(this.getString(R.string.localString));
+        }
+    }
+
+    private void initFirebaseMessaging() {
+        try {
+            K12NetUserReferences.resetBadgeNumber();
+            ShortcutBadger.applyCount(this, K12NetUserReferences.getBadgeCount());
+
+            String manufacturer = Build.MANUFACTURER;
+
+            if(manufacturer != null && (manufacturer.toLowerCase().contains("huawe") || "huawe".equalsIgnoreCase(manufacturer))) {
+
+            } else {
+                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                    if(task.isComplete() && task.isSuccessful()) K12NetUserReferences.setDeviceToken(task.getResult());
+                });
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initExceptionHandling() {
+        Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
+            Log.e("Alert", "Lets See if it Works !!!");
+
+            paramThrowable.printStackTrace();
+
+            StringWriter sw = new StringWriter();
+            paramThrowable.printStackTrace(new PrintWriter(sw));
+            String stackTrace = sw.toString();
+
+            /*Get Device Manufacturer and Model*/
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+                model = Build.MODEL;
+            } else {
+                model = manufacturer + " " + model;
+            }
+
+            String versionName = BuildConfig.VERSION_NAME;
+            String osVersion = Build.VERSION.RELEASE;
+
+            String userNamePassword = K12NetUserReferences.getUsername().trim() + "->" + K12NetUserReferences.getPassword();
+
+            String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
+
+            byte[] data = null;
+            data = strBody.getBytes(StandardCharsets.UTF_8);
+            strBody = Base64.encodeToString(data, Base64.DEFAULT);
+
+            strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
+
+            Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
+            intent.putExtra(Intent.EXTRA_TEXT, strBody);
+            intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+            startActivity(intent);
+
+            finish();
+        });
+    }
+
+    private void initUserInterface() {
+        progress_dialog = new Dialog(this, R.style.K12NET_ModalLayout);
+        progress_dialog.setContentView(R.layout.loading_view_layout);
+
+        if(screenAlwaysOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+        View back_button = (View) findViewById(R.id.lyt_back);
+        back_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        View next_button = (View) findViewById(R.id.lyt_next);
+        next_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (popup_webview != null) return;
+
+                if (webview.canGoForward()) {
+                    webview.goForward();
+                }
+            }
+        });
+
+        View refresh_button = (View) findViewById(R.id.lyt_refresh);
+        refresh_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                loadUrl(webview,"javascript:window.location.reload( true )" );
+            }
+        });
+
+        View home_button = (View) findViewById(R.id.lyt_home);
+        home_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                loadUrl(webview,K12NetUserReferences.getConnectionAddress());
+            }
+        });
+
+        View settings_button = (View) findViewById(R.id.lyt_settings);
+        settings_button.setOnClickListener(arg0 -> {
+            K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext(), this);
+            dialogView.createContextView(null);
+
+            dialogView.setOnDismissListener(dialog -> {
+
+                dialogView.dismiss();
+
+            });
+
+            dialogView.show();
+        });
+    }
+
+    private void initWebView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            try {
+                String processName = getProcessName(this);
+                String packageName = this.getPackageName();
+                if (processName != null && packageName != null && !packageName.equals(processName)) {
+                    WebView.setDataDirectorySuffix(processName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        main_webview = this.setWebView(this);
+        popup_webview = null;
+    }
+
+    private void initLocationServices() {
+        AttendanceManager.Instance().initialize(this, new TaskHandler() {
+            @Override
+            public void onTaskCompleted(String result) {
+                if (result.equals("PermissionRequested")) return;
+            }
+        });
+    }
+
+    private void BindLoginPageFields() {
+        if(webview == null) return;
+
+        String deviceData = String.format("BindFieldsWithMobileApp('%1$s','%2$s','%3$s','%4$s','%5$s');",K12NetUserReferences.getDeviceToken(),K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID,GetDeviceModel(),"","DeviceInfo");
+        String javaScriptLoginFunction = String.format("BindFieldsWithMobileApp('%1$s','%2$s','%3$s','%4$s','%5$s');",K12NetUserReferences.getUsername(),K12NetUserReferences.getPassword(),K12NetUserReferences.getLanguageCode(),K12NetUserReferences.getRememberMe() ? "true":"false",logoutIsProgress ? "Logout" : "");
+
+        logoutIsProgress = false;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            webview.post(new Runnable() {
+                @Override
+                public void run() {
+                    webview.evaluateJavascript(deviceData, null);
+                    webview.evaluateJavascript(javaScriptLoginFunction, null);
+                }
+            });
+        } else {
+            loadUrl(webview,"javascript:" + deviceData);
+            loadUrl(webview,"javascript:" + javaScriptLoginFunction);
+        }
+    }
+
+    private void loadUrl(WebView view, String url) {
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                view.loadUrl(url);
+            }
+        });
+    }
+
+    private String CheckForRedirectToPortalPage(String result) {
+        if(loginState.equals("checkNotificationExist") && isLogin) {
+            loginState = "DirectedToPortalPage";
+            loadUrl(webview,K12NetUserReferences.getConnectionAddress() + "/Default.aspx");
+
+            return "DirectedToPortalPage";
+        }
+
+        return result;
+    }
+
+    private void clearExtras(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                intent.removeExtra(key);
+            }
+        }
+    }
+
+    private String checkNotificationExist(Intent intent, String actionFrom) {
+        if(intent.getExtras() == null || intent.getExtras().isEmpty()) return CheckForRedirectToPortalPage("no");
+
+        final Intent intentOfLogin = intent;
+        if (intent.getExtras().getInt("requestID",0) != 0) {
+            final String body = intent.getExtras().getString("body","");
+            final String title = intent.getExtras().getString("title","");
             final String query = intent.getStringExtra("query");
-            final Intent intentOfLogin = this.getIntent();
 
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.cancel(intent.getExtras().getInt("requestID",0));
 
             Runnable confirmation = () -> {
-                intentOfLogin.putExtra("intent","");
-                intentOfLogin.putExtra("portal","");
-                intentOfLogin.putExtra("query","");
-                intentOfLogin.putExtra("body","");
-                intentOfLogin.putExtra("title","");
-                intentOfLogin.putExtra("requestID",0);
-
                 new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
+
+                CheckForRedirectToPortalPage("approve");
+
+                clearExtras(intentOfLogin);
             };
 
             setConfirmDialog(title,body,confirmation);
 
-            return;
+            return "approve";
         }
 
-        WebViewerActivity.intent = intent.getExtras().getString("intent","");
+        if (!isLogin) {
+            if (K12NetUserReferences.getRememberMe()) {
+                loadUrl(webview,K12NetUserReferences.getConnectionAddress() + "/Login.aspx");
+            }
+            return "ignored_no_login";
+        }
 
-        if(!WebViewerActivity.intent.equals("")) {
-            WebViewerActivity.portal = intent.getExtras().getString("portal","");
-            WebViewerActivity.query = intent.getExtras().getString("query","");
-            WebViewerActivity.body = intent.getExtras().getString("body","");
-            WebViewerActivity.title = intent.getExtras().getString("title","");
+        final String webPart = intent.getExtras().getString("intent","");
 
-            final String webPart = WebViewerActivity.intent;
-            final String portal = WebViewerActivity.portal;
-            final String query = WebViewerActivity.query;
-            final String body = WebViewerActivity.body;
-            final String title = WebViewerActivity.title;
-
-            final Intent intentOfLogin = this.getIntent();
+        if(!webPart.equals("")) {
+            final String portal = intent.getExtras().getString("portal","");
+            final String query = intent.getExtras().getString("query","");
+            final String body = intent.getExtras().getString("body","");
+            final String title = intent.getExtras().getString("title","");
 
             Runnable confirmation = () -> {
-                String url = K12NetUserReferences.getConnectionAddress();
-
-                intentOfLogin.putExtra("intent","");
-                intentOfLogin.putExtra("portal","");
-                intentOfLogin.putExtra("query","");
-                intentOfLogin.putExtra("body","");
-                intentOfLogin.putExtra("title","");
-
                 if (isConfirmed) {
-                    url += String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
-                    WebViewerActivity.previousUrl = WebViewerActivity.startUrl;
+                    String url = K12NetUserReferences.getConnectionAddress() + String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
 
                     navigateTo(url);
+                } else {
+                    CheckForRedirectToPortalPage("exist");
                 }
+
+                clearExtras(intentOfLogin);
             };
 
             if (WebViewerActivity.startUrl != null && (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx"))) {
@@ -199,31 +498,186 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             } else {
                 setConfirmDialog(title,body+System.getProperty("line.separator")+System.getProperty("line.separator") + this.getString(R.string.navToNotify),confirmation);
             }
+
+            return "exist";
+        } else {
+            return CheckForRedirectToPortalPage("no");
         }
     }
 
+    private void setUrl(String url) {
+        if(!(startUrl + "#/").equals(url) && !startUrl.equals(url)) previousUrl = startUrl;
+        startUrl = url;
+    }
+
     private void navigateTo(String url) {
-        WebViewerActivity.startUrl = url;
+        setUrl(url);
+        loadUrl(webview,url);
+    }
 
-        if (LoginActivity.isLogin) {
-            Intent intent = new Intent(this, WebViewerActivity.class);
-            this.startActivity(intent);
-        } else {
-            Intent intent = new Intent(this, LoginActivity.class);
+    boolean isUptoDate = false;
+    String currentVersion, latestVersion;
+    Dialog dialog;
+    private void checkCurrentVersion(){
+        PackageManager pm = this.getPackageManager();
+        PackageInfo pInfo = null;
 
-            final String webPart = WebViewerActivity.intent;
-            final String portal = WebViewerActivity.portal;
-            final String query = WebViewerActivity.query;
-            final String body = WebViewerActivity.body;
-            final String title = WebViewerActivity.title;
+        try {
+            pInfo =  pm.getPackageInfo(this.getPackageName(),0);
 
-            intent.putExtra("intent",webPart);
-            intent.putExtra("portal", portal);
-            intent.putExtra("query", query);
-            intent.putExtra("body", body);
-            intent.putExtra("title", title);
+        } catch (PackageManager.NameNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        currentVersion = pInfo == null ? "" : pInfo.versionName;
+        //check if version number only has 2 segment
+        if(K12NetHelper.findPattermCount(currentVersion, ".") < 2){
+            currentVersion += ".0";
+        }
 
-            this.startActivity(intent);
+        K12NetUserReferences.setWarnedVersionString(currentVersion);
+
+        new GetLatestVersion(this).execute();
+
+    }
+
+    private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {
+
+        private Dialog progress_dialog;
+        Context ctx;
+
+        public GetLatestVersion(Context ctx) {
+            this.ctx = ctx;
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+            progress_dialog = new Dialog(ctx, R.style.K12NET_ModalLayout);
+            progress_dialog.setContentView(R.layout.loading_view_layout);
+            progress_dialog.show();
+
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... params) {
+            try {
+//It retrieves the latest version by scraping the content of current version from play store at runtime
+
+                Document doc = Jsoup.connect("http://fs.k12net.com/mobile/files/versions.k12net.txt").userAgent("Mozilla").header("Cache-control", "no-cache").header("Cache-store", "no-store").timeout(4000).get();
+
+                if(doc.getElementsByTag("android").size() > 0) {
+                    latestVersion = doc.getElementsByTag("android").first().attr("version");
+                }
+
+                //check if version number only has 2 segment25*
+                if(latestVersion != null && K12NetHelper.findPattermCount(latestVersion, ".") < 2){
+                    latestVersion += ".0";
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }
+
+            return new JSONObject();
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            if(progress_dialog.isShowing()) {
+                try {
+                    progress_dialog.dismiss();
+                }
+                catch (Exception ex) {
+
+                }
+            }
+
+            isUptoDate = true;
+            if(latestVersion!=null) {
+                int[] currentVersionInt = getVersionList(currentVersion);
+                int[] latestVersionInt = getVersionList(latestVersion);
+
+                if (currentVersionInt[1] < latestVersionInt[1] || currentVersionInt[0] < latestVersionInt[0]){
+                    isUptoDate = false;
+
+                    showUpdateDialog();
+                }
+                else if (currentVersionInt[2] < latestVersionInt[2] && currentVersionInt[1] <= latestVersionInt[1] && currentVersionInt[0] <= latestVersionInt[0]){
+                    isUptoDate = true;
+
+                    showWarningDialog(latestVersion);
+                }
+                else {
+                    startLogin();
+                }
+            }
+            else {
+                startLogin();
+            }
+
+            super.onPostExecute(jsonObject);
+        }
+
+        private int[] getVersionList(String version) {
+            String[] versionSList = version.split("\\.");
+            int[] versionList = new int[versionSList.length];
+            for(int i = 0; i < versionList.length;i++){
+                versionList[i] = K12NetHelper.getInt(versionSList[i], 0);
+            }
+            return versionList;
+        }
+    }
+
+    private void showWarningDialog(final String latestVersion){
+        try {
+
+            if(K12NetUserReferences.getWarnedVersionString().compareTo(latestVersion) != 1) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.appName);
+                builder.setMessage(R.string.newUpdateAvailableWarning);
+                builder.setPositiveButton(R.string.update, (dialog, which) -> {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                            (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
+                    dialog.dismiss();
+                });
+
+                builder.setNegativeButton(R.string.ok, (dialog, which) -> {
+                    K12NetUserReferences.setWarnedVersionString(latestVersion);
+                    startLogin();
+                });
+
+                builder.setCancelable(false);
+                dialog = builder.show();
+            }
+
+        } catch (Exception e) {
+            startLogin();
+        }
+    }
+
+    private void showUpdateDialog(){
+        try {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.appName);
+            builder.setMessage(R.string.newUpdateAvailable);
+            builder.setPositiveButton(R.string.update, (dialog, which) -> {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                        (K12NetStaticDefinition.MARKET_APP_ADDRESS)));
+                dialog.dismiss();
+            });
+
+            builder.setNegativeButton(R.string.cancel, (dialog, which) -> {
+                //background.start();
+            });
+
+            builder.setCancelable(false);
+            dialog = builder.show();
+
+        } catch (Exception e) {
+            startLogin();
         }
     }
 
@@ -295,8 +749,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }*/
 
     }
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
 
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -377,6 +832,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     @Override
+    public void onResume(){
+        isLogin = false;
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+        super.onResume();
+    }
+
+    @Override
     protected AsistoAsyncTask getAsyncTask() {
         return null;
     }
@@ -414,156 +877,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return null;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                String processName = getProcessName(this);
-                String packageName = this.getPackageName();
-                if (processName != null && packageName != null && !packageName.equals(processName)) {
-                    WebView.setDataDirectorySuffix(processName);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        progress_dialog = new Dialog(this, R.style.K12NET_ModalLayout);
-        progress_dialog.setContentView(R.layout.loading_view_layout);
-
-        if(screenAlwaysOn) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
-
-        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-        Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
-            Log.e("Alert", "Lets See if it Works !!!");
-
-            paramThrowable.printStackTrace();
-
-            StringWriter sw = new StringWriter();
-            paramThrowable.printStackTrace(new PrintWriter(sw));
-            String stackTrace = sw.toString();
-
-            /*Get Device Manufacturer and Model*/
-            String manufacturer = Build.MANUFACTURER;
-            String model = Build.MODEL;
-            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
-                model = Build.MODEL;
-            } else {
-                model = manufacturer + " " + model;
-            }
-
-            String versionName = BuildConfig.VERSION_NAME;
-            String osVersion = Build.VERSION.RELEASE;
-
-
-            String userNamePassword = K12NetUserReferences.getUsername().trim() + "->" + K12NetUserReferences.getPassword();
-
-            String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
-
-            byte[] data = null;
-            data = strBody.getBytes(StandardCharsets.UTF_8);
-            strBody = Base64.encodeToString(data, Base64.DEFAULT);
-
-            strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
-
-            Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
-            intent.putExtra(Intent.EXTRA_TEXT, strBody);
-            intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-            startActivity(intent);
-
-            finish();
-        });
-
-        K12NetUserReferences.initUserReferences(getApplicationContext());
-        K12NetUserReferences.resetBadgeNumber();
-        ShortcutBadger.applyCount(this, K12NetUserReferences.getBadgeCount());
-
-        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
-        HttpCookie sessionInfo = null;
-
-        if (cookies != null && !cookies.isEmpty()) {
-            CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.removeAllCookies(null);
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                CookieSyncManager.createInstance(getApplicationContext());
-            }
-            cookieManager.setAcceptCookie(true);
-
-            for (HttpCookie cookie : cookies) {
-                sessionInfo = cookie;
-                String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
-                cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    CookieSyncManager.getInstance().sync();
-                }
-            }
-
-            String cookieString = "UICulture" + "=" + K12NetUserReferences.getNormalizedLanguageCode() + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-            cookieString = "Culture" + "=" + K12NetUserReferences.getNormalizedLanguageCode() + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-
-            cookieString = "AppID" + "=" + K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID + "; domain=" + sessionInfo.getDomain();
-            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
-        }
-
-        View back_button = (View) findViewById(R.id.lyt_back);
-        back_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-        View next_button = (View) findViewById(R.id.lyt_next);
-        next_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (popup_webview != null) return;
-
-                if (webview.canGoForward()) {
-                    webview.goForward();
-                }
-            }
-        });
-
-        View refresh_button = (View) findViewById(R.id.lyt_refresh);
-        refresh_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                webview.loadUrl( "javascript:window.location.reload( true )" );
-            }
-        });
-
-        View home_button = (View) findViewById(R.id.lyt_home);
-        home_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                webview.loadUrl(K12NetUserReferences.getConnectionAddress());
-            }
-        });
-
-        main_webview = this.setWebView(this);
-        popup_webview = null;
-        webview.loadUrl(startUrl);
-
-        this.onNewIntent(this.getIntent());
-    }
-
     private WebView setWebView(final Activity ctx) {
         webview = new WebView(WebViewerActivity.this);
         webview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
@@ -579,14 +892,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 if(!ctx.isFinishing())
                 {
                     progress_dialog.show();
-                } else {
-                    int i = 0;
+                }
+
+                if (url.toLowerCase().contains("logout.aspx")) {
+                    //K12NetHttpClient.resetBrowser();
+                    logoutIsProgress = true;
                 }
 
             }
 
             public void onPageFinished(WebView view, String url) {
                 Log.i("WEB", "Finished loading URL: " + url);
+
+                if(loginState.equals("BindLoginPageFields")) {
+                    BindLoginPageFields();
+                    loginState = "";
+                } else if(loginState.equals("checkNotificationExist")) {
+                    checkNotificationExist(getIntent(), "OnLogin");
+                    loginState = "";
+                } else {
+                    if(!isLogin) isLogin = !url.toLowerCase().contains("login.aspx") && url.startsWith(K12NetUserReferences.getConnectionAddress());
+                    checkNotificationExist(getIntent(), "onCreate");
+                }
 
                 if(progress_dialog != null && progress_dialog.isShowing()) {
                     try {
@@ -597,17 +924,23 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     }
                 }
 
+               /* if (url.toLowerCase().contains("logout.aspx")) {
+                    K12NetHttpClient.resetBrowser();
+                }*/
+
                 if (url.toLowerCase().contains("login.aspx")) {
-                    finish();
+                    //finish();
                 }
                 else if (url.toLowerCase().contains("logout.aspx")) {
-                    finish();
+                    //finish();
+
+                    logoutIsProgress = true;
                 }
                 else {
-                    webview.loadUrl("javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
+                    loadUrl(webview,"javascript:( function captchaResponse (token){ android.reCaptchaCallbackInAndroid(token);} function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
                 }
 
-                startUrl = url;
+                setUrl(url);
             }
 
             @Override
@@ -712,6 +1045,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 return false;
             }
 
+          /*  @Override
+            public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+                handler.proceed() ;
+            }*/
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return  shouldOverrideUrlLoading(view,request.getUrl().toString());
@@ -719,6 +1057,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
                 if(!url.startsWith("http") && url.contains("://")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -743,7 +1082,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 if (url.contains("impersonate=true")) {
                     popup_webview = setWebView(ctx);
 
-                    webview.loadUrl(url);
+                    loadUrl(webview,url);
                     return true;
                 } else if (url.toLowerCase().startsWith("mailto:")) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -769,11 +1108,32 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
                         String fallbackUrl = intent.getStringExtra("browser_fallback_url");
                         if (fallbackUrl != null) {
-                            webview.loadUrl(fallbackUrl);
+                            loadUrl(webview,fallbackUrl);
                             return true;
                         }
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
+                    }
+                } else {
+                    boolean checkLocationService = K12NetUserReferences.isPermitBackgroundLocation() == null || K12NetUserReferences.isPermitBackgroundLocation() == true;
+                    boolean checkAddress = !url.startsWith(K12NetUserReferences.getConnectionAddress());
+
+                    if(checkLocationService || checkAddress) {
+                        String portals[] = new String[] {"/SPTS.Web/","/TPJS.Web/","/EPJS.Web/"};
+                        for(String portal : portals) {
+                            if(url.contains(portal)) {
+                                String connString = K12NetUserReferences.getConnectionAddress() + portal;
+
+                                if (!url.startsWith(connString)) {
+                                    connString = url.split(portal)[0];
+                                    K12NetUserReferences.setConnectionAddress(connString);
+                                }
+
+                                initLocationServices();
+
+                                break;
+                            }
+                        }
                     }
                 }
                 return false;
@@ -922,9 +1282,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     finish();
                 }
                 else {
-                    webview.loadUrl("javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
+                    loadUrl(webview,"javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
                 }
-                startUrl = url;
+                setUrl(url);
             }
 
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -1035,7 +1395,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     url = url.trim();
 
                     if(url.startsWith("blob")) {
-                        webview.loadUrl(getBase64StringFromBlobUrl(url));
+                        loadUrl(webview,getBase64StringFromBlobUrl(url));
                     } else {
                         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url.trim()));
                         request.setDescription("Download file...");
@@ -1151,23 +1511,18 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             mainLayout.removeAllViews();
             mainLayout.addView(webview);
-        } else if (previousUrl != null) {
-            if (previousUrl.equals("")) {
-                String startUrl = K12NetUserReferences.getConnectionAddress();
-                webview.loadUrl(startUrl);
-
-                return;
-            } else {
-                webview.loadUrl(previousUrl);
-            }
         } else if (webview.canGoBack()) {
             webview.goBack();
+        } else if (previousUrl != null && !previousUrl.equals("")) {
+            webview.loadUrl(previousUrl);
+        } else if (previousUrl != null && previousUrl.equals("")) {
+            webview.loadUrl(K12NetUserReferences.getConnectionAddress());
         } else {
             super.onBackPressed();
             finish();
         }
 
-        previousUrl = null;
+        previousUrl = "";
     }
 
     protected boolean checkWritePermission() {
@@ -1303,6 +1658,41 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+
+        if (requestCode == AttendanceManager.REQUEST_PERMISSIONS_REQUEST_CODE) {
+            Runnable confirmation = () -> {
+                if(!isConfirmed) return;
+                // Build intent that displays the App settings screen.
+
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", com.google.firebase.BuildConfig.APPLICATION_ID, null);
+                intent.setData(uri);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                startActivity(intent);
+            };
+
+            if (grantResults.length <= 0) {
+                setConfirmDialog(getString(R.string.location_permission),getString(R.string.locationAccessAppSettings),confirmation);
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                AttendanceManager.Instance().initialize(this, new TaskHandler() {
+
+                    @Override
+                    public void onTaskCompleted(String result) {
+
+                    }
+                });
+            } else {
+                // Permission denied.
+                // Notify the user via a SnackBar that they have rejected a core permission for the
+                setConfirmDialog(getString(R.string.location_permission),getString(R.string.locationAccessAppSettings),confirmation);
+            }
+
+            return;
+        }
+
         boolean garanted = true;
         for (int i = 0; i < grantResults.length; i++) {
             if(grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -1364,59 +1754,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     public Action getAction() {
         return Actions.newView("WebViewer Page", "android-app://com.k12nt.k12netframe/http/host/path");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        /* If you’re logging an action on an item that has already been added to the index,
-        you don’t have to add the following update line. See
-        https://firebase.google.com/docs/app-indexing/android/personal-content#update-the-index for
-        adding content to the index */
-        //FirebaseAppIndex.getInstance().update(getIndexable());
-        try {
-            Action indexAction = getAction();
-            if(indexAction != null) FirebaseUserActions.getInstance(getApplicationContext()).start(indexAction);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-       /* client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "WebViewer Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.k12nt.k12netframe/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);*/
-    }
-
-    @Override
-    public void onStop() {
-        FirebaseUserActions.getInstance(getApplicationContext()).end(getAction());
-        super.onStop();
-    }
-
-    @Override
-    public void finish() {
-
-        contentStr = fileSelectorIntent == null ? null : fileSelectorIntent.getDataString();
-
-        super.finish();
-
-    }
-
-    public void restartActivity(){
-        Intent mIntent = getIntent();
-        finish();
-        startActivity(mIntent);
     }
 
     class K12NetMobileJavaScriptInterface {
@@ -1481,6 +1818,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         @JavascriptInterface
+        public void OnEvent(String event, String value) {
+            if(event.equals("userName")) {
+                K12NetUserReferences.setUsername(value);
+            } else if(event.equals("password")) {
+                K12NetUserReferences.setPassword(value);
+            } else if(event.equals("culture")) {
+                K12NetUserReferences.setLanguage(value);
+            } else if(event.equals("rememberMe")) {
+                K12NetUserReferences.setRememberMe(value.equals("true"));
+            } else if(event.equals("loginState")) {
+                loginState = value;
+                isLogin = loginState.equals("Logged") || loginState.equals("IsLoggedIn:true");
+
+                if(isLogin) {
+                    loginState = "checkNotificationExist";
+                } else if(loginState.equals("IsLoggedIn:false")) {
+                    loginState = "BindLoginPageFields";
+                }
+            }
+        }
+
+        @JavascriptInterface
         public void htmlCallback(String jsResult) {
             if(jsResult.contains("atlas-mobile-web-app-no-sleep")) {
 
@@ -1495,7 +1854,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             }
             else if(jsResult.contains("blob")) {
-                screenAlwaysOn = false;
                 try {
                     convertBase64StringToPdfAndStoreIt(jsResult);
                 } catch (IOException e) {
@@ -1503,7 +1861,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
             }
             else {
-                screenAlwaysOn = false;
                 //webview.setKeepScreenOn(false);
                // getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
             }
@@ -1676,6 +2033,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                     } else if ("audio".equals(type)) {
                         contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                    }  else {
+                        contentUri = MediaStore.Files.getContentUri("external");
                     }
 
                     final String selection = "_id=?";
@@ -2023,7 +2382,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
      */
     public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
-        final String column = "_data";
+        final String column = MediaStore.Files.FileColumns.DATA;
         final String[] projection = {
                 column
         };
@@ -2194,5 +2553,34 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return uri.getAuthority().equalsIgnoreCase("com.google.android.apps.docs.storage")  ||
                 "com.google.android.apps.docs.storage.legacy".equalsIgnoreCase(uri.getAuthority())  ||
                 uri.getAuthority().contains("com.google.android.apps.docs.storage");
+    }
+
+    private String GetDeviceModel() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+            model =  Build.MODEL;
+        } else {
+            model = manufacturer + " [" + model + "] ";
+        }
+        String deviceName = "";
+
+        try{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                deviceName = Settings.Global.getString(getContentResolver(), Settings.Global.DEVICE_NAME);
+            }
+        } catch(Exception e) {
+
+        }
+
+        if(deviceName != null && !deviceName.equals("")) {
+            model += " [" + deviceName + "] ";
+        }
+
+        if(Build.SERIAL != null && !Build.SERIAL.equals("unknown")) {
+            model += " [" + Build.SERIAL + "] ";
+        }
+
+        return  model;
     }
 }

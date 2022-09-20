@@ -25,7 +25,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.k12nt.k12netframe.LoginActivity;
+import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.R;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -128,7 +128,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         if(requestID == REQUEST_ID_ATTENDANCE) {
             flags = PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE;
-            intent = new Intent(packageContext, LoginActivity.class);
+            intent = new Intent(packageContext, WebViewerActivity.class);
         }
 
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK  );

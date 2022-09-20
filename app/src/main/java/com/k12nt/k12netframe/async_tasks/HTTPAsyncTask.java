@@ -84,6 +84,11 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
                 }
 
                 this.sendData(conn, jsonObject.toString());
+                /*conn.connect();
+
+                String m = conn.getResponseMessage();
+                int c = conn.getResponseCode();
+                String e = this.read(conn.getErrorStream());*/
 
                 if(asyncListener != null)
                     return this.read(conn.getInputStream());

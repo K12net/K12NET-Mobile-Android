@@ -22,7 +22,7 @@ public class K12NetUserReferences {
 	public static final String IMG_FILE_PATH = DATA_FILE_PATH + "temp_img/";
 	public static String FILE_ENCODING_CHARSET = "UTF-8";
 
-    public static boolean LANG_UPDATED = true;
+    //public static boolean LANG_UPDATED = true;
 
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
@@ -32,7 +32,6 @@ public class K12NetUserReferences {
 	private static final String PASSWORD = "password";
     private static final String LANGAUGE = "languageCode";
 	private static final String CONNECTION_ADDRESS = "connectionAddress";
-    private static final String FILE_SERVER_ADDRESS = "fileServerAddress";
     private static final String REMEMBER_PASSWORD = "rememberPassword";
     private static final String PERMIT_LOCATION_SERVICES = "permitLocationService";
 	private static final String LIGHT_OPTION = "lightOption";
@@ -47,12 +46,8 @@ public class K12NetUserReferences {
 	private String username;
 	private String password;
 	private String connectionString;
-    private String fileServerAddress;
-    private String appRegisterId;
-    private int appVersionNo;
     private boolean rememberPassword;
     private Boolean permitBackgroundLocation = null;
-    private int calendarProviderId;
     private int badgeNumber;
     private String languageCode;
     private String warnedVersion;
@@ -65,38 +60,13 @@ public class K12NetUserReferences {
         languageCode = settings.getString(LANGAUGE, null);
         connectionString = settings.getString(CONNECTION_ADDRESS, null);
 
-        if (connectionString == null) {
+        if (connectionString == null) connectionString = "https://okul.k12net.com";
 
-            String language = Locale.getDefault().getLanguage();
+        if(languageCode == null) languageCode = Locale.getDefault().getLanguage().split("_")[0].split("-")[0].toLowerCase();
 
-            language = language.split("_")[0].split("-")[0].toLowerCase();
-
-            if(language.equals("tr")) {
-                languageCode = "tr";
-                connectionString = "https://okul.k12net.com";
-                fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
-            } else {
-                connectionString = "https://azure.k12net.com";
-                fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.azure.k12net.com/FS/");
-            }
-
-        }
-
-        if(languageCode == null) {
-            if(connectionString.equals("https://okul.k12net.com")) {
-                languageCode = "tr";
-            } else {
-                languageCode = "en";
-            }
-        }
-
-        fileServerAddress = settings.getString(FILE_SERVER_ADDRESS, "fs.k12net.com/FS/");
 		rememberPassword = settings.getBoolean(REMEMBER_PASSWORD, false);
         permitBackgroundLocation = settings.contains(PERMIT_LOCATION_SERVICES) ?
                 settings.getBoolean(PERMIT_LOCATION_SERVICES, false) : null;
-        appRegisterId = settings.getString(PROPERTY_REG_ID, "");
-        appVersionNo = settings.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        calendarProviderId = settings.getInt(CALENDAR_PROVIDER_ID, 1);
         badgeNumber = settings.getInt(BADGENUMBER, 0);
         warnedVersion = settings.getString(WARNVERSION, null);
         token = settings.getString(TOKEN, "");
@@ -186,10 +156,6 @@ public class K12NetUserReferences {
         return references.permitBackgroundLocation;
     }
 
-    public static int getCalendarId() {
-        return references.calendarProviderId;
-    }
-
     public static int getBadgeCount() {
         return references.badgeNumber;
     }
@@ -204,66 +170,9 @@ public class K12NetUserReferences {
         references.storeBoolean(PERMIT_LOCATION_SERVICES, references.permitBackgroundLocation);
     }
 
-    public static void setGeoFenceData(List<GeoFenceData> locations, String userName) {
-        SharedPreferences.Editor editor = references.settings.edit();
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
-        String json = gson.toJson(locations,listType);
-        String key = userName.replaceAll(" ","")+":GeoFenceData.toJson";
-        editor.putString(key, json);
-
-        editor.commit();
-    }
-
-    public static List<GeoFenceData> getGeoFenceData(String userName) {
-        Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
-        String key = userName.replaceAll(" ","")+":GeoFenceData.toJson";
-        Gson gson = new Gson();
-        String json = references.settings.getString(key, "");
-        List<GeoFenceData> locations = gson.fromJson(json, listType);
-
-        return locations;
-    }
-
-    public static String getFileServerAddress(){
-        String http_address = references.fileServerAddress;
-        if(!http_address.startsWith("http")) {
-            http_address = "https://" + http_address;
-        }
-        return http_address;
-    }
-
-    public static void setFileServerAddress(String conAddress){
-        references.fileServerAddress = conAddress;
-        references.storeString(FILE_SERVER_ADDRESS, references.fileServerAddress);
-    }
-
-    public static void setAsistoRegisterId(String appRegisterId) {
-        references.appRegisterId = appRegisterId;
-        references.storeString(PROPERTY_REG_ID, references.appRegisterId);
-    }
-
-    public static void setAsistoVersionNo(int appVersionNo) {
-        references.appVersionNo = appVersionNo;
-        references.storeInt(PROPERTY_APP_VERSION, references.appVersionNo);
-    }
-
     public static void setLanguage(String languageCode) {
-        LANG_UPDATED = LANG_UPDATED || references.languageCode == null || !references.languageCode.equals(languageCode);
-
         references.languageCode = languageCode;
         references.storeString(LANGAUGE, references.languageCode);
-    }
-
-    public static String getNormalizedLanguageCode(){
-        String languageCode = getLanguageCode();
-
-        if(languageCode != null && languageCode.equals(K12NetSettingsDialogView.ARABIC)) {
-            return "ar-AE";
-        }
-
-        return  languageCode;
     }
 
     public static String getLanguageCode(){
