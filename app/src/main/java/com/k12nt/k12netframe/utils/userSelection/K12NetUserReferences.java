@@ -60,8 +60,6 @@ public class K12NetUserReferences {
         languageCode = settings.getString(LANGAUGE, null);
         connectionString = settings.getString(CONNECTION_ADDRESS, null);
 
-        if (connectionString == null) connectionString = "https://okul.k12net.com";
-
         if(languageCode == null) languageCode = Locale.getDefault().getLanguage().split("_")[0].split("-")[0].toLowerCase();
 
 		rememberPassword = settings.getBoolean(REMEMBER_PASSWORD, false);
@@ -75,6 +73,11 @@ public class K12NetUserReferences {
 	public static void initUserReferences(Context context) {
         if(references == null){
 	    	references = new K12NetUserReferences(context);
+
+            if (references.connectionString == null) {
+                references.connectionString = "https://okul.k12net.com";
+                setConnectionAddress(references.connectionString);
+            }
 	    }
     }
 

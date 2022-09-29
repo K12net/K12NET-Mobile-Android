@@ -423,7 +423,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private String CheckForRedirectToPortalPage(String result) {
         if(loginState.equals("checkNotificationExist") && isLogin) {
             loginState = "DirectedToPortalPage";
-            loadUrl(webview,K12NetUserReferences.getConnectionAddress() + "/Default.aspx");
+            if(startUrl == null || startUrl.equals("") || startUrl.contains("Login.aspx"))
+                loadUrl(webview,K12NetUserReferences.getConnectionAddress() + "/Default.aspx");
 
             return "DirectedToPortalPage";
         }
@@ -924,20 +925,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     }
                 }
 
-               /* if (url.toLowerCase().contains("logout.aspx")) {
-                    K12NetHttpClient.resetBrowser();
-                }*/
-
-                if (url.toLowerCase().contains("login.aspx")) {
-                    //finish();
-                }
-                else if (url.toLowerCase().contains("logout.aspx")) {
-                    //finish();
-
+                if (url.toLowerCase().contains("logout.aspx")) {
                     logoutIsProgress = true;
                 }
                 else {
-                    loadUrl(webview,"javascript:( function captchaResponse (token){ android.reCaptchaCallbackInAndroid(token);} function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
+                    loadUrl(webview,"javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
                 }
 
                 setUrl(url);
@@ -946,6 +938,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             @Override
             @SuppressWarnings("deprecation")
             public void onReceivedError(WebView view, int errorCod,String description, String failingUrl) {
+                int code = errorCod;
                 //Toast.makeText(getApplicationContext(), "Your Internet Connection May not be active Or " + description , Toast.LENGTH_LONG).show();
             }
 
@@ -1065,18 +1058,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     } catch (Exception e) {
                         webview.stopLoading();
                         Toast.makeText(WebViewerActivity.this,url.split("://")[0] + ": Require app install!",Toast.LENGTH_SHORT).show();
-                        //webview.goBack();
                         return false;
                     }
-                    /*if(isAppInstalled(url) || isAppInstalled(intent)) {
-                        startActivity( intent );
-                        return true;
-                    } else {
-                        webview.stopLoading();
-                        Toast.makeText(WebViewerActivity.this,url.split("://")[0] + ": Require app install!",Toast.LENGTH_SHORT).show();
-                        //webview.goBack();
-                        return false;
-                    }*/
                 }
 
                 if (url.contains("impersonate=true")) {
@@ -1134,6 +1117,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                                 break;
                             }
                         }
+                    }
+
+                    if(checkAddress && url.endsWith(".k12net.com/")) {
+                        String connString = url.substring(0,url.length() - 1);
+                        if(url.contains("azure.") || url.contains("okul.")) K12NetUserReferences.setConnectionAddress(connString);
                     }
                 }
                 return false;
