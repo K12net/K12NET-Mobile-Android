@@ -235,19 +235,24 @@ public class AttendanceManager extends Service {
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-                    // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                    e.printStackTrace();
-
-                    String json = null;
                     try {
-                        json = new String(errorResponse, "UTF-8");
-                        Log.i("WEB", "bindFenceData.onFailure: " + json);
-                    } catch (UnsupportedEncodingException ex) {
+                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                        e.printStackTrace();
+
+                        if(errorResponse != null) {
+                            try {
+                                String json = new String(errorResponse, "UTF-8");
+                                Log.i("WEB", "bindFenceData.onFailure: " + json);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+
+                        Toast.makeText(activity, "Error Code 1071 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        handler.onTaskCompleted("Error");
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-
-                    Toast.makeText(activity, "Error Code 1071 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    handler.onTaskCompleted("Error");
                 }
             });
         } catch (Exception e) {
@@ -320,7 +325,7 @@ public class AttendanceManager extends Service {
     private void bindFenceData(Context ctx, int statusCode, Header[] headers, byte[] response) {
         try {
             mGeofenceList.clear();
-            if(response.length <= 0) return;
+            if(response == null || response.length <= 0) return;
 
             String json = new String(response, "UTF-8");
             //Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
@@ -346,7 +351,7 @@ public class AttendanceManager extends Service {
 
                 mGeofenceList.add(geofence);
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(ctx, "Error Code 1453 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }

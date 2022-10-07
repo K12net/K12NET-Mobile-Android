@@ -76,6 +76,7 @@ import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
+import com.k12nt.k12netframe.utils.helper.AtlasWebView;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -879,7 +880,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private WebView setWebView(final Activity ctx) {
-        webview = new WebView(WebViewerActivity.this);
+        webview = new AtlasWebView(WebViewerActivity.this);
         webview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
