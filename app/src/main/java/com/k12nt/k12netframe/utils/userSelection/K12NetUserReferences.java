@@ -13,6 +13,7 @@ import com.k12nt.k12netframe.K12NetSettingsDialogView;
 import com.k12nt.k12netframe.attendance.GeoFenceData;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -21,8 +22,6 @@ public class K12NetUserReferences {
 	public static String DATA_FILE_PATH = Environment.getExternalStorageDirectory() + "/MobiDers/context/";
 	public static final String IMG_FILE_PATH = DATA_FILE_PATH + "temp_img/";
 	public static String FILE_ENCODING_CHARSET = "UTF-8";
-
-    //public static boolean LANG_UPDATED = true;
 
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
@@ -46,6 +45,9 @@ public class K12NetUserReferences {
 	private String username;
 	private String password;
 	private String connectionString;
+    private String fsConnectionString;
+    private String subDomain;
+    private String cultures;
     private boolean rememberPassword;
     private Boolean permitBackgroundLocation = null;
     private int badgeNumber;
@@ -59,8 +61,13 @@ public class K12NetUserReferences {
 		password = settings.getString(PASSWORD, null);
         languageCode = settings.getString(LANGAUGE, null);
         connectionString = settings.getString(CONNECTION_ADDRESS, null);
+        fsConnectionString = settings.getString("FsConnectionAddress", null);
+        subDomain = settings.getString("subDomain", null);
 
-        if(languageCode == null) languageCode = Locale.getDefault().getLanguage().split("_")[0].split("-")[0].toLowerCase();
+        if(languageCode == null) {
+            languageCode = Locale.getDefault().getLanguage().split("_")[0].split("-")[0].toLowerCase();
+            if(languageCode.equals("ar")) languageCode = "ar-AE";
+        }
 
 		rememberPassword = settings.getBoolean(REMEMBER_PASSWORD, false);
         permitBackgroundLocation = settings.contains(PERMIT_LOCATION_SERVICES) ?
@@ -97,6 +104,22 @@ public class K12NetUserReferences {
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(key, value);
         editor.commit();
+    }
+
+    public static String getSubDomain(){
+        return references.subDomain;
+    }
+    public static void setSubDomain(String domain){
+        references.subDomain = domain;
+        references.storeString("subDomain", references.subDomain);
+    }
+
+    public static String getFsConnectionAddress(){
+        return references.fsConnectionString;
+    }
+    public static void setFsConnectionAddress(String conAddress){
+        references.fsConnectionString = conAddress;
+        references.storeString("FsConnectionAddress", references.fsConnectionString);
     }
 	
 	public static String getConnectionAddress(){
@@ -187,6 +210,16 @@ public class K12NetUserReferences {
             setLanguage(language);
         }
         return references.languageCode;
+    }
+
+    public static void setCultures(String[] cultures) {
+        references.cultures = String.join(",",cultures);
+        references.storeString("cultures", references.cultures);
+    }
+
+    public static List<String> getCultures(){
+        if(references.cultures == null) return null;
+        return Arrays.asList(references.cultures.split(","));
     }
 
     public static void setWarnedVersionString(String newWarnedVersionStr) {

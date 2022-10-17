@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="alternative_signin">تسجيل الدخول باستخدام</string>
     <string name="permlab_accessAllDownloads" msgid="2436240495424393717">"الدخول لجميع التنزيلات"</string>
     <string name="permdesc_accessAllDownloads" msgid="1871832254578267128">"السماح للتطبيق للوصول وتعديل أي ملفات تم تنزيلها من أي تطبيع على الجهاز."</string>
 

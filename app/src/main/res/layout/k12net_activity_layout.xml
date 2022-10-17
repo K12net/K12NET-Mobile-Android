@@ -8,20 +8,19 @@
         android:id="@+id/lyt_activity"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical"
+        android:layout_above="@+id/include"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="top"
         android:background="#ffffff"
         android:gravity="top"
-        android:layout_gravity="top"
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/include">
-    </LinearLayout>
+        android:orientation="vertical"></LinearLayout>
 
     <include
+        android:id="@+id/include"
+        layout="@layout/k12net_toolbar_layout"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        layout="@layout/k12net_toolbar_layout"
         android:layout_alignParentEnd="false"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/include" />
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

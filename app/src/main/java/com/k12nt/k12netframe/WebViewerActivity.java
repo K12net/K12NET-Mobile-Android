@@ -18,8 +18,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
@@ -30,6 +36,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -37,7 +44,9 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -56,10 +65,18 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -68,7 +85,6 @@ import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
 import com.k12nt.k12netframe.async_tasks.AsyncCompleteListener;
 import com.k12nt.k12netframe.async_tasks.HTTPAsyncTask;
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
@@ -81,6 +97,8 @@ import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -95,11 +113,17 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpCookie;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
@@ -107,6 +131,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     public static String currentState = "init";
     public static Boolean isLogin = false;
+    public static Boolean is_native_login = true;
     public static String loginState = "";
     public static boolean logoutIsProgress = false;
     
@@ -131,6 +156,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
+    public static final int LOGIN_SCREEN_SDK_INT = 28;//29
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,8 +173,406 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         initFirebaseMessaging();
 
-        initUserInterface();
+        //is_native_login = android.os.Build.VERSION.SDK_INT >= LOGIN_SCREEN_SDK_INT;
 
+        if (is_native_login == false || currentState == "restartActivity" || (startUrl != null && !startUrl.equals(""))) {
+            startWithWeb();
+        } else {
+            startWithLoginScreen();
+            checkNotificationExist(getIntent(), "login");
+        }
+    }
+
+    private void startWithLoginScreen() {
+        K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+        setContentView(R.layout.k12net_login_layout);
+
+        EditText username = (EditText) findViewById(R.id.txt_login_username);
+        EditText password = (EditText) findViewById(R.id.txt_login_password);
+        CheckBox chkRememberMe = (CheckBox) findViewById(R.id.chk_remember_me);
+
+        username.setText(K12NetUserReferences.getUsername());
+        chkRememberMe.setChecked(K12NetUserReferences.getRememberMe());
+        password.setText(K12NetUserReferences.getPassword());
+
+        Button login_button = (Button) findViewById(R.id.btn_login_submit);
+
+        login_button.setOnClickListener(arg0 -> {
+            doLogin();
+        });
+
+        Button settings_button = (Button) findViewById(R.id.btn_settings);
+        settings_button.setOnClickListener(arg0 -> {
+            K12NetSettingsDialogView dialogView = new K12NetSettingsDialogView(arg0.getContext(), this);
+            dialogView.createContextView(null);
+
+            dialogView.setOnDismissListener(dialog -> {
+
+                K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+            });
+
+            dialogView.show();
+        });
+
+        Button resetPassword = (Button) findViewById(R.id.btnResetPassword);
+        resetPassword.setOnClickListener(arg0 -> {
+            initWebView();
+
+            navigateTo(K12NetUserReferences.getConnectionAddress() + "/ResetPassword.aspx");
+        });
+
+        setLogo();
+
+        try {
+            String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Login/Settings";
+            HTTPAsyncTask settingTask = new HTTPAsyncTask(this, connString, "Settings");
+            settingTask.RequestMethod = "GET";
+
+            settingTask.setHeader("Content-type", "application/json;charset=UTF-8");
+            settingTask.setHeader("Host", K12NetUserReferences.getConnectionAddress());
+            settingTask.setHeader("Referer", K12NetUserReferences.getConnectionAddress() + "/Login.aspx");
+
+            settingTask.setOnCompleteListener(new AsyncCompleteListener() {
+                @Override
+                public void asyncTaskCompleted(HTTPAsyncTask task) {
+                    try {
+                        JSONObject responseJSON = new JSONObject(task.GetResult());
+
+                        JSONArray cultures = responseJSON.optJSONArray("EnabledCultures");
+
+                        List<String> cultureList = new ArrayList<String>();
+                        for (int i=0; i < cultures.length(); i++) {
+                            cultureList.add(cultures.getString(i));
+                        }
+
+                        setCultureButtons(cultureList);
+
+                        JSONArray providers = responseJSON.optJSONArray("LoginProviders");
+
+                        setAlternateSignInButtons(providers);
+
+                        K12NetUserReferences.setSubDomain(responseJSON.getString("SubDomain"));
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        tryWithLoginPage();
+                    }
+                }
+            });
+
+            settingTask.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            tryWithLoginPage();
+        }
+
+        if(K12NetUserReferences.getRememberMe()) {
+            doLogin();
+            return;
+        }
+
+    }
+
+    private void bindSettings() {
+        if(K12NetUserReferences.getFsConnectionAddress() != null && K12NetUserReferences.getFsConnectionAddress().contains(K12NetUserReferences.getConnectionAddress() + "$$$")) {
+           return;
+        }
+
+        try {
+            String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Settings/Global";
+            HTTPAsyncTask settingTask = new HTTPAsyncTask(this, connString, "Settings");
+            settingTask.RequestMethod = "GET";
+
+            settingTask.setHeader("Content-type", "application/json;charset=UTF-8");
+
+            settingTask.setOnCompleteListener(new AsyncCompleteListener() {
+                @Override
+                public void asyncTaskCompleted(HTTPAsyncTask task) {
+                    try {
+                        String fsURL = task.GetResult().split("globalSettings.fileServerUrl=\"")[1].split("\";globalSettings")[0];
+
+                        K12NetUserReferences.setFsConnectionAddress(K12NetUserReferences.getConnectionAddress() + "$$$" + fsURL);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        tryWithLoginPage();
+                    }
+                }
+            });
+
+            settingTask.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            tryWithLoginPage();
+        }
+
+    }
+
+    private void  setLogo() {
+        try {
+            if (K12NetUserReferences.getFsConnectionAddress() == null || K12NetUserReferences.getSubDomain() == null) return;
+            String fsPath = K12NetUserReferences.getFsConnectionAddress().replace(K12NetUserReferences.getConnectionAddress() + "$$$","").split("$$$")[0];
+            String logoPath = fsPath + "/SubdomainFiles/"+ K12NetUserReferences.getSubDomain() + "/login.png";
+
+            ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            executor.execute(() -> {
+                //Background work here
+                handler.post(() -> {
+                    try {
+                        URL aURL = new URL(logoPath);
+                        URLConnection conn = aURL.openConnection();
+                        conn.connect();
+                        InputStream is = conn.getInputStream();
+                        BufferedInputStream bis = new BufferedInputStream(is);
+                        Bitmap bm = BitmapFactory.decodeStream(bis);
+                        bis.close();
+                        is.close();
+
+                        imgLogo.setImageBitmap(bm);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            tryWithLoginPage();
+        }
+    }
+
+    private void setAlternateSignInButtons(JSONArray providers) throws JSONException {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.ly_providers);
+
+        layout.removeAllViews();
+
+        boolean hasAnyAlternate = false;
+        for (int i=0; i < providers.length(); i++) {
+            String route  = providers.getJSONObject(i).getString("Route");
+            String name  = providers.getJSONObject(i).getString("Name");
+
+            if(name.equals("QR")) {
+                continue;
+            }
+
+            ImageButton button = new ImageButton(WebViewerActivity.this);
+
+            if(name.equals("Google")) {
+                button.setImageResource(R.drawable.google_icon);
+            } else if(name.equals("WindowsLive")) {
+                button.setImageResource(R.drawable.outlook_icon);
+            } else if(name.equals("Office365")) {
+                button.setImageResource(R.drawable.office365_icon);
+            } else {
+                continue;
+            }
+
+            hasAnyAlternate = true;
+            button.setBackgroundColor(0x9272aa);
+            button.setAdjustViewBounds(true);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(250, 250);
+            params.gravity = Gravity.CENTER;
+            button.setLayoutParams(params);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    initWebView();
+                    navigateTo(route);
+                }
+            });
+
+            layout.addView(button);
+        }
+
+        if(!hasAnyAlternate) {
+            TextView txtSignIn = (TextView) findViewById(R.id.txt_alternative_signin);
+            txtSignIn.setVisibility(View.GONE);
+
+            CardView cvLogin = (CardView) findViewById(R.id.cardView);
+
+            cvLogin.getLayoutParams().height = (int) (450 * Resources.getSystem().getDisplayMetrics().density + 0.5f);
+        }
+    }
+
+    private void setCultureButtons(List<String> cultures) {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.ly_cultures);
+
+        layout.removeAllViews();
+
+        Drawable atlas_button = getDrawable(this, R.drawable.atlas_button);
+        Drawable atlas_pressed_button = getDrawable(this, R.drawable.atlas_pressed_button);
+        String selectedCulture = K12NetUserReferences.getLanguageCode();
+
+        if(!cultures.contains(selectedCulture)) {
+            if(cultures.contains("EN")) {
+                selectedCulture = "en";
+            } else {
+                selectedCulture = "tr";
+            }
+        }
+
+        List<Button> langButtons = new ArrayList<Button>();
+
+        for(String c : cultures) {
+            String culture = c;
+
+            Button button = new Button(this);
+            button.setText(culture.startsWith("ar") ? "ع" : culture.toUpperCase());
+            button.setBackground(selectedCulture.equals(culture) ? atlas_pressed_button : atlas_button);
+            button.setTextColor(Color.WHITE);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.rightMargin = 10;
+            params.gravity = Gravity.CENTER;
+            button.setLayoutParams(params);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    K12NetUserReferences.setLanguage(culture);
+
+                    for (Button btn: langButtons) {
+                        btn.setBackground(btn.getText().equals(culture.startsWith("ar") ? "ع" : culture.toUpperCase()) ? atlas_pressed_button : atlas_button);
+                    }
+
+                    K12NetSettingsDialogView.setLanguageToDefault(WebViewerActivity.this.getBaseContext());
+
+                    startUrl = "";
+                    recreate();
+                }
+            });
+
+            layout.addView(button);
+            langButtons.add(button);
+        }
+    }
+
+    public static Drawable getDrawable(Context context, int resourceId) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            return context.getDrawable(resourceId);
+        } else {
+            return context.getResources().getDrawable(resourceId);
+        }
+    }
+
+    private void doLogin() {
+        K12NetUserReferences.setUsername(((EditText) findViewById(R.id.txt_login_username)).getText().toString());
+        K12NetUserReferences.setPassword(((EditText) findViewById(R.id.txt_login_password)).getText().toString());
+        K12NetUserReferences.setRememberMe(((CheckBox) findViewById(R.id.chk_remember_me)).isChecked());
+
+        K12NetHttpClient.initCookies();
+
+        try {
+            isLogin = false;
+
+            final WebViewerActivity context = this;
+
+            K12NetHttpClient.initLoginCookies();
+
+            String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Login/Validate";
+            HTTPAsyncTask loginTask = new HTTPAsyncTask(context, connString, "Login");
+
+            loginTask.setHeader("Content-type", "application/json;charset=UTF-8");
+            loginTask.setHeader("Atlas-DeviceID", K12NetUserReferences.getDeviceToken());
+            loginTask.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
+            loginTask.setHeader("Atlas-DeviceModel", GetDeviceModel());
+
+            loginTask.setJson("UserName", K12NetUserReferences.getUsername().trim());
+            loginTask.setJson("Password", K12NetUserReferences.getPassword());
+            loginTask.setJson("CreatePersistentCookie", "false");
+
+            loginTask.setOnCompleteListener(new AsyncCompleteListener() {
+                @Override
+                public void asyncTaskCompleted(HTTPAsyncTask task) {
+                    try {
+                        JSONObject responseJSON = new JSONObject(task.GetResult());
+
+                        isLogin = responseJSON.optBoolean("Success", false);
+
+                        if (isLogin == false) {
+                            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
+                        } else {
+                            setLoginCookies();
+
+                            AttendanceManager.Instance().initialize(context, new TaskHandler() {
+                                @Override
+                                public void onTaskCompleted(String result) {
+                                if (result.equals("PermissionRequested")) return;
+
+                                boolean hasNotification = checkNotificationExist(context.getIntent(), "login").equals("exist");
+
+                                if(!hasNotification) {
+                                    initWebView();
+
+                                    navigateTo(K12NetUserReferences.getConnectionAddress() + "/Logon.aspx");
+                                }
+                                }
+                            });
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        tryWithLoginPage();
+                    }
+                }
+            });
+
+            loginTask.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            tryWithLoginPage();
+        }
+    }
+
+    private void tryWithLoginPage() {
+        is_native_login = false;
+        startWithWeb();
+    }
+
+    private void setLoginCookies() {
+        List<HttpCookie> cookies = K12NetHttpClient.getCookieList();
+        HttpCookie sessionInfo = null;
+
+        if (cookies != null && !cookies.isEmpty()) {
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.removeAllCookies(null);
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                CookieSyncManager.createInstance(getApplicationContext());
+            }
+            cookieManager.setAcceptCookie(true);
+
+            for (HttpCookie cookie : cookies) {
+                sessionInfo = cookie;
+                String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
+                cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    CookieSyncManager.getInstance().sync();
+                }
+            }
+
+            String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+            cookieString = "Culture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+
+            cookieString = "AppID" + "=" + K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID + "; domain=" + sessionInfo.getDomain();
+            cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+        }
+
+    }
+
+    private void startWithWeb() {
         initWebView();
 
         if(currentState == "restartActivity") currentState = "restartActivity:ok";
@@ -239,6 +663,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if(K12NetUserReferences.getLanguageCode() == null){
             K12NetUserReferences.setLanguage(this.getString(R.string.localString));
         }
+        StrictMode.ThreadPolicy gfgPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(gfgPolicy);
     }
 
     private void initFirebaseMessaging() {
@@ -305,13 +731,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         });
     }
 
-    private void initUserInterface() {
+    private void initLoginUserInterface() {
+    }
+
+    private void initWebUserInterface() {
         progress_dialog = new Dialog(this, R.style.K12NET_ModalLayout);
         progress_dialog.setContentView(R.layout.loading_view_layout);
 
         if(screenAlwaysOn) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+
         View back_button = (View) findViewById(R.id.lyt_back);
         back_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -366,6 +796,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private void initWebView() {
+        setContentView(R.layout.k12net_activity_layout);
+
+        initWebUserInterface();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
                 String processName = getProcessName(this);
@@ -380,6 +814,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         main_webview = this.setWebView(this);
         popup_webview = null;
+
+        K12NetSettingsDialogView.setLanguageToDefault(WebViewerActivity.this.getBaseContext());
+        buildCustomView();
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
     }
 
     private void initLocationServices() {
@@ -842,11 +1280,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     @Override
-    protected AsistoAsyncTask getAsyncTask() {
-        return null;
-    }
-
-    @Override
     protected int getToolbarIcon() {
         return R.drawable.k12net_logo;
     }
@@ -866,6 +1299,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if(progress_dialog != null) progress_dialog.dismiss();
         super.onDestroy();
         unregisterReceiver(onDownloadComplete);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // refresh your views here
+        super.onConfigurationChanged(newConfig);
     }
 
     private String getProcessName(Context context) {
@@ -1063,6 +1502,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     }
                 }
 
+                if (is_native_login &&
+                   (url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/login.aspx") ||
+                    url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/logout.aspx"))) {
+                    startWithLoginScreen();
+                    return true;
+                }
+
                 if (url.contains("impersonate=true")) {
                     popup_webview = setWebView(ctx);
 
@@ -1102,11 +1548,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     boolean checkLocationService = K12NetUserReferences.isPermitBackgroundLocation() == null || K12NetUserReferences.isPermitBackgroundLocation() == true;
                     boolean checkAddress = !url.startsWith(K12NetUserReferences.getConnectionAddress());
 
-                    if(checkLocationService || checkAddress) {
-                        String portals[] = new String[] {"/SPTS.Web/","/TPJS.Web/","/EPJS.Web/"};
-                        for(String portal : portals) {
-                            if(url.contains(portal)) {
-                                String connString = K12NetUserReferences.getConnectionAddress() + portal;
+                    String connAddress = K12NetUserReferences.getConnectionAddress();
+                    String portals[] = new String[] {"/SPTS.Web/","/TPJS.Web/","/EPJS.Web/"};
+                    for(String portal : portals) {
+                        if(url.contains(portal)) {
+
+                            bindSettings();
+
+                            if(checkLocationService || checkAddress) {
+                                String connString = connAddress + portal;
 
                                 if (!url.startsWith(connString)) {
                                     connString = url.split(portal)[0];

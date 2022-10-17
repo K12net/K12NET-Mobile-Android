@@ -2,6 +2,7 @@
 <resources>
 
     <!-- Error strings -->
+    <string name="alternative_signin">Alternatif Giriş</string>
     <string name="geofence_not_available">Coğrafi Sınır servisi şuanda aktif değil</string>
     <string name="geofence_too_many_geofences">Uygulama çok fazla çoğrafi sınır için kaydedilmiş.</string>
     <string name="geofence_too_many_pending_intents">

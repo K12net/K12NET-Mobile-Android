@@ -116,7 +116,7 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
     public static void setLanguageToDefault(Context context){
         K12NetUserReferences.initUserReferences(context);
 
-        Locale myLocale = new Locale(K12NetUserReferences.getLanguageCode());
+        Locale myLocale = new Locale(K12NetUserReferences.getLanguageCode().split("-")[0]);
         Resources res = context.getResources();
         Configuration configuration = res.getConfiguration();
 

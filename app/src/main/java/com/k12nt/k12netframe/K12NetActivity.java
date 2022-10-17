@@ -19,7 +19,8 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.k12nt.k12netframe.async_tasks.AsistoAsyncTask;
+import androidx.annotation.LayoutRes;
+
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 
@@ -30,7 +31,6 @@ import java.io.UnsupportedEncodingException;
 public abstract class K12NetActivity extends Activity implements K12NetAsyncCompleteListener {
 	
 	Dialog openDialog = null;
-	protected AsistoAsyncTask atask = null;
 	
 	GridView list = null;
 	protected LinearLayout mainLayout = null;
@@ -51,6 +51,28 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
     }
+
+	@Override
+	public void setContentView(@LayoutRes int layoutResID) {
+		K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
+
+		super.setContentView(layoutResID);
+
+		if (layoutResID == R.layout.k12net_login_layout) {
+			mainLayout = (LinearLayout)findViewById(R.id.main_layout);
+		} else {
+			mainLayout = (LinearLayout)findViewById(R.id.lyt_activity);
+
+			LinearLayout back_button = (LinearLayout) findViewById(R.id.lyt_back);
+			back_button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					 onBackPressed();
+					 finish();
+				}
+			});
+		}
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,9 +130,13 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 //        this.setContentView(R.layout.your_layout_name_here); 
         
        // requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        
-        setContentView(R.layout.k12net_activity_layout);
-        
+
+		if (android.os.Build.VERSION.SDK_INT >= WebViewerActivity.LOGIN_SCREEN_SDK_INT) {
+			setContentView(R.layout.k12net_login_layout);
+		} else {
+			setContentView(R.layout.k12net_activity_layout);
+		}
+
         inflater = LayoutInflater.from(getApplicationContext());
         
      /*   ActionBar actBar = getActionBar();
@@ -127,39 +153,20 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
         yourTextView.setTextSize(R.dimen.titleTextSize);
         yourTextView.setTypeface(type);
        */
-		
-		mainLayout = (LinearLayout)findViewById(R.id.lyt_activity);
-		
-		LinearLayout back_button = (LinearLayout) findViewById(R.id.lyt_back);
-		back_button.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				 onBackPressed();
-				 finish();
-			}
-		});
-		
-		initMainData();		
+
+		initMainData();
 		
 		overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
 	}
 
 	protected void initMainData() {
-		loadView = (RelativeLayout) inflater.inflate(R.layout.modal_loading_layout, null, false);
-		mainLayout.addView(loadView);
-		
-		buildCustomView();
+		//loadView = (RelativeLayout) inflater.inflate(R.layout.modal_loading_layout, null, false);
+		//mainLayout.addView(loadView);
 
-		atask = getAsyncTask();
-		if(atask != null && atask.getStatus() != Status.RUNNING) {
-			atask.setOnLoadComplete(this);
-			atask.execute();
-		}
+		buildCustomView();
 	}
 	
 	public abstract void buildCustomView();
-
-	protected abstract AsistoAsyncTask getAsyncTask();
 
 	protected CharSequence getToolbarSubtitle() {
         String toolbarSubtitle = "";
@@ -176,9 +183,6 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 
 	@Override
 	public void onBackPressed() {
-		if(atask != null) {
-			atask.cancel(true);
-		}
 		super.onBackPressed();
 	}
 	

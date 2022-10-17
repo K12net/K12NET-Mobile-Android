@@ -3,6 +3,7 @@
 <resources>
 
     <!-- Error strings -->
+    <string name="alternative_signin">Se connecter avec</string>
     <string name="geofence_not_available">Le service Geofence n\'est pas disponible actuellement</string>
     <string name="geofence_too_many_geofences">Votre application a enregistré trop de geofences</string>
     <string name="geofence_too_many_pending_intents">

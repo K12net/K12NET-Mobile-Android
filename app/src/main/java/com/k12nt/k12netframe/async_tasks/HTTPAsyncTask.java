@@ -75,6 +75,27 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
             conn = this.GetConnection();
             conn.setRequestMethod(RequestMethod);
 
+            if (RequestMethod.equals("GET")) {
+                int responseCode = conn.getResponseCode();
+
+                if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                    BufferedReader in = new BufferedReader(new InputStreamReader(
+                            conn.getInputStream()));
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    return response.toString();
+                } else {
+                    System.out.println("GET request not worked");
+                    return null;
+                }
+            }
+
             if(jsonObject != null) {
 
                 if (headerParams != null){

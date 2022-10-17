@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="alternative_signin">Sign In With</string>
     <string name="error">Error</string>
     <string name="error_open_page">This page not opened! Would you like to open outside from app?</string>
     <string name="permlab_accessAllDownloads">Access all system downloads</string>

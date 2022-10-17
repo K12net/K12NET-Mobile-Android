@@ -2,6 +2,7 @@
 <resources>
 
     <!-- Error strings -->
+    <string name="alternative_signin">Sign In With</string>
     <string name="geofence_not_available">Geofence service is not available now</string>
     <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
     <string name="geofence_too_many_pending_intents">
