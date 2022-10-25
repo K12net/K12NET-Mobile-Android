@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,6 +13,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
 import com.k12nt.k12netframe.R;
+import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.fcm.MyFirebaseMessagingService;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -23,6 +23,8 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -102,7 +104,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                     fenceList.add(data);
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    WebViewerActivity.Toast(e,context);
                 }
             }
 
@@ -140,7 +142,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                 JSONObject jsonParams = new JSONObject();
 
-                jsonParams.put("UserName", K12NetUserReferences.getUsername().trim());
+                jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
                 jsonParams.put("DeviceID", K12NetUserReferences.getDeviceToken());
                 jsonParams.put("LocationIX", nearestFence.LocationIX);
                 jsonParams.put("Way", geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ? "enter" : "exit");
@@ -186,7 +188,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                             }
 
                         } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
+                            WebViewerActivity.Toast(e,context);
                         }
 
                     }
@@ -194,12 +196,12 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        e.printStackTrace();
+                        WebViewerActivity.Toast(e,context);
                         Toast.makeText(context, "Error Code 1923 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception ex) {
-                ex.printStackTrace();
+                WebViewerActivity.Toast(ex,context);
             }
         } else {
             // Check the action code and determine what to do

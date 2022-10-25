@@ -34,7 +34,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
             android:layout_width="350dp"
-            android:layout_height="550dp"
+            android:layout_height="600dp"
             app:cardElevation="20dp"
             android:background="#80808080"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -3,8 +3,6 @@ package com.k12nt.k12netframe.attendance;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -15,7 +13,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,13 +38,10 @@ import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.k12nt.k12netframe.BuildConfig;
 import com.k12nt.k12netframe.K12NetSettingsDialogView;
 import com.k12nt.k12netframe.R;
-import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.WebViewerActivity;
 import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.fcm.MyFirebaseMessagingService;
@@ -55,21 +49,16 @@ import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.ResponseHandlerInterface;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
-import java.net.HttpCookie;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.entity.BasicHttpEntity;
-import cz.msebera.android.httpclient.entity.ByteArrayEntity;
 import cz.msebera.android.httpclient.entity.StringEntity;
 import cz.msebera.android.httpclient.impl.cookie.BasicClientCookie;
 import cz.msebera.android.httpclient.message.BasicHeader;
@@ -245,6 +234,7 @@ public class AttendanceManager extends Service {
                                 Log.i("WEB", "bindFenceData.onFailure: " + json);
                             } catch (Exception ex) {
                                 ex.printStackTrace();
+                                WebViewerActivity.Toast(ex,activity);
                             }
                         }
 
@@ -317,7 +307,7 @@ public class AttendanceManager extends Service {
         }
         catch (Exception exception)
         {
-            exception.printStackTrace();
+            WebViewerActivity.Toast(exception,activity);
             startAttendanceService(activity);
         }
     }
@@ -325,7 +315,9 @@ public class AttendanceManager extends Service {
     private void bindFenceData(Context ctx, int statusCode, Header[] headers, byte[] response) {
         try {
             mGeofenceList.clear();
-            if(response == null || response.length <= 0) return;
+            if(response == null || response.length <= 0) {
+                return;
+            }
 
             String json = new String(response, "UTF-8");
             //Type listType = new TypeToken<List<GeoFenceData>>() {}.getType();
@@ -380,11 +372,11 @@ public class AttendanceManager extends Service {
 
             //RequestParams params = new RequestParams();
             JSONObject jsonParams = new JSONObject();
-            jsonParams.put("UserName", K12NetUserReferences.getUsername().trim());
+            jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
             jsonParams.put("DeviceID", deviceID);
             StringEntity entity = new StringEntity(jsonParams.toString());
             //StringEntity entity = new StringEntity(K12NetUserReferences.getUsername().trim(), "UTF-8");
-            entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+            entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=utf-8"));
 
             client.cancelRequests(ctx, true);
 
@@ -394,15 +386,17 @@ public class AttendanceManager extends Service {
             //ByteArrayEntity be = new ByteArrayEntity(K12NetUserReferences.getUsername().trim().toString().getBytes());
             //client.addHeader("Content-Type:", "application/json");
             //client.addHeader("Accept", "application/json");
-            client.post(ctx, connString, entity, "application/json", responseHandler);
+            client.post(ctx, connString, entity, "application/json;charset=utf-8", responseHandler);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            WebViewerActivity.Toast(ex,ctx);
         }
     }
 
     @SuppressLint("MissingPermission")
     public void startMonitorLocations() {
+        final Context ctx = this;
+
         try {
             //this.registerReceiver(Receiver, new IntentFilter("GeoFence"));
 
@@ -412,8 +406,6 @@ public class AttendanceManager extends Service {
             } else {
                 activity.startService(intent);
             } */
-
-            final Context ctx = this;
 
             GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
                     .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT | GeofencingRequest.INITIAL_TRIGGER_ENTER)
@@ -454,7 +446,7 @@ public class AttendanceManager extends Service {
                         }
                     });
         } catch (Exception e) {
-            e.printStackTrace();
+            WebViewerActivity.Toast(e,ctx);
         }
     }
 

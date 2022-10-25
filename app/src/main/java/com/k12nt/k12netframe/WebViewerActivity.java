@@ -13,7 +13,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -24,10 +23,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -35,7 +32,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -55,7 +51,6 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
-import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -71,7 +66,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,7 +74,6 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.firebase.appindexing.Action;
 import com.google.firebase.appindexing.FirebaseUserActions;
 import com.google.firebase.appindexing.builders.Actions;
@@ -117,8 +110,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -137,6 +128,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     
     public static String startUrl = "";
     public static String previousUrl = "";
+    public static final int LOGIN_SCREEN_SDK_INT = 26;//29
+
+    public Boolean isConfirmed = false;
 
     WebView webview = null;
     WebView main_webview = null;
@@ -146,7 +140,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private ValueCallback<Uri[]> mFilePathCallback;
     private final static int FILECHOOSER_RESULTCODE = 1;
 
-    public Boolean isConfirmed = false;
     private Dialog progress_dialog;
 
     private static final String TAG = "WebViewerActivity";
@@ -156,34 +149,47 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
-    public static final int LOGIN_SCREEN_SDK_INT = 28;//29
+
+    private static Bitmap LogoBitmap = null;
+    private static String GlobalSettings = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState);
+        try {
+            super.onCreate(savedInstanceState);
 
-        initUserReferences();
+            initUserReferences();
 
-        if(currentState.equals("init")) checkCurrentVersion();
+            if(currentState.equals("init")) checkCurrentVersion();
 
-        registerReceivers();
+            registerReceivers();
 
-        initExceptionHandling();
+            initExceptionHandling();
 
-        initFirebaseMessaging();
+            initFirebaseMessaging();
 
-        //is_native_login = android.os.Build.VERSION.SDK_INT >= LOGIN_SCREEN_SDK_INT;
+            is_native_login = android.os.Build.VERSION.SDK_INT >= LOGIN_SCREEN_SDK_INT;
 
-        if (is_native_login == false || currentState == "restartActivity" || (startUrl != null && !startUrl.equals(""))) {
-            startWithWeb();
-        } else {
-            startWithLoginScreen();
-            checkNotificationExist(getIntent(), "login");
+            if (is_native_login == false || currentState == "restartActivity" || (startUrl != null && !startUrl.equals(""))) {
+                startWithWeb();
+            } else {
+                startWithLoginScreen();
+                checkNotificationExist(getIntent(), "login");
+            }
+        } catch (Exception ex) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String sStackTrace = sw.toString();
+
+            Toast.makeText(this, "Please try later or reinstall app. Unknown error : " + ex.getMessage() + " / " + sStackTrace, Toast.LENGTH_LONG).show();
         }
     }
 
     private void startWithLoginScreen() {
+        K12NetHttpClient.initCookies();
+
         K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
         setContentView(R.layout.k12net_login_layout);
 
@@ -222,7 +228,27 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             navigateTo(K12NetUserReferences.getConnectionAddress() + "/ResetPassword.aspx");
         });
 
+        boolean isLogout = loginState != null && loginState.equals("logout");
+        boolean isCultureChange = loginState != null && loginState.equals("culture_set");
+
+        if(isLogout || isCultureChange) {
+            loginState = "";
+        } else {
+            if(K12NetUserReferences.getRememberMe()) {
+                doLogin();
+                if(K12NetUserReferences.getSubDomain() == null) {
+                    getSettings();
+                }
+                return;
+            }
+        }
+
         setLogo();
+
+        getSettings();
+    }
+
+    private void getSettings() {
 
         try {
             String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Login/Settings";
@@ -255,8 +281,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         K12NetUserReferences.setSubDomain(responseJSON.getString("SubDomain"));
 
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        tryWithLoginPage();
+                        Toast(e,WebViewerActivity.this);
+                        //tryWithLoginPage();
                     }
                 }
             });
@@ -264,23 +290,33 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             settingTask.execute();
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            tryWithLoginPage();
+            Toast(ex,this);
+            //tryWithLoginPage();
+        }
+    }
+
+    public static void Toast(Throwable ex, Context context) {
+        if(K12NetUserReferences.getUsername() != null && K12NetUserReferences.getUsername().equals("emrez")) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String sStackTrace = sw.toString(); // stack trace as a string
+            Toast.makeText(context, "Unknown error. " + ex.getMessage() + " / " + sStackTrace, Toast.LENGTH_LONG).show();
         }
 
-        if(K12NetUserReferences.getRememberMe()) {
-            doLogin();
-            return;
-        }
-
+        ex.printStackTrace();
     }
 
     private void bindSettings() {
-        if(K12NetUserReferences.getFsConnectionAddress() != null && K12NetUserReferences.getFsConnectionAddress().contains(K12NetUserReferences.getConnectionAddress() + "$$$")) {
-           return;
-        }
-
         try {
+            if(GlobalSettings != null) {
+                setSettingParameters();
+                return;
+            }
+
+            if(K12NetUserReferences.getFsConnectionAddress() != null && K12NetUserReferences.getFsConnectionAddress().contains(K12NetUserReferences.getConnectionAddress() + "$$$")) {
+                return;
+            }
             String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Settings/Global";
             HTTPAsyncTask settingTask = new HTTPAsyncTask(this, connString, "Settings");
             settingTask.RequestMethod = "GET";
@@ -291,12 +327,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 @Override
                 public void asyncTaskCompleted(HTTPAsyncTask task) {
                     try {
-                        String fsURL = task.GetResult().split("globalSettings.fileServerUrl=\"")[1].split("\";globalSettings")[0];
-
-                        K12NetUserReferences.setFsConnectionAddress(K12NetUserReferences.getConnectionAddress() + "$$$" + fsURL);
+                        GlobalSettings = task.GetResult();
+                        setSettingParameters();
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        tryWithLoginPage();
+                        Toast(e,WebViewerActivity.this);
+                        //tryWithLoginPage();
                     }
                 }
             });
@@ -304,18 +339,37 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             settingTask.execute();
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            tryWithLoginPage();
+            Toast(ex,this);
+            //tryWithLoginPage();
         }
 
     }
 
+    private void setSettingParameters() {
+        try {
+            if(GlobalSettings == null) return;
+
+            String fsURL = GlobalSettings.split("globalSettings.fileServerUrl=\"")[1].split("\";globalSettings")[0];
+
+            K12NetUserReferences.setFsConnectionAddress(K12NetUserReferences.getConnectionAddress() + "$$$" + fsURL);
+        } catch (Exception e) {
+            Toast(e,WebViewerActivity.this);
+        }
+    }
+
     private void  setLogo() {
         try {
+            if(LogoBitmap != null) {
+                ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
+                imgLogo.setImageBitmap(LogoBitmap);
+                return;
+            }
+
             if (K12NetUserReferences.getFsConnectionAddress() == null || K12NetUserReferences.getSubDomain() == null) return;
             String fsPath = K12NetUserReferences.getFsConnectionAddress().replace(K12NetUserReferences.getConnectionAddress() + "$$$","").split("$$$")[0];
             String logoPath = fsPath + "/SubdomainFiles/"+ K12NetUserReferences.getSubDomain() + "/login.png";
 
+            if(logoPath.contains("$$$")) return;
             ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
 
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -335,14 +389,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         is.close();
 
                         imgLogo.setImageBitmap(bm);
+
+                        LogoBitmap = bm;
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Toast(ex,this);
                     }
                 });
             });
         } catch (Exception e) {
-            e.printStackTrace();
-            tryWithLoginPage();
+            Toast(e,this);
         }
     }
 
@@ -428,7 +483,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             button.setBackground(selectedCulture.equals(culture) ? atlas_pressed_button : atlas_button);
             button.setTextColor(Color.WHITE);
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(150, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.rightMargin = 10;
             params.gravity = Gravity.CENTER;
             button.setLayoutParams(params);
@@ -444,6 +499,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                     K12NetSettingsDialogView.setLanguageToDefault(WebViewerActivity.this.getBaseContext());
 
+                    loginState = "culture_set";
                     startUrl = "";
                     recreate();
                 }
@@ -463,13 +519,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private void doLogin() {
-        K12NetUserReferences.setUsername(((EditText) findViewById(R.id.txt_login_username)).getText().toString());
-        K12NetUserReferences.setPassword(((EditText) findViewById(R.id.txt_login_password)).getText().toString());
-        K12NetUserReferences.setRememberMe(((CheckBox) findViewById(R.id.chk_remember_me)).isChecked());
-
-        K12NetHttpClient.initCookies();
-
         try {
+            K12NetUserReferences.setUsername(((EditText) findViewById(R.id.txt_login_username)).getText().toString());
+            K12NetUserReferences.setPassword(((EditText) findViewById(R.id.txt_login_password)).getText().toString());
+            K12NetUserReferences.setRememberMe(((CheckBox) findViewById(R.id.chk_remember_me)).isChecked());
+
+            K12NetHttpClient.initCookies();
+
             isLogin = false;
 
             final WebViewerActivity context = this;
@@ -501,24 +557,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         } else {
                             setLoginCookies();
 
-                            AttendanceManager.Instance().initialize(context, new TaskHandler() {
-                                @Override
-                                public void onTaskCompleted(String result) {
-                                if (result.equals("PermissionRequested")) return;
+                            initWebView();
 
-                                boolean hasNotification = checkNotificationExist(context.getIntent(), "login").equals("exist");
+                            navigateTo(K12NetUserReferences.getConnectionAddress() + "/Logon.aspx");
 
-                                if(!hasNotification) {
-                                    initWebView();
-
-                                    navigateTo(K12NetUserReferences.getConnectionAddress() + "/Logon.aspx");
-                                }
-                                }
-                            });
+                            loginState = "checkNotificationExist";
                         }
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Toast(e,WebViewerActivity.this);
                         tryWithLoginPage();
                     }
                 }
@@ -527,14 +574,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             loginTask.execute();
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Toast(ex,this);
             tryWithLoginPage();
         }
     }
 
     private void tryWithLoginPage() {
-        is_native_login = false;
-        startWithWeb();
+        Toast.makeText(this, "Unknown error. Check your connection or try later.", Toast.LENGTH_SHORT).show();
+        //is_native_login = false;
+        //startWithWeb();
     }
 
     private void setLoginCookies() {
@@ -543,11 +591,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         if (cookies != null && !cookies.isEmpty()) {
             CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.removeAllCookies(null);
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                cookieManager.removeAllCookies(null);
+            } else {
                 CookieSyncManager.createInstance(getApplicationContext());
             }
+
             cookieManager.setAcceptCookie(true);
 
             for (HttpCookie cookie : cookies) {
@@ -555,7 +605,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
                 cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
 
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                if (Build.VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
                     CookieSyncManager.getInstance().sync();
                 }
             }
@@ -678,7 +728,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             } else {
                 FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-                    if(task.isComplete() && task.isSuccessful()) K12NetUserReferences.setDeviceToken(task.getResult());
+                    if(task != null && task.isComplete() && task.isSuccessful()) K12NetUserReferences.setDeviceToken(task.getResult());
                 });
             }
 
@@ -808,7 +858,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     WebView.setDataDirectorySuffix(processName);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Toast(e,this);
             }
         }
 
@@ -851,6 +901,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private void loadUrl(WebView view, String url) {
+        if(view == null) return;
+
         view.post(new Runnable() {
             @Override
             public void run() {
@@ -967,7 +1019,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         } catch (PackageManager.NameNotFoundException e1) {
             // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Toast(e1,this);
         }
         currentVersion = pInfo == null ? "" : pInfo.versionName;
         //check if version number only has 2 segment
@@ -1017,7 +1069,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
 
             }catch (Exception e){
-                e.printStackTrace();
+                Toast(e,WebViewerActivity.this);
 
             }
 
@@ -1485,7 +1537,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return  shouldOverrideUrlLoading(view,request.getUrl().toString());
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                    return  shouldOverrideUrlLoading(view,request.getUrl().toString());
+                } else {
+                    return  shouldOverrideUrlLoading(view,request.toString());
+                }
             }
 
             @Override
@@ -1502,11 +1558,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     }
                 }
 
-                if (is_native_login &&
-                   (url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/login.aspx") ||
-                    url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/logout.aspx"))) {
-                    startWithLoginScreen();
-                    return true;
+                if (is_native_login) {
+                    boolean isLoginPage = url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/login.aspx");
+                    boolean isLogoutPage = url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/logout.aspx");
+
+                    if(isLogoutPage) loginState = "logout";
+
+                    if(isLoginPage || isLogoutPage) {
+                        startWithLoginScreen();
+                        return true;
+                    }
                 }
 
                 if (url.contains("impersonate=true")) {
@@ -1950,11 +2011,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             mainLayout.removeAllViews();
             mainLayout.addView(webview);
-        } else if (webview.canGoBack()) {
+        } else if (webview != null && webview.canGoBack()) {
             webview.goBack();
-        } else if (previousUrl != null && !previousUrl.equals("")) {
+        } else if (webview != null && previousUrl != null && !previousUrl.equals("")) {
             webview.loadUrl(previousUrl);
-        } else if (previousUrl != null && previousUrl.equals("")) {
+        } else if (webview != null && previousUrl != null && previousUrl.equals("")) {
             webview.loadUrl(K12NetUserReferences.getConnectionAddress());
         } else {
             super.onBackPressed();
@@ -2105,12 +2166,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", com.google.firebase.BuildConfig.APPLICATION_ID, null);
+                Uri uri = Uri.fromParts("package", "com.k12nt.k12netframe", null);
                 intent.setData(uri);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 startActivity(intent);
+
             };
 
             if (grantResults.length <= 0) {
