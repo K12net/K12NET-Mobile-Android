@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -85,7 +86,6 @@ import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
-import com.k12nt.k12netframe.utils.helper.AtlasWebView;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -99,6 +99,7 @@ import org.jsoup.nodes.Document;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,6 +109,7 @@ import java.net.HttpCookie;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -407,43 +409,46 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         layout.removeAllViews();
 
         boolean hasAnyAlternate = false;
-        for (int i=0; i < providers.length(); i++) {
-            String route  = providers.getJSONObject(i).getString("Route");
-            String name  = providers.getJSONObject(i).getString("Name");
 
-            if(name.equals("QR")) {
-                continue;
-            }
+        if(providers != null) {
+            for (int i=0; i < providers.length(); i++) {
+                String route  = providers.getJSONObject(i).getString("Route");
+                String name  = providers.getJSONObject(i).getString("Name");
 
-            ImageButton button = new ImageButton(WebViewerActivity.this);
-
-            if(name.equals("Google")) {
-                button.setImageResource(R.drawable.google_icon);
-            } else if(name.equals("WindowsLive")) {
-                button.setImageResource(R.drawable.outlook_icon);
-            } else if(name.equals("Office365")) {
-                button.setImageResource(R.drawable.office365_icon);
-            } else {
-                continue;
-            }
-
-            hasAnyAlternate = true;
-            button.setBackgroundColor(0x9272aa);
-            button.setAdjustViewBounds(true);
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(250, 250);
-            params.gravity = Gravity.CENTER;
-            button.setLayoutParams(params);
-
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    initWebView();
-                    navigateTo(route);
+                if(name.equals("QR")) {
+                    continue;
                 }
-            });
 
-            layout.addView(button);
+                ImageButton button = new ImageButton(WebViewerActivity.this);
+
+                if(name.equals("Google")) {
+                    button.setImageResource(R.drawable.google_icon);
+                } else if(name.equals("WindowsLive")) {
+                    button.setImageResource(R.drawable.outlook_icon);
+                } else if(name.equals("Office365")) {
+                    button.setImageResource(R.drawable.office365_icon);
+                } else {
+                    continue;
+                }
+
+                hasAnyAlternate = true;
+                button.setBackgroundColor(0x9272aa);
+                button.setAdjustViewBounds(true);
+
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(250, 250);
+                params.gravity = Gravity.CENTER;
+                button.setLayoutParams(params);
+
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        initWebView();
+                        navigateTo(route);
+                    }
+                });
+
+                layout.addView(button);
+            }
         }
 
         if(!hasAnyAlternate) {
@@ -460,6 +465,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         LinearLayout layout = (LinearLayout) findViewById(R.id.ly_cultures);
 
         layout.removeAllViews();
+
+        if(cultures == null) return;
 
         Drawable atlas_button = getDrawable(this, R.drawable.atlas_button);
         Drawable atlas_pressed_button = getDrawable(this, R.drawable.atlas_pressed_button);
@@ -555,6 +562,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         if (isLogin == false) {
                             Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
                         } else {
+                            String loginSite = responseJSON.optString("LoginSite", K12NetUserReferences.getConnectionAddress());
+
+                            if(loginSite != null && !loginSite.equals("/") && loginSite.contains("https")) {
+                                K12NetUserReferences.setConnectionAddress(loginSite);
+                            }
+
                             setLoginCookies();
 
                             initWebView();
@@ -1262,7 +1275,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             if (resultStr != null) {
                 Uri uri = Uri.parse(resultStr.trim());
 
-                String filePath = getPath(this, uri);// getFilePathFromContent(resultStr);
+                String filePath = getPath(this, uri);
 
                 if(filePath == null) {
                     Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
@@ -1371,7 +1384,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private WebView setWebView(final Activity ctx) {
-        webview = new AtlasWebView(WebViewerActivity.this);
+        //webview = new AtlasWebView(WebViewerActivity.this); => this fix the auto complete box issue but rises Turkish char problem on keyboard
+        webview = new WebView(WebViewerActivity.this);
         webview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -2543,7 +2557,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                             split[1]
                     };
 
-                    return getDataColumn(context, contentUri, selection, selectionArgs);
+                    String result = getDataColumn(context, contentUri, selection, selectionArgs);
+
+                    if (result == null || result.isEmpty()) {
+                        return getPathFromSavingTempFile(context, uri);
+                    }
+
+                    return result;
                 } else if (isGoogleDrive(uri)) { // Google Drive
                     try {
                         File file = saveFileIntoExternalStorageByUri(context, uri);
@@ -2599,6 +2619,62 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         return null;
+    }
+
+    private static String sanitizeFilename(String filename) {
+        if (filename == null) {
+            return null;
+        }
+
+        File f = new File(filename);
+        return f.getName();
+    }
+
+    public static String getPathFromSavingTempFile(Context context, final Uri uri) {
+        File tmpFile;
+        String fileName = null;
+
+        if (uri == null || uri.isRelative()) {
+            return null;
+        }
+
+        // Try and get the filename from the Uri
+        try {
+            Cursor returnCursor =
+                    context.getContentResolver().query(uri, null, null, null, null);
+            int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            returnCursor.moveToFirst();
+            fileName = sanitizeFilename(returnCursor.getString(nameIndex));
+
+        } catch (Exception e) {
+            // just continue to get the filename with the last segment of the path
+        }
+
+        try {
+            if (TextUtils.isEmpty(fileName)) {
+                fileName = sanitizeFilename(uri.getLastPathSegment().toString().trim());
+            }
+
+
+            File cacheDir = new File(context.getCacheDir(), "mmShare");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+
+            tmpFile = new File(cacheDir, fileName);
+            tmpFile.createNewFile();
+
+            ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
+
+            FileChannel src = new FileInputStream(pfd.getFileDescriptor()).getChannel();
+            FileChannel dst = new FileOutputStream(tmpFile).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+        } catch (IOException ex) {
+            return null;
+        }
+        return tmpFile.getAbsolutePath();
     }
 
     /**

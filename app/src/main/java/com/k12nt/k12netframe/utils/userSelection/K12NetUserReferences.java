@@ -5,14 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
-import com.google.android.gms.location.Geofence;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.k12nt.k12netframe.K12NetSettingsDialogView;
-import com.k12nt.k12netframe.attendance.GeoFenceData;
-
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -202,6 +194,7 @@ public class K12NetUserReferences {
     }
 
     public static String getLanguageCode(){
+        if(references == null) return null;
 	    if (references.languageCode == null) {
             setLanguage("en");
 

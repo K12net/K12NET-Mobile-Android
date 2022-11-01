@@ -16,7 +16,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -45,6 +44,10 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
 	public View getDialogView(Object objView) { 
 
         View view = inflater.inflate(R.layout.k12net_setting_layout, null);
+
+        final EditText appAddress = (EditText) view.findViewById(R.id.txt_connection_address);
+
+        appAddress.setText(K12NetUserReferences.getConnectionAddress());
 
         Switch swtGeoFenceMonitor = (Switch) view.findViewById(R.id.swtGeoFenceMonitor);
 
@@ -87,6 +90,7 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
 
             @Override
             public void onClick(View arg0) {
+                K12NetUserReferences.setConnectionAddress(appAddress.getText().toString());
                 dismiss();
             }
         });
