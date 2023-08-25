@@ -234,7 +234,7 @@ public class AttendanceManager extends Service {
                                 Log.i("WEB", "bindFenceData.onFailure: " + json);
                             } catch (Exception ex) {
                                 ex.printStackTrace();
-                                WebViewerActivity.Toast(ex,activity);
+                                WebViewerActivity.Toast(ex,activity, false);
                             }
                         }
 
@@ -307,7 +307,7 @@ public class AttendanceManager extends Service {
         }
         catch (Exception exception)
         {
-            WebViewerActivity.Toast(exception,activity);
+            WebViewerActivity.Toast(exception,activity, false);
             startAttendanceService(activity);
         }
     }
@@ -389,7 +389,7 @@ public class AttendanceManager extends Service {
             client.post(ctx, connString, entity, "application/json;charset=utf-8", responseHandler);
 
         } catch (Exception ex) {
-            WebViewerActivity.Toast(ex,ctx);
+            WebViewerActivity.Toast(ex,ctx, false);
         }
     }
 
@@ -446,7 +446,7 @@ public class AttendanceManager extends Service {
                         }
                     });
         } catch (Exception e) {
-            WebViewerActivity.Toast(e,ctx);
+            WebViewerActivity.Toast(e,ctx, false);
         }
     }
 

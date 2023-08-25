@@ -39,9 +39,17 @@
     <uses-feature android:name="android.hardware.camera2.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera2.external" android:required="false" />
     <uses-permission android:name="android.webkit.PermissionRequest" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <!-- Android 13 => api level 33  -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Android 13 => api level 33  -->
+
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <!--
@@ -145,7 +153,7 @@
              android:foregroundServiceType="location" />
              -->
 
-         <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+         <!-- ${applicationId}.FileProvider ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data
             android:name="com.google.android.gms.version"

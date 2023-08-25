@@ -104,7 +104,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                     fenceList.add(data);
                 } catch (ParseException e) {
-                    WebViewerActivity.Toast(e,context);
+                    WebViewerActivity.Toast(e,context, false);
                 }
             }
 
@@ -188,7 +188,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                             }
 
                         } catch (UnsupportedEncodingException e) {
-                            WebViewerActivity.Toast(e,context);
+                            WebViewerActivity.Toast(e,context, false);
                         }
 
                     }
@@ -196,12 +196,11 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        WebViewerActivity.Toast(e,context);
                         Toast.makeText(context, "Error Code 1923 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception ex) {
-                WebViewerActivity.Toast(ex,context);
+                WebViewerActivity.Toast(ex,context, false);
             }
         } else {
             // Check the action code and determine what to do

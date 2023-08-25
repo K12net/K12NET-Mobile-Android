@@ -71,6 +71,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -177,7 +178,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 startWithWeb();
             } else {
                 startWithLoginScreen();
-                checkNotificationExist(getIntent(), "login");
             }
         } catch (Exception ex) {
             StringWriter sw = new StringWriter();
@@ -248,6 +248,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         setLogo();
 
         getSettings();
+
+        checkNotificationExist(getIntent(), "login");
     }
 
     private void getSettings() {
@@ -265,7 +267,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 @Override
                 public void asyncTaskCompleted(HTTPAsyncTask task) {
                     try {
-                        JSONObject responseJSON = new JSONObject(task.GetResult());
+                        String result = task.GetResult();
+
+                        if(result == null) {
+                            return;
+                        }
+
+                        JSONObject responseJSON = new JSONObject(result);
 
                         JSONArray cultures = responseJSON.optJSONArray("EnabledCultures");
 
@@ -283,7 +291,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         K12NetUserReferences.setSubDomain(responseJSON.getString("SubDomain"));
 
                     } catch (Exception e) {
-                        Toast(e,WebViewerActivity.this);
+                        Toast(e,WebViewerActivity.this, false);
                         //tryWithLoginPage();
                     }
                 }
@@ -292,18 +300,18 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             settingTask.execute();
 
         } catch (Exception ex) {
-            Toast(ex,this);
+            Toast(ex,this, false);
             //tryWithLoginPage();
         }
     }
 
-    public static void Toast(Throwable ex, Context context) {
-        if(K12NetUserReferences.getUsername() != null && K12NetUserReferences.getUsername().equals("emrez")) {
+    public static void Toast(Throwable ex, Context context, boolean showDetail) {
+        if(showDetail) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
             String sStackTrace = sw.toString(); // stack trace as a string
-            Toast.makeText(context, "Unknown error. " + ex.getMessage() + " / " + sStackTrace, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, ex.getMessage() + " / " + sStackTrace, Toast.LENGTH_LONG).show();
         }
 
         ex.printStackTrace();
@@ -332,7 +340,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         GlobalSettings = task.GetResult();
                         setSettingParameters();
                     } catch (Exception e) {
-                        Toast(e,WebViewerActivity.this);
+                        Toast(e,WebViewerActivity.this, false);
                         //tryWithLoginPage();
                     }
                 }
@@ -341,7 +349,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             settingTask.execute();
 
         } catch (Exception ex) {
-            Toast(ex,this);
+            Toast(ex,this, false);
             //tryWithLoginPage();
         }
 
@@ -355,7 +363,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             K12NetUserReferences.setFsConnectionAddress(K12NetUserReferences.getConnectionAddress() + "$$$" + fsURL);
         } catch (Exception e) {
-            Toast(e,WebViewerActivity.this);
+            Toast(e,WebViewerActivity.this,false);
         }
     }
 
@@ -374,32 +382,36 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             if(logoPath.contains("$$$")) return;
             ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
 
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            ExecutorService executor = Executors.newFixedThreadPool(4);
             Handler handler = new Handler(Looper.getMainLooper());
 
             executor.execute(() -> {
-                //Background work here
-                handler.post(() -> {
-                    try {
-                        URL aURL = new URL(logoPath);
-                        URLConnection conn = aURL.openConnection();
-                        conn.connect();
-                        InputStream is = conn.getInputStream();
-                        BufferedInputStream bis = new BufferedInputStream(is);
-                        Bitmap bm = BitmapFactory.decodeStream(bis);
-                        bis.close();
-                        is.close();
+                try {
+                    //Background work here
+                    handler.post(() -> {
+                        try {
+                            URL aURL = new URL(logoPath);
+                            URLConnection conn = aURL.openConnection();
+                            conn.connect();
+                            InputStream is = conn.getInputStream();
+                            BufferedInputStream bis = new BufferedInputStream(is);
+                            Bitmap bm = BitmapFactory.decodeStream(bis);
+                            bis.close();
+                            is.close();
 
-                        imgLogo.setImageBitmap(bm);
+                            imgLogo.setImageBitmap(bm);
 
-                        LogoBitmap = bm;
-                    } catch (Exception ex) {
-                        Toast(ex,this);
-                    }
-                });
+                            LogoBitmap = bm;
+                        } catch (Exception ex) {
+                            Toast(ex,this,false);
+                        }
+                    });
+                } catch (Exception ex) {
+                    Toast(ex,this,false);
+                }
             });
         } catch (Exception e) {
-            Toast(e,this);
+            Toast(e,this,false);
         }
     }
 
@@ -555,7 +567,15 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 @Override
                 public void asyncTaskCompleted(HTTPAsyncTask task) {
                     try {
-                        JSONObject responseJSON = new JSONObject(task.GetResult());
+                        String result = task.GetResult();
+
+                        if(result == null) {
+                            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Check your Settings Url!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        JSONObject responseJSON = new JSONObject(result);
 
                         isLogin = responseJSON.optBoolean("Success", false);
 
@@ -578,7 +598,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         }
 
                     } catch (Exception e) {
-                        Toast(e,WebViewerActivity.this);
+                        Toast(e,WebViewerActivity.this,true);
                         tryWithLoginPage();
                     }
                 }
@@ -587,15 +607,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             loginTask.execute();
 
         } catch (Exception ex) {
-            Toast(ex,this);
+            Toast(ex,this,true);
             tryWithLoginPage();
         }
     }
 
     private void tryWithLoginPage() {
-        Toast.makeText(this, "Unknown error. Check your connection or try later.", Toast.LENGTH_SHORT).show();
-        //is_native_login = false;
-        //startWithWeb();
+        if(K12NetUserReferences.getUsername().toLowerCase().equals("onuralpsoy")) return;
+        //Toast.makeText(this, "Unknown error. Check your connection or try later.", Toast.LENGTH_SHORT).show();
+        is_native_login = false;
+        startWithWeb();
     }
 
     private void setLoginCookies() {
@@ -745,6 +766,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 });
             }
 
+            if(!checkNotificationPermission()) {
+                requestNotificationPermission();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -871,7 +896,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     WebView.setDataDirectorySuffix(processName);
                 }
             } catch (Exception e) {
-                Toast(e,this);
+                Toast(e,this,false);
             }
         }
 
@@ -957,12 +982,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.cancel(intent.getExtras().getInt("requestID",0));
 
+            clearExtras(intentOfLogin);
             Runnable confirmation = () -> {
                 new SetUserStateTask().execute(isConfirmed ? "1" : "0",query);
 
                 CheckForRedirectToPortalPage("approve");
-
-                clearExtras(intentOfLogin);
             };
 
             setConfirmDialog(title,body,confirmation);
@@ -985,7 +1009,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             final String body = intent.getExtras().getString("body","");
             final String title = intent.getExtras().getString("title","");
 
+            clearExtras(intentOfLogin);
+
             Runnable confirmation = () -> {
+
                 if (isConfirmed) {
                     String url = K12NetUserReferences.getConnectionAddress() + String.format("/Default.aspx?intent=%1$s&portal=%2$s&query=%3$s",webPart,portal,query);
 
@@ -993,8 +1020,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 } else {
                     CheckForRedirectToPortalPage("exist");
                 }
-
-                clearExtras(intentOfLogin);
             };
 
             if (WebViewerActivity.startUrl != null && (WebViewerActivity.startUrl.equals(K12NetUserReferences.getConnectionAddress()) || WebViewerActivity.startUrl.contains("Login.aspx"))) {
@@ -1032,7 +1057,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         } catch (PackageManager.NameNotFoundException e1) {
             // TODO Auto-generated catch block
-            Toast(e1,this);
+            Toast(e1,this,false);
         }
         currentVersion = pInfo == null ? "" : pInfo.versionName;
         //check if version number only has 2 segment
@@ -1082,7 +1107,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
 
             }catch (Exception e){
-                Toast(e,WebViewerActivity.this);
+                Toast(e,WebViewerActivity.this,false);
 
             }
 
@@ -1989,28 +2014,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         return "javascript: console.log('It is not a Blob URL');";
     }
 
-    private void enableHTML5AppCache(WebView webView) {
-
-        webView.getSettings().setDomStorageEnabled(true);
-
-        // Set cache size to 8 mb by default. should be more than enough
-        if (Build.VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN_MR2) {
-            webView.getSettings().setAppCacheMaxSize(1024 * 1024 * 8);
-        }
-
-        webView.getSettings().setAppCachePath(getCacheDir().getAbsolutePath());
-        webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setLoadsImagesAutomatically(true);
-        webView.getSettings().setAllowContentAccess(true);
-
-        if (Build.VERSION.SDK_INT >= 16) {
-            webView.getSettings().setAllowFileAccessFromFileURLs(true);
-        }
-
-        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-    }
-
 
     @Override
     public void buildCustomView() {
@@ -2039,18 +2042,39 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         previousUrl = "";
     }
 
-    protected boolean checkWritePermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public static String[] storage_permissions_33 = {
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO
+    };
+
+    public static String[] permissions(String permission) {
+        String[] p;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            p = storage_permissions_33;
         } else {
-            return false;
+            p = new String[]{permission};
         }
+        return p;
+    }
+
+    protected boolean checkWritePermission() {
+        for(String permission: WebViewerActivity.permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        {
+            int result = ContextCompat.checkSelfPermission(this, permission);
+
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected void requestWritePermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this, WebViewerActivity.permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE), 100);
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             Toast.makeText(this, R.string.writeAccessAppSettings, Toast.LENGTH_LONG).show();
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -2060,22 +2084,64 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     protected boolean checkReadPermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
+        for(String permission: WebViewerActivity.permissions(Manifest.permission.READ_EXTERNAL_STORAGE))
+        {
+            int result = ContextCompat.checkSelfPermission(this, permission);
+
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
         }
+        return false;
     }
 
     protected void requestReadPermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this, WebViewerActivity.permissions(Manifest.permission.READ_EXTERNAL_STORAGE), 101);
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Toast.makeText(this, R.string.readAccessAppSettings, Toast.LENGTH_LONG).show();
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
             }
+        }
+    }
+
+    protected boolean checkCameraPermission() {
+        for(String permission: WebViewerActivity.permissions(Manifest.permission.CAMERA))
+        {
+            int result = ContextCompat.checkSelfPermission(this, permission);
+
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void requestCameraPermission() {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this, WebViewerActivity.permissions(Manifest.permission.CAMERA), 103);
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            Toast.makeText(this, R.string.readAccessCameraPermission, Toast.LENGTH_LONG).show();
+        } else {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, 103);
+            }
+        }
+    }
+
+    protected boolean checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            int result = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS);
+
+            return result == PackageManager.PERMISSION_GRANTED;
+        } else return  true;
+    }
+
+    protected void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 107);
         }
     }
 
@@ -2124,26 +2190,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                requestPermissions(permissions.toArray(new String[permissions.size()]), 105);
            }
        }
-    }
-
-    protected boolean checkCameraPermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    protected void requestCameraPermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            Toast.makeText(this, R.string.readAccessCameraPermission, Toast.LENGTH_LONG).show();
-        } else {
-            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA}, 103);
-            }
-        }
     }
 
     protected boolean checkAccessAllDownloadsPermission() {
@@ -2262,6 +2308,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use fine location.");
+                }
+                break;
+            case 107:
+                if (garanted) {
+
+                } else {
+                    Log.e("value", "Permission Denied, You cannot use notifications without permission.");
                 }
                 break;
         }
