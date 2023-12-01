@@ -142,6 +142,8 @@ public class K12NetUserReferences {
 		return references.password;
 	}
 	public static void setConnectionAddress(String conAddress){
+        if(conAddress.contains("192.")) return;
+        if(conAddress.startsWith("http://")) conAddress = conAddress.replace("http://","https://");
 		references.connectionString = conAddress;
 		references.storeString(CONNECTION_ADDRESS, references.connectionString);
 	}

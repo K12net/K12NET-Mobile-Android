@@ -569,11 +569,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     try {
                         String result = task.GetResult();
 
-                        if(result == null) {
+                        if(result == null || result == "") {
                             Toast.makeText(context, R.string.login_failed, Toast.LENGTH_SHORT).show();
                             Toast.makeText(context, "Check your Settings Url!", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        Log.w(TAG, "result "+result);
 
                         JSONObject responseJSON = new JSONObject(result);
 
@@ -1507,7 +1508,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                                 } catch (Exception e) {
                                     try {
                                         if (!startUrl.startsWith("http://") && !startUrl.startsWith("https://")) {
-                                            Uri webpage = Uri.parse("http://" + startUrl);
+                                            Uri webpage = Uri.parse("https://" + startUrl);
                                             Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
                                             if (intent.resolveActivity(getPackageManager()) != null) {
                                                 startActivity(intent);
@@ -1651,7 +1652,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     String connAddress = K12NetUserReferences.getConnectionAddress();
                     String portals[] = new String[] {"/SPTS.Web/","/TPJS.Web/","/EPJS.Web/"};
                     for(String portal : portals) {
-                        if(url.contains(portal)) {
+                        if(url.contains(portal) && url.startsWith("https://")) {
 
                             bindSettings();
 

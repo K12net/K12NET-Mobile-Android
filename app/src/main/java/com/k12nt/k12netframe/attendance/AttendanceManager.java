@@ -388,6 +388,7 @@ public class AttendanceManager extends Service {
             //client.addHeader("Accept", "application/json");
             client.post(ctx, connString, entity, "application/json;charset=utf-8", responseHandler);
 
+            Log.w(TAG, "Geofence post to "+connString);
         } catch (Exception ex) {
             WebViewerActivity.Toast(ex,ctx, false);
         }
