@@ -740,7 +740,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private void registerReceivers() {
-        registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
+            registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        }
     }
 
     private void initUserReferences() {
@@ -1346,6 +1350,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 }
             }
         }
+        else if(requestCode == AttendanceManager.REQUEST_CHECK_SETTINGS) {
+            AttendanceManager.IS_REQUEST_CHECK_SETTINGS_OK = resultCode == RESULT_OK;
+        }
         else {
             if (mUploadMessage != null) {
                 mUploadMessage.onReceiveValue(null);
@@ -1492,7 +1499,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     return;
                 }
 
-                if (url != null && (url.contains(domain) || url.toLowerCase().contains("sso.globed.co"))) {
+                if (url != null && (url.toLowerCase().contains(".k12net.") || url.replace("https","").contains(domain.replace("https","")) || url.toLowerCase().contains("sso.globed.co"))) {
                     super.onReceivedError(view, request, error);
                 } else {
                     webview.stopLoading();

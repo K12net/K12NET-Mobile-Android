@@ -1,16 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.k12nt.k12netframe"
         minSdkVersion 20
-        targetSdkVersion 33
+        targetSdkVersion 34
         vectorDrawables.useSupportLibrary = true
-        versionCode 129
-        versionName "1.33.29"
+        versionCode 135
+        versionName "1.33.35"
         multiDexEnabled true
     }
     buildTypes {
@@ -61,9 +61,9 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
 
-    implementation 'com.google.firebase:firebase-messaging:23.2.1'
+    implementation 'com.google.firebase:firebase-messaging:23.4.0'
     implementation 'com.google.firebase:firebase-core:21.1.1'
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
@@ -71,10 +71,10 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.13.1'
 
     // required to avoid crash on Android 12 API 31
-    implementation 'androidx.work:work-runtime-ktx:2.8.1'
-    implementation("androidx.work:work-runtime:2.8.1")
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+    implementation("androidx.work:work-runtime:2.9.0")
 
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.google.android.gms:play-services-location:21.1.0'
     implementation 'com.google.code.gson:gson:2.8.8'
 
     implementation 'com.loopj.android:android-async-http:1.4.9'

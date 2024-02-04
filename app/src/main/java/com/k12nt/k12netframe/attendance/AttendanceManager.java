@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -69,6 +70,7 @@ public class AttendanceManager extends Service {
     private static final int LOCATION_INTERVAL = 1000 * 60 * 2; // 2 minute
     public static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     public static final int REQUEST_CHECK_SETTINGS = 35;
+    public static boolean IS_REQUEST_CHECK_SETTINGS_OK = true;
 
     private static final String TAG = AttendanceManager.class.getSimpleName();
     private List<Geofence> mGeofenceList;
@@ -281,6 +283,10 @@ public class AttendanceManager extends Service {
                             // Location settings are not satisfied. But could be fixed by showing the
                             // user a dialog.
                             try {
+
+                                if (IS_REQUEST_CHECK_SETTINGS_OK == false) {
+                                    return;
+                                }
                                 // Cast to a resolvable exception.
                                 ResolvableApiException resolvable = (ResolvableApiException) exception;
                                 // Show the dialog by calling startResolutionForResult(),
@@ -399,7 +405,7 @@ public class AttendanceManager extends Service {
         final Context ctx = this;
 
         try {
-            //this.registerReceiver(Receiver, new IntentFilter("GeoFence"));
+            //this.registerReceiver(receiver, new IntentFilter("GeoFence"));
 
            /* final Intent intent = new Intent(activity, LocationUpdatesService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
