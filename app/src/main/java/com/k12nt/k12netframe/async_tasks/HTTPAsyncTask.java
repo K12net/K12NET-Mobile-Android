@@ -105,6 +105,7 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
                 }
 
                 this.sendData(conn, jsonObject.toString());
+
                 /*conn.connect();
 
                 String m = conn.getResponseMessage();
@@ -140,6 +141,11 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
 
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                System.out.println("errorstream : " + this.read(conn.getErrorStream()));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             return null;
         }finally {
             if(conn != null) conn.disconnect();

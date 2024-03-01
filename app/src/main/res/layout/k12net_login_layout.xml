@@ -177,8 +177,7 @@
                         android:layout_height="1dp"
                         android:background="@android:color/darker_gray"/>
 
-                    <LinearLayout
-                        android:id="@+id/ly_cultures"
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -186,8 +185,12 @@
                         android:layout_marginHorizontal="15dp"
                         android:layout_marginTop="10dp"
                         android:orientation="horizontal">
-
-                    </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/ly_cultures"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </LinearLayout>
+                    </HorizontalScrollView >
 
                 </LinearLayout>
 

@@ -54,6 +54,7 @@ import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -64,6 +65,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -554,7 +556,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             String connString = K12NetUserReferences.getConnectionAddress() + "/GWCore.Web/api/Login/Validate";
             HTTPAsyncTask loginTask = new HTTPAsyncTask(context, connString, "Login");
 
+           // loginTask.GetConnection().addRequestProperty("User-Agent", getLoginUserAgent());
+
             loginTask.setHeader("Content-type", "application/json;charset=UTF-8");
+            loginTask.setHeader("User-Agent", getLoginUserAgent());
             loginTask.setHeader("Atlas-DeviceID", K12NetUserReferences.getDeviceToken());
             loginTask.setHeader("Atlas-DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
             loginTask.setHeader("Atlas-DeviceModel", GetDeviceModel());
@@ -908,6 +913,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         main_webview = this.setWebView(this);
         popup_webview = null;
 
+        LinearLayout signout_button = (LinearLayout) findViewById(R.id.lyt_signout);
+        signout_button.setOnClickListener(arg0 -> {
+            webview.loadUrl(K12NetUserReferences.getConnectionAddress() + "/logout.aspx");
+        });
+
         K12NetSettingsDialogView.setLanguageToDefault(WebViewerActivity.this.getBaseContext());
         buildCustomView();
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_in_left);
@@ -1054,6 +1064,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     String currentVersion, latestVersion;
     Dialog dialog;
     private void checkCurrentVersion(){
+        setWarnedVersionString();
+        new GetLatestVersion(this).execute();
+    }
+
+    private void setWarnedVersionString() {
         PackageManager pm = this.getPackageManager();
         PackageInfo pInfo = null;
 
@@ -1071,9 +1086,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         }
 
         K12NetUserReferences.setWarnedVersionString(currentVersion);
-
-        new GetLatestVersion(this).execute();
-
     }
 
     private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {
@@ -3196,29 +3208,72 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     private String GetDeviceModel() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
-        if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
-            model =  Build.MODEL;
-        } else {
-            model = manufacturer + " [" + model + "] ";
-        }
-        String deviceName = "";
 
-        try{
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                deviceName = Settings.Global.getString(getContentResolver(), Settings.Global.DEVICE_NAME);
+        try {
+            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+                model =  Build.MODEL;
+            } else {
+                model = manufacturer + " [" + model + "] ";
             }
-        } catch(Exception e) {
+            String deviceName = "";
 
+            try{
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                    deviceName = Settings.Global.getString(getContentResolver(), Settings.Global.DEVICE_NAME);
+                }
+            } catch(Exception e) {
+
+            }
+
+            if(deviceName != null && !deviceName.equals("")) {
+                model += " [" + deviceName + "] ";
+            }
+
+            if(currentVersion != null && !currentVersion.equals("")) {
+                model += " [v=" + currentVersion + "] ";
+            }
+
+            if(Build.SERIAL != null && !Build.SERIAL.equals("unknown")) {
+                model += " [" + Build.SERIAL + "] ";
+            }
+
+            model += " [" + getAndroidVersion() + "] ";
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return  model;
+    }
 
-        if(deviceName != null && !deviceName.equals("")) {
-            model += " [" + deviceName + "] ";
-        }
+    public String getLoginUserAgent() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
 
-        if(Build.SERIAL != null && !Build.SERIAL.equals("unknown")) {
-            model += " [" + Build.SERIAL + "] ";
+        try {
+            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+                model =  Build.MODEL;
+            } else {
+                model = manufacturer + " [" + model + "] ";
+            }
+
+            String k12version = K12NetUserReferences.getWarnedVersionString();
+
+            if(k12version == null || k12version.equals("")) {
+                setWarnedVersionString();
+                k12version = currentVersion;
+            }
+
+            model = "K12net " + k12version + ";" + getAndroidVersion() + ";" + model;
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return  model;
+    }
+
+    public String getAndroidVersion() {
+        String release = Build.VERSION.RELEASE;
+        int sdkVersion = Build.VERSION.SDK_INT;
+        return "Android " + sdkVersion + " (" + release +")";
     }
 }

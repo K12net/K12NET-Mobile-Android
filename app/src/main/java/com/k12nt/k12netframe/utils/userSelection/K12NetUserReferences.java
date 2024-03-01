@@ -117,10 +117,17 @@ public class K12NetUserReferences {
 	public static String getConnectionAddress(){
 		String http_address = references.connectionString;
 		if(!http_address.startsWith("http")) {
-			http_address = "http://" + http_address;
+			http_address = "https://" + http_address;
 		}
 		return http_address;
 	}
+
+    public static void setConnectionAddress(String conAddress){
+        if(conAddress.contains("192.")) return;
+        if(conAddress.startsWith("http://")) conAddress = conAddress.replace("http://","https://");
+        references.connectionString = conAddress;
+        references.storeString(CONNECTION_ADDRESS, references.connectionString);
+    }
 
     public static String getConnectionAddressDomain(){
         String[] parts = getConnectionAddress().split("://");
@@ -140,12 +147,6 @@ public class K12NetUserReferences {
 	
 	public static String getPassword(){
 		return references.password;
-	}
-	public static void setConnectionAddress(String conAddress){
-        if(conAddress.contains("192.")) return;
-        if(conAddress.startsWith("http://")) conAddress = conAddress.replace("http://","https://");
-		references.connectionString = conAddress;
-		references.storeString(CONNECTION_ADDRESS, references.connectionString);
 	}
 
 	public static void setUsername(String username) {
