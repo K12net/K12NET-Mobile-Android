@@ -182,13 +182,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:layout_marginHorizontal="15dp"
                         android:layout_marginTop="10dp"
                         android:orientation="horizontal">
                         <LinearLayout
                             android:id="@+id/ly_cultures"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" >
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:layout_gravity="center" >
                         </LinearLayout>
                     </HorizontalScrollView >
 

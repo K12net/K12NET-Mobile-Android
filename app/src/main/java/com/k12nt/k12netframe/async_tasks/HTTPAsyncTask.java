@@ -3,6 +3,8 @@ package com.k12nt.k12netframe.async_tasks;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
 import com.k12nt.k12netframe.R;
@@ -10,6 +12,7 @@ import com.k12nt.k12netframe.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.BufferedWriter;
@@ -34,6 +37,7 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     private JSONObject jsonObject ;
     private String name ;
     private String result ;
+    public Bitmap ResultAsBitmap;
     private HttpURLConnection conn = null;
 
     public HTTPAsyncTask(Context ctx, String connString, String name) throws MalformedURLException {
@@ -79,6 +83,17 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
                 int responseCode = conn.getResponseCode();
 
                 if (responseCode == HttpURLConnection.HTTP_OK) { // success
+
+                    if(name != null && name.equals("SchoolLogo")) {
+                        InputStream is = conn.getInputStream();
+                        BufferedInputStream bis = new BufferedInputStream(is);
+                        ResultAsBitmap = BitmapFactory.decodeStream(bis);
+                        bis.close();
+                        is.close();
+
+                        return "SchoolLogo";
+                    }
+
                     BufferedReader in = new BufferedReader(new InputStreamReader(
                             conn.getInputStream()));
                     String inputLine;

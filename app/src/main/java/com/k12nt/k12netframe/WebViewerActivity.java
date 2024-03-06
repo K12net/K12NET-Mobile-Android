@@ -373,7 +373,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         try {
             if(LogoBitmap != null) {
                 ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
-                imgLogo.setImageBitmap(LogoBitmap);
+                if(imgLogo != null) imgLogo.setImageBitmap(LogoBitmap);
                 return;
             }
 
@@ -384,34 +384,29 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             if(logoPath.contains("$$$")) return;
             ImageView imgLogo = (ImageView) findViewById(R.id.img_login_icon);
 
-            ExecutorService executor = Executors.newFixedThreadPool(4);
-            Handler handler = new Handler(Looper.getMainLooper());
+            try {
+                HTTPAsyncTask logoTask = new HTTPAsyncTask(this, logoPath, "SchoolLogo");
+                logoTask.RequestMethod = "GET";
 
-            executor.execute(() -> {
-                try {
-                    //Background work here
-                    handler.post(() -> {
+                logoTask.setOnCompleteListener(new AsyncCompleteListener() {
+                    @Override
+                    public void asyncTaskCompleted(HTTPAsyncTask task) {
                         try {
-                            URL aURL = new URL(logoPath);
-                            URLConnection conn = aURL.openConnection();
-                            conn.connect();
-                            InputStream is = conn.getInputStream();
-                            BufferedInputStream bis = new BufferedInputStream(is);
-                            Bitmap bm = BitmapFactory.decodeStream(bis);
-                            bis.close();
-                            is.close();
+                            imgLogo.setImageBitmap(task.ResultAsBitmap);
 
-                            imgLogo.setImageBitmap(bm);
-
-                            LogoBitmap = bm;
-                        } catch (Exception ex) {
-                            Toast(ex,this,false);
+                            LogoBitmap = task.ResultAsBitmap;
+                        } catch (Exception e) {
+                            Toast(e,WebViewerActivity.this, false);
                         }
-                    });
-                } catch (Exception ex) {
-                    Toast(ex,this,false);
-                }
-            });
+                    }
+                });
+
+                logoTask.execute();
+
+            } catch (Exception ex) {
+                Toast(ex,this, false);
+            }
+
         } catch (Exception e) {
             Toast(e,this,false);
         }
@@ -505,7 +500,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             button.setTextColor(Color.WHITE);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(150, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.rightMargin = 10;
+            params.rightMargin = 7;
+            params.leftMargin = culture.equals(cultures.get(0)) ? 50 : 7;
             params.gravity = Gravity.CENTER;
             button.setLayoutParams(params);
 
@@ -915,6 +911,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
         LinearLayout signout_button = (LinearLayout) findViewById(R.id.lyt_signout);
         signout_button.setOnClickListener(arg0 -> {
+            loginState = "logout";
             webview.loadUrl(K12NetUserReferences.getConnectionAddress() + "/logout.aspx");
         });
 
