@@ -783,45 +783,51 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     private void initExceptionHandling() {
         Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
-            Log.e("Alert", "Lets See if it Works !!!");
 
-            paramThrowable.printStackTrace();
+            try {
 
-            StringWriter sw = new StringWriter();
-            paramThrowable.printStackTrace(new PrintWriter(sw));
-            String stackTrace = sw.toString();
+                Log.e("Alert", "Lets See if it Works !!!");
 
-            /*Get Device Manufacturer and Model*/
-            String manufacturer = Build.MANUFACTURER;
-            String model = Build.MODEL;
-            if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
-                model = Build.MODEL;
-            } else {
-                model = manufacturer + " " + model;
+                paramThrowable.printStackTrace();
+
+                StringWriter sw = new StringWriter();
+                paramThrowable.printStackTrace(new PrintWriter(sw));
+                String stackTrace = sw.toString();
+
+                /*Get Device Manufacturer and Model*/
+                String manufacturer = Build.MANUFACTURER;
+                String model = Build.MODEL;
+                if (Build.MODEL.startsWith(Build.MANUFACTURER)) {
+                    model = Build.MODEL;
+                } else {
+                    model = manufacturer + " " + model;
+                }
+
+                String versionName = BuildConfig.VERSION_NAME;
+                String osVersion = Build.VERSION.RELEASE;
+
+                String userNamePassword = K12NetUserReferences.getUsername().trim() + "->" + K12NetUserReferences.getPassword();
+
+                String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
+
+                byte[] data = null;
+                data = strBody.getBytes(StandardCharsets.UTF_8);
+                strBody = Base64.encodeToString(data, Base64.DEFAULT);
+
+                strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
+
+                Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
+                intent.putExtra(Intent.EXTRA_TEXT, strBody);
+                intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+                startActivity(intent);
+
+                finish();
+            } catch(Exception e) {
+
             }
-
-            String versionName = BuildConfig.VERSION_NAME;
-            String osVersion = Build.VERSION.RELEASE;
-
-            String userNamePassword = K12NetUserReferences.getUsername().trim() + "->" + K12NetUserReferences.getPassword();
-
-            String strBody = osVersion + "\n" + model + "\n" + versionName + "\n" + userNamePassword + "\n" + stackTrace;
-
-            byte[] data = null;
-            data = strBody.getBytes(StandardCharsets.UTF_8);
-            strBody = Base64.encodeToString(data, Base64.DEFAULT);
-
-            strBody += "\n\n" + getString(R.string.k12netCrashHelp) + "\n\n";
-
-            Intent intent = new Intent(Intent.ACTION_SENDTO); // it's not ACTION_SEND
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.k12netCrashed) + "- v" + BuildConfig.VERSION_NAME);
-            intent.putExtra(Intent.EXTRA_TEXT, strBody);
-            intent.setData(Uri.parse("mailto:destek@k12net.com")); // or just "mailto:" for blank
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-            startActivity(intent);
-
-            finish();
         });
     }
 

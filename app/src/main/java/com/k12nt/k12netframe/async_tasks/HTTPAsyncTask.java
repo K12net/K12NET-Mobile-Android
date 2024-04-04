@@ -156,11 +156,6 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
 
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                System.out.println("errorstream : " + this.read(conn.getErrorStream()));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
             return null;
         }finally {
             if(conn != null) conn.disconnect();
@@ -182,6 +177,8 @@ public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
     }
 
     private String read(InputStream is) throws IOException {
+        if(is == null) return null;
+
         BufferedReader in = null;
         String inputLine;
         StringBuilder body;
