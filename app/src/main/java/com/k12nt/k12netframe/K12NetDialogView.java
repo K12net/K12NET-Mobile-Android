@@ -8,6 +8,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 public abstract class K12NetDialogView extends Dialog {
 
     LayoutInflater inflater = null;
@@ -23,7 +27,7 @@ public abstract class K12NetDialogView extends Dialog {
 		inflater = LayoutInflater.from(getContext());
         ownDialogView = inflater.inflate(R.layout.k12net_dialog_layout, null, false);
         mainDialogLayout = (LinearLayout) ownDialogView.findViewById(R.id.lyt_activity);
-		
+
 		TextView txt_title1 = (TextView)ownDialogView.findViewById(R.id.txt_toolbar_title);
 		txt_title1.setText(getToolbarTitle());
 		

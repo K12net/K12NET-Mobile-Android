@@ -240,7 +240,7 @@ public class AttendanceManager extends Service {
                             }
                         }
 
-                        Toast.makeText(activity, "Error Code 1071 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "Error Code 1071.1 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         handler.onTaskCompleted("Error");
                     } catch (Exception ex) {
                         ex.printStackTrace();

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask.Status;
 import android.os.Build;
@@ -15,11 +16,17 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.LayoutRes;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.k12nt.k12netframe.async_tasks.K12NetAsyncCompleteListener;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
@@ -137,22 +144,39 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 			setContentView(R.layout.k12net_activity_layout);
 		}
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30 ve üzeri için
+			getWindow().setDecorFitsSystemWindows(false);
+			WindowInsetsControllerCompat insetsController = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
+			if (insetsController != null) {
+				insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+				insetsController.setAppearanceLightStatusBars(true);
+				insetsController.setAppearanceLightNavigationBars(true);
+			}
+		} else { // API 21-29 için eski yöntem
+			getWindow().getDecorView().setSystemUiVisibility(
+					View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+							| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+							| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+			);
+			getWindow().setStatusBarColor(Color.TRANSPARENT);
+			getWindow().setNavigationBarColor(Color.TRANSPARENT);
+		}
+
+		ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+			Insets systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+			v.setPadding(
+					systemBarsInsets.left,
+					systemBarsInsets.top,
+					systemBarsInsets.right,
+					systemBarsInsets.bottom
+			);
+
+			// Eğer insets'i başka View'lara yaymak istiyorsanız, CONSUMED döndürmeyin.
+			// Genellikle bu senaryoda CONSUMED döndürülür.
+			return WindowInsetsCompat.CONSUMED;
+		});
         inflater = LayoutInflater.from(getApplicationContext());
-        
-     /*   ActionBar actBar = getActionBar();
-        actBar.setDisplayHomeAsUpEnabled(true);
-        actBar.setBackgroundDrawable(getApplicationContext().getResources().getDrawable(R.drawable.action_bar_color));
-        actBar.setTitle(getToolbarTitle());
-        actBar.setSubtitle(getToolbarSubtitle());
-        actBar.setIcon(getToolbarIcon());*/
-        
-     /*   Typeface type = Typeface.createFromAsset(getAssets(),"fonts/ProximaNova/ProximaNova-Light.otf"); 
-        int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
-        TextView yourTextView = (TextView) findViewById(titleId);
-        yourTextView.setTextColor(getResources().getColor(android.R.color.white));
-        yourTextView.setTextSize(R.dimen.titleTextSize);
-        yourTextView.setTypeface(type);
-       */
 
 		initMainData();
 		

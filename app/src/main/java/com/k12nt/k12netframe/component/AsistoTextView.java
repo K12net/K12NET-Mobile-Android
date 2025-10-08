@@ -6,11 +6,6 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 public class AsistoTextView extends TextView {
-	
-	public String fontName = "ProximaNova/ProximaNova-Light.otf";
-	public String fontNameBold = "ProximaNova/ProximaNova-Semibold.otf";
-	public String fontNameItalic = "ProximaNova/ProximaNova-RegularItalic.otf";
-	public String fontNameBoldItalic = "ProximaNova/ProximaNova-Semibolditalic.otf";
 
 	public AsistoTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -37,28 +32,8 @@ public class AsistoTextView extends TextView {
 
 	private void init() {
 		if(isInEditMode() == false) {
-		    Typeface tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/"+fontName); //"fonts/HelveNeuMedCon.ttf"
-		    if(getTypeface() != null){
-				if (getTypeface().isBold() && getTypeface().isItalic()) {
-					 tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/"+fontNameBoldItalic); //"fonts/HelveNeuMedCon.ttf"
-				}
-			    else if(getTypeface().isBold()) {
-				    tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/"+fontNameBold); //"fonts/HelveNeuMedCon.ttf"
-				}
-				else if(getTypeface().isItalic()) {
-				    tf = Typeface.createFromAsset(getContext().getAssets(), "fonts/"+fontNameItalic); //"fonts/HelveNeuMedCon.ttf"
-				}
-		    }
-		    setTypeface(tf);
+			setTypeface(Typeface.DEFAULT);
 		}
 	}
 
-	public String getFontName() {
-		return fontName;
-	}
-
-	public void setFontName(String fontName) {
-		this.fontName = fontName;
-	}
-	
 }

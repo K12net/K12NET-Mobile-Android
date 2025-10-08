@@ -112,10 +112,15 @@ import java.net.HttpCookie;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -176,7 +181,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             is_native_login = android.os.Build.VERSION.SDK_INT >= LOGIN_SCREEN_SDK_INT;
 
-            if (is_native_login == false || currentState == "restartActivity" || (startUrl != null && !startUrl.equals(""))) {
+            if (!is_native_login || Objects.equals(currentState, "restartActivity") || (startUrl != null && !startUrl.isEmpty())) {
                 startWithWeb();
             } else {
                 startWithLoginScreen();
@@ -962,7 +967,33 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         view.post(new Runnable() {
             @Override
             public void run() {
-                view.loadUrl(url);
+                boolean isLoginRequest = url.toLowerCase().contains("login");
+                if(isLoginRequest) {
+                    try {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("DeviceID", K12NetUserReferences.getDeviceToken());
+                        jsonObject.put("DeviceModel", GetDeviceModel());
+                        jsonObject.put("DeviceTypeID", K12NetStaticDefinition.ASISTO_ANDROID_APPLICATION_ID);
+
+                        CookieManager cookieManager = CookieManager.getInstance();
+                        cookieManager.setAcceptCookie(true);
+
+                        String cookieName = "DeviceInfo";
+                        String cookieValue = URLEncoder.encode(jsonObject.toString()) +  "; path=/GWCore.Web/api/Login/External"; // expires eklenmezse session cookie olur
+
+                        cookieManager.setCookie(url, cookieName + "=" + cookieValue);
+
+                        // Android 5.0+ için cookie'yi zorla kaydet
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            cookieManager.flush();
+                        }
+                        view.loadUrl(url);
+                    } catch (Exception e) {
+                        view.loadUrl(url);
+                    }
+                } else {
+                    view.loadUrl(url);
+                }
             }
         });
     }
@@ -1323,7 +1354,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 String filePath = getPath(this, uri);
 
                 if(filePath == null) {
-                    Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                    if (uri != null) {
+                        uriArray.add(uri); // File değil, content:// uri gönder
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     File file = new File(filePath);
                     uriArray.add(Uri.fromFile(file));
@@ -1336,7 +1371,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                    // String filePath = getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
 
                     if(filePath == null) {
-                        Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                        Uri uri = intent.getClipData().getItemAt(i).getUri();
+                        if (uri != null) {
+                            uriArray.add(uri); // File değil, content:// uri gönder
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
+                        }
                     } else {
                         File file = new File(filePath);
                         uriArray.add(Uri.fromFile(file));
@@ -1775,7 +1815,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview.getSettings().setLoadWithOverviewMode(true);
         webview.getSettings().setUseWideViewPort(true);
         webview.getSettings().setGeolocationEnabled(true);
-        webview.getSettings().setUserAgentString("Android Mozilla/5.0 AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
+        webview.getSettings().setUserAgentString("Android Mozilla/5.0 AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 K12Net_Android");
         webview.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webview.getSettings().setAllowContentAccess(true);
         webview.getSettings().setAllowFileAccessFromFileURLs(true);

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -142,7 +143,11 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                 JSONObject jsonParams = new JSONObject();
 
-                jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
+                } else {
+                    jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), "UTF-8"));
+                }
                 jsonParams.put("DeviceID", K12NetUserReferences.getDeviceToken());
                 jsonParams.put("LocationIX", nearestFence.LocationIX);
                 jsonParams.put("Way", geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ? "enter" : "exit");

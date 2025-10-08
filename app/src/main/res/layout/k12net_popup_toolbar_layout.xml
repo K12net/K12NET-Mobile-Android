@@ -18,8 +18,8 @@
             android:background="@drawable/torquese_button_flat"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingRight="15dp"
-            android:paddingLeft="15dp">
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp">
 
             <ImageView
                 android:id="@+id/btn_back"

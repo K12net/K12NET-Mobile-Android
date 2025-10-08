@@ -17,6 +17,10 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 

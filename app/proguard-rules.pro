@@ -15,3 +15,9 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# AsyncHttpClient için ProGuard kuralları
+-keep class com.loopj.android.http.** { *; }
+-keepattributes *Annotation*
+-keepattributes Signature
+-dontwarn com.loopj.android.http.**

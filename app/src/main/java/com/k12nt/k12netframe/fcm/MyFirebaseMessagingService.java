@@ -174,7 +174,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         if("confirm".equals(intentStr)) {
-            builder.setColor(ContextCompat.getColor(packageContext, R.color.cardview_dark_background));
+            builder.setColor(ContextCompat.getColor(packageContext, androidx.cardview.R.color.cardview_dark_background));
 
             String culture =query.split(";")[0];
             Locale myLocale = new Locale(culture);
