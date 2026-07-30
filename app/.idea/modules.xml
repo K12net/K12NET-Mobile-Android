@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-605740248/K12NET-Mobile-Android.iml" filepath="$PROJECT_DIR$/.idea/modules/-605740248/K12NET-Mobile-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.iml" filepath="$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/K12NET-Mobile-Android.app.main.iml" />

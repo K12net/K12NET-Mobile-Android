@@ -1,0 +1,4 @@
+- [x] Manually upgrade AGP to 8.13.2
+    - [x] Update project-level `build.gradle`
+- [x] Verify build status
+- [x] Create walkthrough

@@ -22,6 +22,8 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.LayoutRes;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -35,7 +37,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
-public abstract class K12NetActivity extends Activity implements K12NetAsyncCompleteListener {
+@SuppressWarnings("deprecation")
+public abstract class K12NetActivity extends ComponentActivity implements K12NetAsyncCompleteListener {
 	
 	Dialog openDialog = null;
 	
@@ -74,7 +77,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 			back_button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					 onBackPressed();
+					 getOnBackPressedDispatcher().onBackPressed();
 					 finish();
 				}
 			});
@@ -205,10 +208,6 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
 	protected abstract int getToolbarTitle();
 	
 
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
-	}
 	
 	protected void openDialog(Dialog dialog) {
 		openDialog = dialog;
@@ -238,7 +237,7 @@ public abstract class K12NetActivity extends Activity implements K12NetAsyncComp
         switch (item.getItemId()) {
         case android.R.id.home: 
             // API 5+ solution
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             return true;
 
         default:

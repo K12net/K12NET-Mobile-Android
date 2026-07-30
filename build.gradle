@@ -6,9 +6,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.10.1'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         // Google Services Plugin (Firebase için)
-        classpath 'com.google.gms:google-services:4.4.3' // 7.x için en uyumlu sürüm
+        classpath 'com.google.gms:google-services:4.5.0' // 7.x için en uyumlu sürüm
 
         // Use bundletool 0.9.0 or higher when building with the
         // Android Gradle plugin.

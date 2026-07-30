@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class HTTPAsyncTask extends AsyncTask<String, Void, String> {
 
     private AsyncCompleteListener asyncListener = null;

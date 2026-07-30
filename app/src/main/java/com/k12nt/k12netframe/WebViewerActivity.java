@@ -72,6 +72,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.cardview.widget.CardView;
@@ -128,6 +129,7 @@ import java.util.concurrent.Executors;
 
 import me.leolin.shortcutbadger.ShortcutBadger;
 
+@SuppressWarnings("deprecation")
 public class WebViewerActivity extends K12NetActivity implements K12NetAsyncCompleteListener {
 
     public static String currentState = "init";
@@ -186,6 +188,33 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             } else {
                 startWithLoginScreen();
             }
+
+            getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    if (popup_webview != null) {
+                        popup_webview = null;
+                        webview = main_webview;
+
+                        mainLayout.removeAllViews();
+                        mainLayout.addView(webview);
+                        previousUrl = "";
+                    } else if (webview != null && webview.canGoBack()) {
+                        webview.goBack();
+                        previousUrl = "";
+                    } else if (webview != null && previousUrl != null && !previousUrl.equals("")) {
+                        webview.loadUrl(previousUrl);
+                        previousUrl = "";
+                    } else if (webview != null && previousUrl != null && previousUrl.equals("")) {
+                        webview.loadUrl(K12NetUserReferences.getConnectionAddress());
+                        previousUrl = "";
+                    } else {
+                        setEnabled(false);
+                        getOnBackPressedDispatcher().onBackPressed();
+                        setEnabled(true);
+                    }
+                }
+            });
         } catch (Exception ex) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
@@ -533,11 +562,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     public static Drawable getDrawable(Context context, int resourceId) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            return context.getDrawable(resourceId);
-        } else {
-            return context.getResources().getDrawable(resourceId);
-        }
+        return ContextCompat.getDrawable(context, resourceId);
     }
 
     private void doLogin() {
@@ -635,6 +660,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
                 cookieManager.removeAllCookies(null);
+                cookieManager.flush();
             } else {
                 CookieSyncManager.createInstance(getApplicationContext());
             }
@@ -650,7 +676,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     CookieSyncManager.getInstance().sync();
                 }
             }
-
+            
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                cookieManager.flush();
+            }
             String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
             cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
 
@@ -781,6 +810,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 requestNotificationPermission();
             }
 
+            if(!checkLocalNetworkPermission()) {
+                requestLocalNetworkPermission();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -851,7 +884,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         back_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
             }
         });
 
@@ -1122,6 +1155,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         K12NetUserReferences.setWarnedVersionString(currentVersion);
     }
 
+    @SuppressWarnings("deprecation")
     private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {
 
         private Dialog progress_dialog;
@@ -1647,6 +1681,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
                 if(!url.startsWith("http") && url.contains("://")) {
@@ -1659,6 +1694,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         return false;
                     }
                 }
+                
+                // ... (rest of the method logic)
 
                 if (is_native_login) {
                     boolean isLoginPage = url.toLowerCase().contains( K12NetUserReferences.getConnectionAddress().toLowerCase() + "/login.aspx");
@@ -1741,68 +1778,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 return false;
             }
 
-            //The undocumented magic method override
-            //Eclipse will swear at you if you try to put @Override here
-            // For Android 3.0+
-            public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("image/*");
-                WebViewerActivity.this.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
-
-            }
-
-            // For Android 3.0+
-            public void openFileChooser(ValueCallback uploadMsg, String acceptType) {
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("*/*");
-                WebViewerActivity.this.startActivityForResult(
-                        Intent.createChooser(i, "File Browser"),
-                        FILECHOOSER_RESULTCODE);
-            }
-
-            //For Android 4.1
-            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-                mUploadMessage = uploadMsg;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("image/*");
-                WebViewerActivity.this.startActivityForResult(Intent.createChooser(i, "File Chooser"), WebViewerActivity.FILECHOOSER_RESULTCODE);
-
-            }
-
-            // file upload callback (Android 5.0 (API level 21) -- current) (public method)
-            @SuppressWarnings("all")
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
-                hasReadAccess = false;
-                if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
-                    if (checkReadPermission()) {
-                        hasReadAccess = true;
-                    } else {
-                        requestReadPermission();
-                    }
-                } else {
-                    hasReadAccess = true;
-                }
-
-                if (hasReadAccess) {
-
-                    mFilePathCallback = filePathCallback;
-                    Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                    i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setType("*/*");
-                    WebViewerActivity.this.startActivityForResult(Intent.createChooser(i, "File Chooser"), WebViewerActivity.FILECHOOSER_RESULTCODE);
-
-                    return true;// super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
-                } else {
-                    return false;
-                }
-            }
-
         });
 
         //webview.getSettings().setDatabaseEnabled(true);
@@ -1875,20 +1850,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 callback.invoke(origin, true, false);
             }
 
-            public void onPageFinished(WebView view, String url) {
-                Log.i("WEB", "Finished loading URL: " + url);
-                if (url.toLowerCase().contains("login.aspx")) {
-                    finish();
-                }
-                else if (url.toLowerCase().contains("logout.aspx")) {
-                    finish();
-                }
-                else {
-                    loadUrl(webview,"javascript:( function () { var resultSrc = document.head.outerHTML; window.HTMLOUT.htmlCallback(resultSrc); } ) ()");
-                }
-                setUrl(url);
-            }
-
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("tel:")) {
                     if (url.startsWith("tel:")) {
@@ -1914,7 +1875,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             }
 
             // For Android 3.0+
-            public void openFileChooser(ValueCallback uploadMsg, String acceptType) {
+            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
                 mUploadMessage = uploadMsg;
                 fileSelectorIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 fileSelectorIntent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -2083,27 +2044,6 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if(popup_webview != null) {
-            popup_webview = null;
-            webview = main_webview;
-
-            mainLayout.removeAllViews();
-            mainLayout.addView(webview);
-        } else if (webview != null && webview.canGoBack()) {
-            webview.goBack();
-        } else if (webview != null && previousUrl != null && !previousUrl.equals("")) {
-            webview.loadUrl(previousUrl);
-        } else if (webview != null && previousUrl != null && previousUrl.equals("")) {
-            webview.loadUrl(K12NetUserReferences.getConnectionAddress());
-        } else {
-            super.onBackPressed();
-            finish();
-        }
-
-        previousUrl = "";
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public static String[] storage_permissions_33 = {
@@ -2205,6 +2145,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     protected void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 107);
+        }
+    }
+
+    protected boolean checkLocalNetworkPermission() {
+        if (Build.VERSION.SDK_INT >= 36) { // Android 16
+            int result = ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES);
+            return result == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    protected void requestLocalNetworkPermission() {
+        if (Build.VERSION.SDK_INT >= 36) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.NEARBY_WIFI_DEVICES}, 108);
         }
     }
 
@@ -2378,6 +2332,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     Log.e("value", "Permission Denied, You cannot use notifications without permission.");
+                }
+                break;
+            case 108:
+                if (garanted) {
+
+                } else {
+                    Log.e("value", "Permission Denied, Local Network access might be restricted.");
                 }
                 break;
         }
