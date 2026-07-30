@@ -221,6 +221,12 @@
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 
+    <style name="Asisto_PopupDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@style/Asisto_DetailPopupDialogAnimation</item>
+    </style>
+
     <style name="TextAppearanceFinish" parent="android:TextAppearance.Holo.Medium">
 <!--         <item name="android:textColor">#fff</item> -->
     </style>

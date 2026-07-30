@@ -71,7 +71,18 @@ public class AttendanceManager extends Service {
     private static final int LOCATION_INTERVAL = 1000 * 60 * 2; // 2 minute
     public static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     public static final int REQUEST_CHECK_SETTINGS = 35;
+    /** Arka plan konum izni ayri istendigi icin sonucu da ayri kodla ayirt edilmeli. */
+    public static final int REQUEST_BACKGROUND_PERMISSIONS_REQUEST_CODE = 36;
     public static boolean IS_REQUEST_CHECK_SETTINGS_OK = true;
+
+    /**
+     * Arka plan izni reddedildiginde her portal gecisinde yeniden sorulmasini engeller.
+     * Kullanici izni Ayarlar'dan verirse bir sonraki acilista dogal olarak sifirlanir.
+     */
+    private static boolean backgroundPermissionRequested = false;
+
+    /** onCreate geofence kaydini baslatabildi mi; baslatamadiysa servis bos yere ayakta kalmamali. */
+    private boolean monitoringInitialized = false;
 
     private static final String TAG = AttendanceManager.class.getSimpleName();
     private List<Geofence> mGeofenceList;
@@ -101,10 +112,27 @@ public class AttendanceManager extends Service {
                  this.getString(R.string.attendance_service_title),
                 "","*","", MyFirebaseMessagingService.REQUEST_ID_ATTENDANCE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(1001, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
-        } else {
-            startForeground(1001, notification);
+        // startForegroundService sozlesmesi geregi once startForeground cagrilmali; aksi halde
+        // sistem "did not then call startForeground" ile process'i sonlandirir. Android 14+ da
+        // location tipli cagri, konum izni yoksa SecurityException firlatir.
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1001, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+            } else {
+                startForeground(1001, notification);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "startForeground failed", e);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        if (!hasForegroundLocationPermission(this) || !monitoringInitialized) {
+            // Geofence kaydi yapilamadi. Servisi ayakta tutmak, arkasinda hicbir is olmayan
+            // kalici bir bildirim birakir (ve START_STICKY ile surekli yeniden dogar).
+            Log.w(TAG, "Attendance monitoring could not start; stopping service");
+            stopSelf();
+            return START_NOT_STICKY;
         }
 
         if (mGeofencingClient == null) {
@@ -125,13 +153,12 @@ public class AttendanceManager extends Service {
             //WifiManager.setEnabled();
             Context ctx = this;
 
-            boolean hasPermission = true;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                hasPermission = ActivityCompat.checkSelfPermission(ctx.getApplicationContext(),
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            }
+            boolean hasPermission = hasForegroundLocationPermission(ctx)
+                    && hasBackgroundLocationPermission(ctx);
 
             if(hasPermission) {
+                monitoringInitialized = true;
+
                 // Initially set the PendingIntent used in startMonitorLocations() and stopMonitorLocations() to null.
                 K12NetSettingsDialogView.setLanguageToDefault(getBaseContext());
                 mGeofencePendingIntent = null;
@@ -527,60 +554,70 @@ public class AttendanceManager extends Service {
         return mGeofencePendingIntent;
     }
 
+    /**
+     * Konum izinlerini iki adimda ister. Android 11+ da arka plan izni on plan izinleriyle
+     * ayni istekte gonderilirse sistem istegi sessizce yok sayar; bu yuzden arka plan izni
+     * ancak on plan izinleri alindiktan SONRA ve tek basina istenir.
+     *
+     * @return izinler hazir ve izlemeye devam edilebiliyorsa true; bir izin istegi
+     *         baslatildiysa false (sonuc {@code onRequestPermissionsResult}'a gelir).
+     */
     public boolean checkAndRequestPermissions(WebViewerActivity activity) {
 
+        // 1. Adim: on plan konum izinleri.
+        // ACCESS_LOCATION_EXTRA_COMMANDS "normal" seviyededir, kurulumda verilir; istemek anlamsiz.
         List<String> permissions = new ArrayList<String>();
-        boolean showMessage = false;
 
-        int result = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (result != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                showMessage = true;
-            }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            result = ActivityCompat.checkSelfPermission(activity.getApplicationContext(),
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                    showMessage = true;
-                }
-            }
-        }
-
-        result = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (result != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                showMessage = true;
-            }
         }
 
-        result = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
-        if (result != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS)) {
-                showMessage = true;
-            }
+        if (!permissions.isEmpty()) {
+            ActivityCompat.requestPermissions(activity,
+                    permissions.toArray(new String[0]), REQUEST_PERMISSIONS_REQUEST_CODE);
+            return false;
         }
 
-        if(showMessage) {
-            //showAlertDialogForRequestingPermission(activity);
-            //Toast.makeText(activity, R.string.locationAccessAppSettings, Toast.LENGTH_LONG).show();
-        }
-
-        if(!permissions.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                activity.requestPermissions(permissions.toArray(new String[permissions.size()]), REQUEST_PERMISSIONS_REQUEST_CODE);
-
+        // 2. Adim: arka plan konum izni. API 29 oncesinde boyle bir izin yoktur; SDK kontrolu
+        // hasBackgroundLocationPermission icinde de var, burada acikca tekrarlanmasi hem
+        // okunurluk hem de lint icin gerekli.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !hasBackgroundLocationPermission(activity)) {
+            if (!backgroundPermissionRequested) {
+                backgroundPermissionRequested = true;
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                        REQUEST_BACKGROUND_PERMISSIONS_REQUEST_CODE);
                 return false;
             }
+
+            // Bu oturumda soruldu ve verilmedi. Her portal gecisinde tekrar sormamak icin
+            // devam ediyoruz; geofence'ler yalnizca uygulama kullanimdayken tetiklenir.
+            Log.w(TAG, "Background location not granted; geofences will only fire while app is in use");
         }
 
         return true;
+    }
+
+    /** Konum erisimi icin FINE veya COARSE izinlerinden en az biri gerekir. */
+    public static boolean hasForegroundLocationPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** ACCESS_BACKGROUND_LOCATION API 29 (Q) ile geldi; oncesinde ayri bir izin yoktur. */
+    public static boolean hasBackgroundLocationPermission(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return true;
+
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private void showAlertDialogForRequestingPermission(WebViewerActivity activity) {

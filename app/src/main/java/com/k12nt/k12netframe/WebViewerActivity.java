@@ -2235,7 +2235,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         // ComponentActivity, ActivityResult API'lerini beslemek icin super cagrisina ihtiyac duyar.
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == AttendanceManager.REQUEST_PERMISSIONS_REQUEST_CODE) {
+        boolean isForegroundLocationResult = requestCode == AttendanceManager.REQUEST_PERMISSIONS_REQUEST_CODE;
+        boolean isBackgroundLocationResult = requestCode == AttendanceManager.REQUEST_BACKGROUND_PERMISSIONS_REQUEST_CODE;
+
+        if (isForegroundLocationResult || isBackgroundLocationResult) {
             Runnable confirmation = () -> {
                 if(!isConfirmed) return;
                 // Build intent that displays the App settings screen.
@@ -2251,9 +2254,16 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             };
 
-            if (grantResults.length <= 0) {
-                setConfirmDialog(getString(R.string.location_permission),getString(R.string.locationAccessAppSettings),confirmation);
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // grantResults'i konumsal olarak okumak yerine gercek izin durumunu sorguluyoruz:
+            // dizinin sirasi hangi izinlerin eksik oldugumuza gore degisiyor.
+            boolean granted = isBackgroundLocationResult
+                    ? AttendanceManager.hasBackgroundLocationPermission(this)
+                    : AttendanceManager.hasForegroundLocationPermission(this);
+
+            if (granted) {
+                // initialize() -> checkAndRequestPermissions sonraki adimi (varsa arka plan
+                // iznini) kendisi ister. Arka plan reddedildiyse burada tekrar initialize
+                // edilmedigi icin dongu olusmaz.
                 AttendanceManager.Instance().initialize(this, new TaskHandler() {
 
                     @Override
