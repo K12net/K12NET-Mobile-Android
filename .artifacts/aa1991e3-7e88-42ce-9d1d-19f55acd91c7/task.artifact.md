@@ -1,4 +1,11 @@
-- [x] Manually upgrade AGP to 8.13.2
-    - [x] Update project-level `build.gradle`
-- [x] Verify build status
-- [x] Create walkthrough
+- [x] Step 1: Manifest & Configuration Updates
+    - [x] Add `<queries>` to `AndroidManifest.xml`
+- [x] Step 2: Storage Migration
+    - [x] Update `DATA_FILE_PATH` in `K12NetUserReferences.java`
+- [x] Step 3: API & Crash Fixes
+    - [x] Fix `PendingIntent` flags in all classes
+    - [x] Update `getPackageInfo` in `WebViewerActivity.java`
+    - [x] Add `FOREGROUND_SERVICE_TYPE_LOCATION` in `AttendanceManager.java`
+- [x] Step 4: Secure File Sharing
+    - [x] Replace `Uri.fromFile` with `FileProvider` logic
+- [x] Final Verification

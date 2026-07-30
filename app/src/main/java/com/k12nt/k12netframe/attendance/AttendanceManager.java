@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -100,7 +101,11 @@ public class AttendanceManager extends Service {
                  this.getString(R.string.attendance_service_title),
                 "","*","", MyFirebaseMessagingService.REQUEST_ID_ATTENDANCE);
 
-        startForeground(1001, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1001, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+        } else {
+            startForeground(1001, notification);
+        }
 
         if (mGeofencingClient == null) {
             mGeofencePendingIntent = null;

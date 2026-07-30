@@ -1140,7 +1140,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         PackageInfo pInfo = null;
 
         try {
-            pInfo =  pm.getPackageInfo(this.getPackageName(),0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pInfo = pm.getPackageInfo(this.getPackageName(), PackageManager.PackageInfoFlags.of(0));
+            } else {
+                pInfo = pm.getPackageInfo(this.getPackageName(), 0);
+            }
 
         } catch (PackageManager.NameNotFoundException e1) {
             // TODO Auto-generated catch block
@@ -1395,7 +1399,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                     }
                 } else {
                     File file = new File(filePath);
-                    uriArray.add(Uri.fromFile(file));
+                    Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+                    uriArray.add(contentUri);
                 }
 
             }
@@ -1413,7 +1418,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         }
                     } else {
                         File file = new File(filePath);
-                        uriArray.add(Uri.fromFile(file));
+                        Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+                        uriArray.add(contentUri);
                     }
                 }
             }
@@ -2367,7 +2373,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
             Uri apkURI = FileProvider.getUriForFile(this,this.getApplicationContext().getPackageName() + ".provider", dwldsPath);
             intent.setDataAndType(apkURI, MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf"));
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this,1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            int pendingFlags = PendingIntent.FLAG_CANCEL_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,1, intent, pendingFlags);
             String CHANNEL_ID = "MYCHANNEL";
             final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 

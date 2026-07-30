@@ -3,16 +3,15 @@ package com.k12nt.k12netframe.utils.userSelection;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Environment;
-
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 public class K12NetUserReferences {
 	
-	public static String DATA_FILE_PATH = Environment.getExternalStorageDirectory() + "/MobiDers/context/";
-	public static final String IMG_FILE_PATH = DATA_FILE_PATH + "temp_img/";
+	public static String DATA_FILE_PATH;
+	public static String IMG_FILE_PATH;
 	public static String FILE_ENCODING_CHARSET = "UTF-8";
 
     public static final String PROPERTY_REG_ID = "registration_id";
@@ -48,6 +47,14 @@ public class K12NetUserReferences {
     private String token;
 	
 	public K12NetUserReferences(Context context) {
+        File extFilesDir = context.getExternalFilesDir(null);
+        if (extFilesDir != null) {
+            DATA_FILE_PATH = extFilesDir.getAbsolutePath() + "/MobiDers/context/";
+        } else {
+            DATA_FILE_PATH = context.getFilesDir().getAbsolutePath() + "/MobiDers/context/";
+        }
+        IMG_FILE_PATH = DATA_FILE_PATH + "temp_img/";
+
 		settings = context.getSharedPreferences(SETTINGS_FILE_NAME, Context.MODE_PRIVATE);
 		username = settings.getString(USERNAME, null);
 		password = settings.getString(PASSWORD, null);
