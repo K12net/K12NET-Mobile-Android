@@ -123,11 +123,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static Notification sendNotification(Context packageContext, String messageBody, String title, String intentStr, String portal, String query, @Nullable Integer requestID) {
         if(requestID == null) requestID = (int) System.currentTimeMillis();
 
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | mutableFlag();
         Intent intent = new Intent(packageContext, WebViewerActivity.class);
 
         if(requestID == REQUEST_ID_ATTENDANCE) {
-            flags = PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+            flags = PendingIntent.FLAG_CANCEL_CURRENT | immutableFlag();
             intent = new Intent(packageContext, WebViewerActivity.class);
         }
 
@@ -181,11 +181,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Resources res = packageContext.getResources();
             Configuration configuration = res.getConfiguration();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-                configuration.setLocale(myLocale);
-            }
-
-            configuration.locale = myLocale;
+            // setLocale API 17'den beri mevcut (minSdk 21), surum kontrolu gereksiz.
+            configuration.setLocale(myLocale);
             Locale.setDefault(myLocale);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
                 packageContext.createConfigurationContext(configuration);
@@ -198,14 +195,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             yesAction.putExtra("portal",portal);
             yesAction.putExtra("query",query);
             yesAction.putExtra("id", requestID);
-            PendingIntent yesPendingAction = PendingIntent.getBroadcast(packageContext, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+            PendingIntent yesPendingAction = PendingIntent.getBroadcast(packageContext, requestID + 1 , yesAction, PendingIntent.FLAG_CANCEL_CURRENT | mutableFlag());
 
             Intent noAction = new Intent(packageContext, NotificationReceiver.class);
             noAction.putExtra("confirm","0");
             noAction.putExtra("query",query);
             noAction.putExtra("portal",portal);
             noAction.putExtra("id", requestID);
-            PendingIntent noPendingAction = PendingIntent.getBroadcast(packageContext, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
+            PendingIntent noPendingAction = PendingIntent.getBroadcast(packageContext, requestID - 1 , noAction, PendingIntent.FLAG_CANCEL_CURRENT | mutableFlag());
 
             if("auth".equals(portal)) {
                 builder = builder.addAction(0,"✅ " + packageContext.getString(R.string.yes),yesPendingAction);
@@ -219,18 +216,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     //.setStyle(new NotificationCompat.BigTextStyle().bigText(this.getString(R.string.no)));
         }
 
-        Notification notification = null;
-
-        if (Build.VERSION.SDK_INT > 15) {// for some reason Notification.PRIORITY_DEFAULT doesn't show the counter
-            if(requestID == REQUEST_ID_ATTENDANCE) {
-                builder.setPriority(Notification.PRIORITY_LOW);
-            } else {
-                builder.setPriority(Notification.PRIORITY_MAX);
-            }
-            notification= builder.build();
+        // minSdk 21 => build() her zaman kullanilabilir, getNotification() dalina gerek yok.
+        if(requestID == REQUEST_ID_ATTENDANCE) {
+            builder.setPriority(NotificationCompat.PRIORITY_LOW);
         } else {
-            notification = builder.getNotification();
+            builder.setPriority(NotificationCompat.PRIORITY_MAX);
         }
+
+        Notification notification = builder.build();
 
         NotificationManager notificationManager =
                 (NotificationManager) packageContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -246,6 +239,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         ShortcutBadger.applyCount(packageContext.getApplicationContext(), K12NetUserReferences.getBadgeCount());
 
         return notification;
+    }
+
+    /**
+     * PendingIntent.FLAG_MUTABLE yalnizca API 31+ da tanimlidir. Daha eski surumlerde
+     * bayrak gonderilmez; PendingIntent zaten varsayilan olarak mutable'dir.
+     */
+    public static int mutableFlag() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0;
+    }
+
+    /**
+     * PendingIntent.FLAG_IMMUTABLE yalnizca API 23+ da tanimlidir (minSdk 21).
+     */
+    public static int immutableFlag() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

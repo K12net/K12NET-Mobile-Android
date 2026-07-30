@@ -5,11 +5,13 @@
 <!--     </style> -->
     
         
-    <style name="AppTheme"  parent="@android:style/Theme.Light.NoTitleBar">
+    <!-- minSdk 21 oldugu icin eski values-v21/styles.xml her zaman bu dosyayi eziyordu;
+         gecerli olan tanim buraya tasindi. -->
+    <style name="AppTheme"  parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-       <item name="android:colorPrimary">#005555</item>
-      <item name="android:colorPrimaryDark">#04b7bb</item>
+        <item name="android:colorPrimary">#2d76a1</item>
+        <item name="android:colorPrimaryDark">#2d76a1</item>
     </style>
 
     <style name="Asisto_Button">
@@ -175,7 +177,8 @@
         <item name="android:background">#c4f8ff</item>
     </style>
 
-    <style name="Asisto_DialogLayout">
+    <!-- Eski values-v21/styles.xml tanimi (minSdk 21 => her zaman gecerliydi). -->
+    <style name="Asisto_DialogLayout"  parent="AppTheme">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>

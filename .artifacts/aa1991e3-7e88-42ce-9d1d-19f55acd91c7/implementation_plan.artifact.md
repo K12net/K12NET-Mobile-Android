@@ -1,40 +1,38 @@
-# Modern Android Compatibility Fixes (API 21-36)
+# Final Review and Stability Enhancements
 
-This plan addresses critical code areas that may cause crashes or errors on modern Android versions (up to API 36) while maintaining support for `minSdkVersion 21`.
+This plan reviews the latest changes from the other agent and implements the remaining stability fixes for background location and UI consistency.
 
-## User Review Required
-
-> [!IMPORTANT]
-> - **Scoped Storage:** I am migrating data storage from the root external directory to the app's external files directory (`/Android/data/...`). This is required for Android 10+ compatibility.
-> - **Foreground Services:** On Android 14+, foreground services *must* declare a type. I'm adding `FOREGROUND_SERVICE_TYPE_LOCATION` to the attendance service call.
-> - **Package Visibility:** On Android 11+, apps cannot "see" other apps unless declared. I'm adding `<queries>` to the manifest to ensure the app can still open browsers and email clients.
+## Review of Latest Changes
+The recent updates by the other agent are **excellent**:
+- **`goAsync()`:** Correctly ensures that the network request for attendance completes in the background.
+- **`BootCompletedReceiver`:** Correctly restarts the attendance monitor after a device reboot.
+- **Wakelock Management:** Proper `try-finally` blocks prevent battery drain.
 
 ## Proposed Changes
 
-### 1. Build & Manifest Updates
+### 1. Manifest & Boot Integration
 #### [MODIFY] [AndroidManifest.xml](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/AndroidManifest.xml)
-- Add `<queries>` block for browser and email intents.
-- Ensure all exported components have intent filters (already done in previous steps).
+- Add `RECEIVE_BOOT_COMPLETED` permission.
+- Register `BootCompletedReceiver` to handle system boot and app updates.
 
-### 2. Core Logic & Crash Prevention
-#### [MODIFY] [WebViewerActivity.java](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java)
-- Fix `PendingIntent` mutability flags (add `FLAG_IMMUTABLE` or `FLAG_MUTABLE`) where missing.
-- Update `getPackageInfo` usage for API 33+.
-- Replace `Uri.fromFile` with `FileProvider.getUriForFile` for sharing files with external apps.
-
+### 2. Background Location Fixes (Android 10 & 11+)
 #### [MODIFY] [AttendanceManager.java](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/java/com/k12nt/k12netframe/attendance/AttendanceManager.java)
-- Pass `ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION` to `startForeground`.
+- Update version checks for `ACCESS_BACKGROUND_LOCATION` from API 30 (`R`) to **API 29 (`Q`)**.
+- Implement two-stage permission flow for Android 11+: Request foreground location first, then request background location in `onRequestPermissionsResult`.
 
-### 3. Data & Storage
-#### [MODIFY] [K12NetUserReferences.java](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/java/com/k12nt/k12netframe/utils/userSelection/K12NetUserReferences.java)
-- Migrate `DATA_FILE_PATH` from `Environment.getExternalStorageDirectory()` to `context.getExternalFilesDir(null)`.
+#### [MODIFY] [WebViewerActivity.java](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/java/com/k12nt/k12netframe/WebViewerActivity.java)
+- Update permission request logic to handle the two-stage flow for Android 11+.
+
+### 3. UI Consistency
+#### [MODIFY] [res/values/styles.xml](file:///D:/TFS/Mobile/GitHub/K12NET/K12NET-Mobile-Android/app/src/main/res/values/styles.xml)
+- Define `Asisto_PopupDialog` for phones (not just tablets) to ensure the settings dialog looks consistent across all devices.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `./gradlew clean assembleDebug`.
+- Run `./gradlew assembleDebug` to verify no regressions in build or manifest merging.
 
 ### Manual Verification
-- **Android 14/15/16 Testing:** Launch the attendance service and verify it doesn't crash on `startForeground`.
-- **File Chooser:** Test picking a file and sharing it; verify `FileProvider` works correctly.
-- **Intent Resolution:** Verify that "Open with Browser" or "Send Email" buttons still work on Android 11+.
+- **Boot Test:** Simulate a boot broadcast using `adb shell am broadcast -a android.intent.action.BOOT_COMPLETED`.
+- **Permission Test:** On Android 11+, verify that the app correctly prompts for "Always Allow" location access after the initial "While using app" prompt.
+- **UI Test:** Open settings on a phone-sized device and verify the dialog uses the correct theme.

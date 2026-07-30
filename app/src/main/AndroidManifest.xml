@@ -56,6 +56,8 @@
     <!--
       <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
           tools:ignore="ScopedStorage" />  -->
+    <!-- Cihaz yeniden baslatildiginda geofence kayitlari silinir; yeniden kurmak icin gerekli. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_GPS" />
@@ -157,6 +159,17 @@
                    android:enabled="true"
                    android:exported="true"/>
 
+            <!-- Acilis / uygulama guncellemesi sonrasi geofence kayitlarini yeniden kurar. -->
+            <receiver android:name="com.k12nt.k12netframe.attendance.BootCompletedReceiver"
+                android:enabled="true"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                    <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                    <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                </intent-filter>
+            </receiver>
+
                <!-- [START firebase_service] -->
         <service
             android:name="com.k12nt.k12netframe.fcm.MyFirebaseMessagingService"
@@ -185,7 +198,7 @@
 
          <provider
              android:name="androidx.core.content.FileProvider"
-             android:authorities="com.k12nt.k12netframe"
+             android:authorities="${applicationId}.provider"
              android:exported="false"
              android:grantUriPermissions="true">
              <meta-data

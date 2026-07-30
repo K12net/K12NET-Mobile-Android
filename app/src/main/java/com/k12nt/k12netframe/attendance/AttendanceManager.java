@@ -117,6 +117,10 @@ public class AttendanceManager extends Service {
 
     @Override
     public void onCreate() {
+        // Onceden yalnizca izin verilmis dalda cagriliyordu; Service sozlesmesi geregi
+        // her durumda ve is yapilmadan once cagrilmali.
+        super.onCreate();
+
         try {
             //WifiManager.setEnabled();
             Context ctx = this;
@@ -148,7 +152,6 @@ public class AttendanceManager extends Service {
                         Toast.makeText(ctx, "Error Code 1071 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-                super.onCreate();
             } else {
                // final Intent intent = new Intent(ctx, AttendanceManager.class);
                 //ctx.stopService(intent);
@@ -518,7 +521,8 @@ public class AttendanceManager extends Service {
         // startMonitorLocations() and stopMonitorLocations().
         int requestID = 1978;//(int) System.currentTimeMillis();
 
-        mGeofencePendingIntent = PendingIntent.getBroadcast(ctx, requestID, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        mGeofencePendingIntent = PendingIntent.getBroadcast(ctx, requestID, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | MyFirebaseMessagingService.mutableFlag());
 
         return mGeofencePendingIntent;
     }

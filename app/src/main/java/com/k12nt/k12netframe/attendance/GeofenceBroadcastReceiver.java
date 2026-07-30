@@ -29,6 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import cz.msebera.android.httpclient.Header;
@@ -50,6 +52,9 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
     private static final String CHANNEL_ID = "channel_01";
 
+    /** Wakelock icin ust sinir; sunucuya yoklama gonderimi bundan uzun surmemeli. */
+    private static final long WAKELOCK_TIMEOUT_MS = 60 * 1000L;
+
     /**
      * Receives incoming intents.
      *
@@ -62,10 +67,61 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "k12Mobile:MyWakelockTag");
-        wakeLock.acquire();
+        // Zaman asimi olmadan alinan wakelock, release() atlanirsa cihazi surekli uyanik
+        // tutar. Timeout yalnizca emniyet subabidir; normal akista is bitince birakilir.
+        wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
 
-        // Enqueues a JobIntentService passing the context and intent as parameters
+        // Yoklama istegi asenkron gonderiliyor. goAsync() olmadan onReceive doner donmez
+        // sistem broadcast'i bitmis sayar; process arka plan onceligine duser ve ekran
+        // kapaliyken (Doze) HTTP cevabi hic tamamlanmayabilir. goAsync ile finish()
+        // cagrilana kadar broadcast aktif kalir.
+        final PendingResult pendingResult = goAsync();
+        final AtomicBoolean completed = new AtomicBoolean(false);
+
+        final Runnable onComplete = new Runnable() {
+            @Override
+            public void run() {
+                // Hem senkron hata yollarindan hem HTTP callback'inden cagrilabilir;
+                // yalnizca ilk cagri is gorur.
+                if (!completed.compareAndSet(false, true)) return;
+
+                try {
+                    pendingResult.finish();
+                } catch (Exception e) {
+                    Log.e(TAG, "PendingResult.finish failed", e);
+                }
+
+                if (wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+            }
+        };
+
+        boolean handedOff = false;
+        try {
+            handedOff = handleGeofenceEvent(context, intent, onComplete);
+        } catch (Throwable t) {
+            Log.e(TAG, "handleGeofenceEvent failed", t);
+        } finally {
+            // Is asenkron HTTP callback'ine devredilmediyse burada kapatiyoruz.
+            if (!handedOff) {
+                onComplete.run();
+            }
+        }
+    }
+
+    /**
+     * @return isin asenkron HTTP callback'ine devredildigi durumda true. Bu durumda
+     *         wakelock/goAsync temizligini {@code onComplete} yapar.
+     */
+    private boolean handleGeofenceEvent(Context context, Intent intent, Runnable onComplete) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+        if (geofencingEvent == null) {
+            // Intent bir geofence olayi tasimiyorsa fromIntent null doner.
+            Log.e(TAG, "GeofencingEvent.fromIntent returned null");
+            return false;
+        }
+
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceStatusCodes
                     .getStatusCodeString(geofencingEvent.getErrorCode());
@@ -75,7 +131,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     "onReceive errorMessage : " + errorMessage,
                     "Geo Fence Event",
                     "","","",null);
-            return;
+            return false;
         }
 
         // Get the transition type.
@@ -86,13 +142,23 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
             Location eventLocation = geofencingEvent.getTriggeringLocation();
+            if (eventLocation == null) {
+                Log.e(TAG, "Triggering location is null");
+                return false;
+            }
             String accuracy = eventLocation.hasAccuracy() ? String.valueOf(eventLocation.getAccuracy()) : "x";
 
             // Get the geofences that were triggered. A single event can trigger
             // multiple geofences.
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+            if (triggeringGeofences == null) {
+                Log.e(TAG, "Triggering geofence list is null");
+                return false;
+            }
+
             ArrayList<GeoFenceData> fenceList = new ArrayList<>();
             NumberFormat nf = NumberFormat.getInstance();
-            for (Geofence geofence : geofencingEvent.getTriggeringGeofences()) {
+            for (Geofence geofence : triggeringGeofences) {
                 String[] parts = geofence.getRequestId().split(Pattern.quote("$$$"));
                 try {
                     GeoFenceData data = new GeoFenceData();
@@ -104,9 +170,15 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                     data.LocationSummary = parts[5];
 
                     fenceList.add(data);
-                } catch (ParseException e) {
+                } catch (ParseException | IndexOutOfBoundsException e) {
                     WebViewerActivity.Toast(e,context, false);
                 }
+            }
+
+            if (fenceList.isEmpty()) {
+                // Hicbir requestId cozulemedi; get(0) IndexOutOfBounds firlatirdi.
+                Log.e(TAG, "No parsable geofence found in triggering list");
+                return false;
             }
 
             GeoFenceData nearestFence = fenceList.get(0);
@@ -143,11 +215,8 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                 JSONObject jsonParams = new JSONObject();
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
-                } else {
-                    jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), "UTF-8"));
-                }
+                // StandardCharsets API 19'dan beri mevcut (minSdk 21), surum kontrolu gereksiz.
+                jsonParams.put("UserName", URLEncoder.encode(K12NetUserReferences.getUsername().trim(), StandardCharsets.UTF_8.toString()));
                 jsonParams.put("DeviceID", K12NetUserReferences.getDeviceToken());
                 jsonParams.put("LocationIX", nearestFence.LocationIX);
                 jsonParams.put("Way", geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ? "enter" : "exit");
@@ -194,18 +263,28 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
                         } catch (UnsupportedEncodingException e) {
                             WebViewerActivity.Toast(e,context, false);
+                        } finally {
+                            // Yoklama gonderimi bitti; broadcast'i ve wakelock'u serbest birak.
+                            onComplete.run();
                         }
-
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        Toast.makeText(context, "Error Code 1923 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        try {
+                            // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                            Toast.makeText(context, "Error Code 1923 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        } finally {
+                            onComplete.run();
+                        }
                     }
                 });
+
+                // Istek gonderildi; temizligi callback'ler yapacak.
+                return true;
             } catch (Exception ex) {
                 WebViewerActivity.Toast(ex,context, false);
+                return false;
             }
         } else {
             // Check the action code and determine what to do
@@ -222,7 +301,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
            // MyFirebaseMessagingService.sendNotification(context, "onReceive 2 " + context.getString(R.string.geofence_transition_invalid_type, geofenceTransition),"Geo Fence Event","","","");
         }
 
-        wakeLock.release();
+        return false;
     }
 
     /**

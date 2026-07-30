@@ -161,6 +161,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     private Intent fileSelectorIntent = null;
     private String contentStr = null;
+    private boolean isDownloadReceiverRegistered = false;
 
     private static Bitmap LogoBitmap = null;
     private static String GlobalSettings = null;
@@ -658,12 +659,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if (cookies != null && !cookies.isEmpty()) {
             CookieManager cookieManager = CookieManager.getInstance();
 
-            if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-                cookieManager.removeAllCookies(null);
-                cookieManager.flush();
-            } else {
-                CookieSyncManager.createInstance(getApplicationContext());
-            }
+            // minSdk 21 => removeAllCookies/flush her zaman mevcut, CookieSyncManager'a gerek yok.
+            cookieManager.removeAllCookies(null);
+            cookieManager.flush();
 
             cookieManager.setAcceptCookie(true);
 
@@ -671,15 +669,10 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 sessionInfo = cookie;
                 String cookieString = sessionInfo.getName() + "=" + sessionInfo.getValue() + "; domain=" + sessionInfo.getDomain();
                 cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
+            }
 
-                if (Build.VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
-                    CookieSyncManager.getInstance().sync();
-                }
-            }
-            
-            if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-                cookieManager.flush();
-            }
+            cookieManager.flush();
+
             String cookieString = "UICulture" + "=" + K12NetUserReferences.getLanguageCode() + "; domain=" + sessionInfo.getDomain();
             cookieManager.setCookie(K12NetUserReferences.getConnectionAddress(), cookieString);
 
@@ -775,11 +768,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     private void registerReceivers() {
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
-            registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), RECEIVER_EXPORTED);
-        } else {
-            registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        }
+        // Context.registerReceiver(receiver, filter, int flags) sadece API 33+ da vardir.
+        // ContextCompat tum sdk seviyeleri icin dogru overload'i secer (API 21-32 dahil).
+        // ACTION_DOWNLOAD_COMPLETE korumali (protected) bir broadcast olmadigi icin
+        // DownloadManager'dan alinabilmesi adina RECEIVER_EXPORTED kullanilmalidir.
+        ContextCompat.registerReceiver(this, onDownloadComplete,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_EXPORTED);
+        isDownloadReceiverRegistered = true;
     }
 
     private void initUserReferences() {
@@ -980,18 +976,14 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         String javaScriptLoginFunction = String.format("BindFieldsWithMobileApp('%1$s','%2$s','%3$s','%4$s','%5$s');",K12NetUserReferences.getUsername(),K12NetUserReferences.getPassword(),K12NetUserReferences.getLanguageCode(),K12NetUserReferences.getRememberMe() ? "true":"false",logoutIsProgress ? "Logout" : "");
 
         logoutIsProgress = false;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            webview.post(new Runnable() {
-                @Override
-                public void run() {
-                    webview.evaluateJavascript(deviceData, null);
-                    webview.evaluateJavascript(javaScriptLoginFunction, null);
-                }
-            });
-        } else {
-            loadUrl(webview,"javascript:" + deviceData);
-            loadUrl(webview,"javascript:" + javaScriptLoginFunction);
-        }
+        // minSdk 21 => evaluateJavascript (API 19+) her zaman kullanilabilir.
+        webview.post(new Runnable() {
+            @Override
+            public void run() {
+                webview.evaluateJavascript(deviceData, null);
+                webview.evaluateJavascript(javaScriptLoginFunction, null);
+            }
+        });
     }
 
     private void loadUrl(WebView view, String url) {
@@ -1016,10 +1008,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                         cookieManager.setCookie(url, cookieName + "=" + cookieValue);
 
-                        // Android 5.0+ için cookie'yi zorla kaydet
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            cookieManager.flush();
-                        }
+                        // Android 5.0+ için cookie'yi zorla kaydet (minSdk 21)
+                        cookieManager.flush();
                         view.loadUrl(url);
                     } catch (Exception e) {
                         view.loadUrl(url);
@@ -1491,7 +1481,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     public void onDestroy() {
         if(progress_dialog != null) progress_dialog.dismiss();
         super.onDestroy();
-        unregisterReceiver(onDownloadComplete);
+
+        // onCreate icindeki try/catch nedeniyle kayit yapilmamis olabilir;
+        // kayitsiz receiver'i unregister etmek IllegalArgumentException firlatir.
+        if (isDownloadReceiverRegistered) {
+            try {
+                unregisterReceiver(onDownloadComplete);
+            } catch (IllegalArgumentException ignored) {
+                // zaten kayitli degil
+            }
+            isDownloadReceiverRegistered = false;
+        }
     }
 
     @Override
@@ -1516,9 +1516,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         webview = new WebView(WebViewerActivity.this);
         webview.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
-            { WebView.setWebContentsDebuggingEnabled(true); }
+        if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+            WebView.setWebContentsDebuggingEnabled(true);
         }
 
         webview.setWebViewClient(new WebViewClient() {
@@ -1679,11 +1678,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-                    return  shouldOverrideUrlLoading(view,request.getUrl().toString());
-                } else {
-                    return  shouldOverrideUrlLoading(view,request.toString());
-                }
+                // Bu overload zaten API 21+ da cagrilir; getUrl() her zaman kullanilabilir.
+                return shouldOverrideUrlLoading(view, request.getUrl().toString());
             }
 
             @Override
@@ -1809,11 +1805,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         //webview.getSettings().setLoadWithOverviewMode(true);
        // webview.getSettings().setUseWideViewPort(true);
 
-        if (Build.VERSION.SDK_INT > 7) {
-            webview.getSettings().setPluginState(WebSettings.PluginState.ON);
-        } else {
-            //webview.getSettings().setPluginsEnabled(true);
-        }
+        // setPluginState API 18'de deprecate edildi ve API 21+ da tamamen etkisiz;
+        // cagrilmasi gereksiz oldugu icin kaldirildi.
 
         //if (android.os.Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
         //    CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
@@ -1836,9 +1829,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    request.grant(request.getResources());
-                }
+                request.grant(request.getResources());
             }
 
             @Override
@@ -2241,6 +2232,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        // ComponentActivity, ActivityResult API'lerini beslemek icin super cagrisina ihtiyac duyar.
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == AttendanceManager.REQUEST_PERMISSIONS_REQUEST_CODE) {
             Runnable confirmation = () -> {

@@ -128,11 +128,8 @@ public class K12NetSettingsDialogView extends K12NetDialogView {
         Resources res = context.getResources();
         Configuration configuration = res.getConfiguration();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-            configuration.setLocale(myLocale);
-        }
-
-        configuration.locale = myLocale;
+        // setLocale API 17'den beri mevcut (minSdk 21), surum kontrolu gereksiz.
+        configuration.setLocale(myLocale);
 
         Locale.setDefault(myLocale);
 
