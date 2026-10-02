@@ -1209,12 +1209,17 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 int[] currentVersionInt = getVersionList(currentVersion);
                 int[] latestVersionInt = getVersionList(latestVersion);
 
-                if (currentVersionInt[1] < latestVersionInt[1] || currentVersionInt[0] < latestVersionInt[0]){
+                // Compared part by part, the major number first. Checking the minor number on its
+                // own made 2.0.9 look older than 1.34.05, because 0 < 34, so every launch demanded
+                // an update that did not exist.
+                int release = compareParts(latestVersionInt, currentVersionInt, 2);
+
+                if (release > 0){
                     isUptoDate = false;
 
                     showUpdateDialog();
                 }
-                else if (currentVersionInt[2] < latestVersionInt[2] && currentVersionInt[1] <= latestVersionInt[1] && currentVersionInt[0] <= latestVersionInt[0]){
+                else if (release == 0 && part(latestVersionInt, 2) > part(currentVersionInt, 2)){
                     isUptoDate = true;
 
                     showWarningDialog(latestVersion);
@@ -1237,6 +1242,20 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 versionList[i] = K12NetHelper.getInt(versionSList[i], 0);
             }
             return versionList;
+        }
+
+        /** Compares the first {@code count} parts of two versions, the most significant first. */
+        private int compareParts(int[] a, int[] b, int count) {
+            for (int i = 0; i < count; i++) {
+                int diff = Integer.compare(part(a, i), part(b, i));
+                if (diff != 0) return diff;
+            }
+            return 0;
+        }
+
+        /** A missing part counts as 0, so "2.0" and "2.0.0" are the same version. */
+        private int part(int[] version, int index) {
+            return index < version.length ? version[index] : 0;
         }
     }
 
@@ -1374,42 +1393,26 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 Toast.makeText(getApplicationContext(), "intent resetlendi", Toast.LENGTH_LONG).show();
             }
 
+            // The picker's own content:// addresses go to the page unchanged. The picker grants
+            // read access to exactly what the user chose, so this works without any storage
+            // permission on every Android version.
+            //
+            // They used to be resolved to file paths first. Reading a file by path needs
+            // READ_MEDIA_* from Android 13 on, which Play no longer allows this app, and turning
+            // the path back into an address through FileProvider throws for anything outside its
+            // roots - a memory card, or another app's own provider - which closed the app.
             ArrayList<Uri> uriArray = new ArrayList<>();
 
             if (resultStr != null) {
-                Uri uri = Uri.parse(resultStr.trim());
-
-                String filePath = getPath(this, uri);
-
-                if(filePath == null) {
-                    if (uri != null) {
-                        uriArray.add(uri); // File değil, content:// uri gönder
-                    } else {
-                        Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    File file = new File(filePath);
-                    Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
-                    uriArray.add(contentUri);
-                }
-
+                uriArray.add(Uri.parse(resultStr.trim()));
             }
             else if(intent != null && intent.getClipData() != null && intent.getClipData().getItemCount() > 0) {
                 for(int i = 0; i < intent.getClipData().getItemCount();i++) {
-                    String filePath = getPath(this, intent.getClipData().getItemAt(i).getUri());//getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
-                   // String filePath = getFilePathFromContent(intent.getClipData().getItemAt(i).getUri().getPath());
-
-                    if(filePath == null) {
-                        Uri uri = intent.getClipData().getItemAt(i).getUri();
-                        if (uri != null) {
-                            uriArray.add(uri); // File değil, content:// uri gönder
-                        } else {
-                            Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
-                        }
+                    Uri uri = intent.getClipData().getItemAt(i).getUri();
+                    if (uri != null) {
+                        uriArray.add(uri);
                     } else {
-                        File file = new File(filePath);
-                        Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
-                        uriArray.add(contentUri);
+                        Toast.makeText(getApplicationContext(), R.string.fileNotFound, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -1808,12 +1811,18 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         // setPluginState API 18'de deprecate edildi ve API 21+ da tamamen etkisiz;
         // cagrilmasi gereksiz oldugu icin kaldirildi.
 
-        //if (android.os.Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-        //    CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
-        //}
+        // targetSdk 21+ uygulamalarda WebView ucuncu taraf cerezleri varsayilan olarak engeller.
+        // Ust seviye yonlendirmelerle yurunen SSO akislari bundan etkilenmez, ancak iframe icine
+        // gomulu farkli site kaynaklari (orn. sessiz oturum yenileme) cerezsiz kalir.
+        // Ayar WebView ornegi basina verilir; popup icin de burada uygulanir.
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
 
         if (!checkCameraPermission()) {
             requestCameraPermission();
+        }
+
+        if (!checkAudioPermission()) {
+            requestAudioPermission();
         }
 
         webview.setWebChromeClient(new WebChromeClient() {
@@ -1958,6 +1967,11 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                         loadUrl(webview,getBase64StringFromBlobUrl(url));
                     } else {
                         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url.trim()));
+                        
+                        String cookies = CookieManager.getInstance().getCookie(url);
+                        request.addRequestHeader("cookie", cookies);
+                        request.addRequestHeader("User-Agent", userAgent);
+
                         request.setDescription("Download file...");
 
                         String possibleFileName = "";
@@ -1975,15 +1989,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                         try {
                             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, possibleFileName);
-                        } catch (IllegalStateException e) {
-
-                            try {
-                                request.setDestinationInExternalPublicDir(getApplicationContext().getFilesDir().getAbsolutePath(), possibleFileName);
-                            } catch (IllegalStateException ex) {
-                                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-
-                                return;
-                            }
+                        } catch (Exception e) {
+                            // If external downloads folder is not reachable, let the system handle the location
+                            // or fallback to app specific directory if possible, but DownloadManager usually requires public dirs.
                         }
 
                         try {
@@ -2042,24 +2050,26 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    public static String[] storage_permissions_33 = {
-            Manifest.permission.READ_MEDIA_IMAGES,
-            Manifest.permission.READ_MEDIA_AUDIO,
-            Manifest.permission.READ_MEDIA_VIDEO
-    };
-
     public static String[] permissions(String permission) {
-        String[] p;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            p = storage_permissions_33;
-        } else {
-            p = new String[]{permission};
-        }
-        return p;
+        return new String[]{permission};
+    }
+
+    /**
+     * Whether there is no storage permission to hold at all.
+     *
+     * <p>Android 13 split the storage permissions into READ_MEDIA_*, and Play only allows those for
+     * apps that need broad access to the user's photos and videos. This app never does: files are
+     * chosen through the system picker and saved through DownloadManager, and neither needs a
+     * permission. Without this the checks below asked for READ_MEDIA_*, which is no longer
+     * declared, and every upload and download stopped at a refused request.</p>
+     */
+    private static boolean isStoragePermissionObsolete() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
 
     protected boolean checkWritePermission() {
+        if (isStoragePermissionObsolete()) return true;
+
         for(String permission: WebViewerActivity.permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE))
         {
             int result = ContextCompat.checkSelfPermission(this, permission);
@@ -2072,9 +2082,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     protected void requestWritePermission() {
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, WebViewerActivity.permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE), 100);
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (isStoragePermissionObsolete()) return;
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             Toast.makeText(this, R.string.writeAccessAppSettings, Toast.LENGTH_LONG).show();
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -2084,6 +2094,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     protected boolean checkReadPermission() {
+        if (isStoragePermissionObsolete()) return true;
+
         for(String permission: WebViewerActivity.permissions(Manifest.permission.READ_EXTERNAL_STORAGE))
         {
             int result = ContextCompat.checkSelfPermission(this, permission);
@@ -2096,9 +2108,9 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
     }
 
     protected void requestReadPermission() {
-        if (Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, WebViewerActivity.permissions(Manifest.permission.READ_EXTERNAL_STORAGE), 101);
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (isStoragePermissionObsolete()) return;
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Toast.makeText(this, R.string.readAccessAppSettings, Toast.LENGTH_LONG).show();
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -2127,6 +2139,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         } else {
             if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.CAMERA}, 103);
+            }
+        }
+    }
+
+    protected boolean checkAudioPermission() {
+        for(String permission: WebViewerActivity.permissions(Manifest.permission.RECORD_AUDIO))
+        {
+            int result = ContextCompat.checkSelfPermission(this, permission);
+
+            if (result == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void requestAudioPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
+            Toast.makeText(this, "Microphone access is required for audio recording.", Toast.LENGTH_LONG).show();
+        } else {
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 109);
             }
         }
     }
@@ -2348,6 +2382,13 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                 } else {
                     Log.e("value", "Permission Denied, Local Network access might be restricted.");
+                }
+                break;
+            case 109:
+                if (garanted) {
+
+                } else {
+                    Log.e("value", "Permission Denied, You cannot use microphone to record audio.");
                 }
                 break;
         }
@@ -2869,6 +2910,8 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
            String cookies = CookieManager.getInstance().getCookie(startUrl);
            request.addRequestHeader("Cookie", cookies);
+           // WebView'deki sahte UA ile ayni tutuluyor (bkz. setWebView icindeki setUserAgentString
+           // notu): sunucu ayni oturumun sayfa istegi ile dosya indirmesini ayni istemci gormeli.
            request.addRequestHeader("User-Agent", "Android Mozilla/5.0 AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
 
             downloadID = downloadManager.enqueue(request);

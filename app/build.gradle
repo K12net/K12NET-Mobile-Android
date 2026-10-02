@@ -18,8 +18,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 36
         vectorDrawables.useSupportLibrary = true
-        versionCode 152
-        versionName "1.34.17"
+        versionCode 164
+        versionName "2.0.9"
         multiDexEnabled true
     }
     buildTypes {
@@ -34,6 +34,8 @@ android {
     }
     // add: Prevent errors in "Generate Signed APK"
     compileOptions {
+        // jsoup needs it; see the coreLibraryDesugaring dependency.
+        coreLibraryDesugaringEnabled true
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
@@ -83,6 +85,11 @@ dependencies {
 
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
+    // jsoup relies on java.util.function and java.util.stream, which Android only gained in 7.0,
+    // and on ThreadLocal.withInitial, which came in 8.0. Core library desugaring supplies them on
+    // older versions; without it the start-up version check throws on Android 7.1 and below and
+    // nothing catches it. jsoup asks for the nio flavour of the library.
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'
     implementation 'org.jsoup:jsoup:1.23.1'
 
     // required to avoid crash on Android 12 API 31

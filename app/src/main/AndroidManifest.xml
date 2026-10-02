@@ -25,6 +25,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.CAMERA2" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -39,14 +40,20 @@
     <uses-feature android:name="android.hardware.camera2.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera2.external" android:required="false" />
     <uses-permission android:name="android.webkit.PermissionRequest" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!--
+        READ_MEDIA_IMAGES, READ_MEDIA_VIDEO and READ_MEDIA_AUDIO are deliberately not declared.
+        Play only allows them for apps that need broad access to the user's photos and videos, and
+        rejected this app for them. Files are chosen through the system picker, which grants access
+        to exactly what the user picks, so no media permission is needed on any Android version.
+    -->
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
 
     <!-- Android 13 => api level 33  -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- Both have no effect from Android 13 on; the cap only makes that explicit. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Android 13 => api level 33  -->
