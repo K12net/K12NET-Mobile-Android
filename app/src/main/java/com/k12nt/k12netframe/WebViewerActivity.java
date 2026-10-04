@@ -659,8 +659,12 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
         if (cookies != null && !cookies.isEmpty()) {
             CookieManager cookieManager = CookieManager.getInstance();
 
-            // minSdk 21 => removeAllCookies/flush her zaman mevcut, CookieSyncManager'a gerek yok.
-            cookieManager.removeAllCookies(null);
+            // Only the cookies without an expiry are removed: the session ones, which the login
+            // cookies written below replace. Long-lived cookies stay, among them the portal's device
+            // trust ("this browser is on my personal device") and the answer to its new device
+            // offer; removing everything brought the device approval back on every launch. A
+            // persistent Google or Microsoft sign-in stays as well.
+            cookieManager.removeSessionCookies(null);
             cookieManager.flush();
 
             cookieManager.setAcceptCookie(true);
@@ -724,6 +728,28 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
                 Uri.parse("android-app://com.k12nt.k12netframe/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);*/
+    }
+
+    /**
+     * Writes the cookie store to disk before the process can be killed.
+     *
+     * <p>A WebView keeps new cookies in memory and persists them on its own schedule, roughly every
+     * 30 seconds. The portal's device cookies are written after sign-in - the answer to the new
+     * device offer and "this browser is on my personal device" - and nothing saved them, so closing
+     * the application soon after answering lost them and both questions came back on the next
+     * launch. onPause is the last callback guaranteed to run before the system may kill the
+     * process.</p>
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        try {
+            CookieManager.getInstance().flush();
+        } catch (Exception e) {
+            // CookieManager needs the WebView provider, which may be absent or being updated.
+            e.printStackTrace();
+        }
     }
 
     @Override
