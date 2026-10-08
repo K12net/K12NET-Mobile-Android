@@ -52,7 +52,6 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
-import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -90,6 +89,7 @@ import com.k12nt.k12netframe.async_tasks.TaskHandler;
 import com.k12nt.k12netframe.attendance.AttendanceManager;
 import com.k12nt.k12netframe.fcm.SetUserStateTask;
 import com.k12nt.k12netframe.utils.definition.K12NetStaticDefinition;
+import com.k12nt.k12netframe.utils.helper.K12NetFileNameHelper;
 import com.k12nt.k12netframe.utils.helper.K12NetHelper;
 import com.k12nt.k12netframe.utils.userSelection.K12NetUserReferences;
 import com.k12nt.k12netframe.utils.webConnection.K12NetHttpClient;
@@ -2000,13 +2000,7 @@ public class WebViewerActivity extends K12NetActivity implements K12NetAsyncComp
 
                         request.setDescription("Download file...");
 
-                        String possibleFileName = "";
-                        if(url.contains("name=")) {
-                            possibleFileName = url.substring(url.indexOf("name=")+5);
-                        }
-                        else {
-                            possibleFileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                        }
+                        String possibleFileName = K12NetFileNameHelper.forDownload(url, contentDisposition, mimetype);
                         request.setTitle(possibleFileName);
 
                         request.allowScanningByMediaScanner();
